@@ -16,6 +16,7 @@
 #include "Messages.h"
 #include "SolutionResult.h"
 #include "SolverInterface.h"
+#include "GlobalizerProblem.h"
 
 #ifdef _GLOBALIZER_BENCHMARKS
 #include "IGlobalOptimizationProblem.h"
@@ -25,16 +26,9 @@
 
 
 /**
-* Базовые классы для решения задач глобальной оптимизации
+ Базовые классы для решения задач глобальной оптимизации
 **/
-// ------------------------------------------------------------------------------------------------
 
-
-
-// ------------------------------------------------------------------------------------------------
-/**
-Базового класса
-*/
 class Solver : public ISolver
 {
 protected:
@@ -48,8 +42,6 @@ protected:
   /// База данных(поисковая информация)
   SearchData* pData;
 
-  /// Дерева распараллеливания
-  //TParallelTree* parTree;
   /// Результат работы системы
   SolutionResult* result;
 

@@ -70,7 +70,7 @@ endif()
 
 include(cmake/globalizer_utils.cmake)
 include(cmake/globalizer_mpi.cmake)
-#include(cmake/globalizer_lib.cmake)
+include(cmake/globalizer_lib.cmake)
 include(cmake/globalizer_doxygen.cmake)
 
 GLOBALIZER_initialize()

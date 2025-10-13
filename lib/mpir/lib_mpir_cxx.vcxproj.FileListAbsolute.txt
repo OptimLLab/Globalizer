@@ -1,0 +1,1 @@
+C:\Users\Alexander\Desktop\mpir-master\msvc\vs22\lib_mpir_cxx\x64\Release\mpirxx.lib

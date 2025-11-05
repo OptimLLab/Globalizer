@@ -5,60 +5,38 @@
 //                       Copyright (c) 2015 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      CudaCalculation.h                                           //
+//  File:      OMPCalculation.h                                            //
 //                                                                         //
-//  Purpose:   Header file for CUDA calculation class                      //
+//  Purpose:   Header file for OpenMP calculation class                    //
 //                                                                         //
 //  Author(s): Lebedev I.                                                  //
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * \file CudaCalculation.h
+ * \file OMPCalculation.h
  *
  * \authors Лебедев И.
  * \date 2015
  * \copyright ННГУ им. Н.И. Лобачевского
  *
- * \brief Объявление класса #CUDACalculation для вычислений с помощью CUDA
+ * \brief Объявление класса #OMPCalculation для вычислений с помощью OpenMP
  */
 
-#ifndef __CUDA_CALCULATION_H__
-#define __CUDA_CALCULATION_H__
+#ifndef __OMP_CALCULATION_H__
+#define __OMP_CALCULATION_H__
 
 #include "Calculation.h"
 
  /**
-  * \brief Реализация вычислителя с использованием технологии CUDA.
+  * \brief Реализация вычислителя с использованием технологии OpenMP.
   *
-  * Позволяет выполнять массовые параллельные вычисления на GPU от NVIDIA.
+  * Позволяет распараллеливать вычисления на несколько потоков
+  * в рамках одного процесса.
   */
-class CUDACalculation : public Calculation
+class OMPCalculation : public Calculation
 {
 protected:
-	// распределения вычислений по нескольким GPU
-
-	/// Количество доступных GPU
-	int deviceCount;
-	/// Размер данных для каждого GPU
-	int* dataSize;
-	/// Начальный индекс данных для каждого GPU
-	int* dataStart;
-	/// Индексы используемых GPU
-	int* devicesIndex;
-
-	/// Буфер для координат точек, передаваемых в CUDA-ядро
-	double* coordinates;
-	/// Размер буфера coordinates
-	int coordinatesSize;
-	/// Буфер для значений функций, получаемых из CUDA-ядра
-	double* FuncValues;
-	/// Размер буфера FuncValues
-	int FuncValuesSize;
-
-	/// Флаг, показывающий, была ли проведена инициализация
-	bool mIsInitialized;
-
 	/**
 	 * \brief Внутренний метод, запускающий процесс вычислений.
 	 * \param[in] inputSet Входные данные.
@@ -71,17 +49,12 @@ public:
 	 * \brief Конструктор.
 	 * \param _pTask Ссылка на объект задачи.
 	 */
-	CUDACalculation(Task& _pTask) : Calculation(_pTask)
+	OMPCalculation(Task& _pTask) : Calculation(_pTask)
 	{
-		mIsInitialized = false;
-		coordinates = 0;
-		FuncValues = 0;
-		coordinatesSize = 0;
-		FuncValuesSize = 0;
 	}
 
 	/**
-	 * \brief Выполняет вычисления для набора испытаний с использованием CUDA.
+	 * \brief Выполняет вычисления для набора испытаний с использованием OpenMP.
 	 * \param[in] inputSet Входные данные.
 	 * \param[out] outputSet Выходные данные.
 	 */

@@ -1,4 +1,4 @@
-﻿#ifdef _GLOBALIZER_BENCHMARKS
+﻿#ifdef _GLOBALIZER_GCGEN
 #include "IOptProblem.hpp"
 #include "Problem.h"
 
@@ -106,7 +106,7 @@ public:
   virtual int SetDimension(int dimension) override
   {
     if (dimension != problem->GetDimension())
-        return IProblem::ERROR;
+        return -2;
     Dimension = dimension;
     return IProblem::OK;
   }

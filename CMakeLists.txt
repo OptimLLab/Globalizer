@@ -207,11 +207,24 @@ if(${GLOBALIZER_BUILD_PROBLEMS})
   include_directories(${GLOBALIZER_BENCHMARKS_Interface}/include/)
 endif()
 
-# add GCGen
 if(${GLOBALIZER_BUILD_GCGEN})
   add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/GCGen)
-  include_directories(${PROJECT_SOURCE_DIR}/third_party/GCGen/src/)
-  include_directories(${PROJECT_SOURCE_DIR}/third_party/GCGen/sample_src/)
+
+  include_directories(
+    ${PROJECT_SOURCE_DIR}/third_party/GCGen/src
+    ${PROJECT_SOURCE_DIR}/third_party/GCGen/sample_src
+  )
+
+  file(GLOB_RECURSE GCGEN_SOURCES
+    ${PROJECT_SOURCE_DIR}/third_party/GCGen/src/*.cpp
+    ${PROJECT_SOURCE_DIR}/third_party/GCGen/sample_src/*.cpp
+  )
+  file(GLOB_RECURSE GCGEN_HEADERS
+    ${PROJECT_SOURCE_DIR}/third_party/GCGen/src/*.hpp
+    ${PROJECT_SOURCE_DIR}/third_party/GCGen/sample_src/*.hpp
+  )
+
+  add_definitions(-D_GLOBALIZER_GCGEN)
 endif()
 
 # build main library and executable
@@ -264,7 +277,7 @@ else()
   
 endif()
 
-add_library(${GLOBALIZER_LIB_NAME} STATIC ${ALL_SRC_FILES})
+add_library(${GLOBALIZER_LIB_NAME} STATIC ${ALL_SRC_FILES} ${GCGEN_SOURCES} ${GCGEN_HEADERS})
 
 file(GLOB main_list "${GLOBALIZER_EXAMPLES_SRC_DIR}/*.cpp")
 
@@ -401,6 +414,7 @@ if (IS_MICROSOFT_COMPILER)
   source_group("Header Files\\method" FILES ${method_HEADERS})
   source_group("Header Files\\calculation" FILES ${calculation_HEADERS})
   source_group("Header Files\\local_method" FILES ${local_method_HEADERS})
+  source_group("Header Files\\gcgen" FILES ${GCGEN_HEADERS})
 
   source_group("Source Files" FILES ${ROOT_SOURCES})
   source_group("Source Files\\evolvent" FILES ${evolvent_SOURCES})
@@ -411,6 +425,7 @@ if (IS_MICROSOFT_COMPILER)
   source_group("Source Files\\calculation" FILES ${calculation_SOURCES})
   source_group("Source Files\\local_method" FILES ${local_method_SOURCES})
   source_group("Source Files\\parameters" FILES ${PARAMETERS_SOURCES})
+  source_group("Source Files\\gcgen" FILES ${GCGEN_SOURCES})
   
   
   

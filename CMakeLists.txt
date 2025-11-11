@@ -374,13 +374,23 @@ endif()
 # create source groups for VS IDE projects
 if (IS_MICROSOFT_COMPILER)
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-  #set_property(TARGET pugixml PROPERTY FOLDER "3rd-party")
-  if(${GLOBALIZER_BUILD_TESTS})
-    set_property(TARGET gtest gmock gmock_main gtest_main mpi_stub PROPERTY FOLDER "3rd-party")
-  else()
-    set_property(TARGET mpi_stub PROPERTY FOLDER "3rd-party")
+  
+  set(3RD_PARTY_PROJECT "")
+  
+  if(GLOBALIZER_BUILD_TESTS)
+    list(APPEND 3RD_PARTY_PROJECT "gtest" "gmock" "gmock_main" "gtest_main")	
   endif()
-
+  
+  if(NOT GLOBALIZER_USE_MPI)
+      list(APPEND 3RD_PARTY_PROJECT "mpi_stub")	
+  endif()
+  
+  if(GLOBALIZER_BUILD_GCGEN)
+    list(APPEND 3RD_PARTY_PROJECT "builder_sample")	
+  endif()
+  
+  set_property(TARGET ${3RD_PARTY_PROJECT} PROPERTY FOLDER "3rd-party")
+ 
 
   source_group("Header Files" FILES ${ROOT_HEADERS})
   source_group("Header Files\\Parameters" FILES ${PARAMETERS_HEADERS})

@@ -53,17 +53,17 @@ double StronginC3Functionals(const double* y, int fNumber)
   double x1 = y[0], x2 = y[1];
   switch (fNumber)
   {
-  case 0: // constraint 1
+  case 0: // ограниечние 1
     res = 0.01 * ((x1 - 2.2) * (x1 - 2.2) + (x2 - 1.2) * (x2 - 1.2) - 2.25);
     break;
-  case 1: // constraint 2
+  case 1: // ограниечние 2
     res = 100.0 * (1.0 - ((x1 - 2.0) / 1.2) * ((x1 - 2.0) / 1.2) -
       (x2 / 2.0) * (x2 / 2.0));
     break;
-  case 2: // constraint 3
+  case 2: // ограниечние 3
     res = 10.0 * (x2 - 1.5 - 1.5 * sin(6.283 * (x1 - 1.75)));
     break;
-  case 3: // criterion
+  case 3: // критерий
   {
     double t1 = pow(0.5 * x1 - 0.5, 4.0);
     double t2 = pow(x2 - 1.0, 4.0);

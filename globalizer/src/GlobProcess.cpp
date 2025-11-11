@@ -108,7 +108,7 @@ void Process::Solve()
           }
         }
       }
-
+      
       if (static_cast<std::string>(parameters.iterPointsSavePath).size())
       {
         if (!(pMethod->GetIterationCount() % parameters.StepSavePoint))
@@ -564,8 +564,6 @@ void Process::DoIteration()
   IsOptimumFound = CheckIsStop(IsOptimumFound);
   IsStop = IsOptimumFound;
 
-  //if (pTask->GetProcLevel() == 0)  printf("CC-1A! Proc=%d iter=%d PL=%d IsStop=%d\n", parameters.GetProcRank(), this->pMethod->GetIterationCount(), (parameters.MapProcInLevel[pTask->GetProcLevel()] - 1), IsStop);
-
   try
   {
     if (!IsStop)
@@ -582,10 +580,6 @@ void Process::DoIteration()
 
       pMethod->CalculateFunctionals();
 
-      //if (pTask->GetProcLevel() == 0)
-      //{
-      //  print << "IterationCount = " << pMethod->GetIterationCount() << "\n";
-      //}
 
       for (int j = 0; j < pTask->GetNumOfFunc(); j++)
       {
@@ -626,26 +620,6 @@ bool Process::CheckIsStop(bool IsStop)
   bool f = IsStop;
 
   MPI_Status status;
-
-  if (pTask->GetProcLevel() == 0)
-  {
-      for (int k = 0; k < Neighbours.size(); k++)
-      {
-        MPI_Send(&f, 1, MPI_CHAR, Neighbours[k], TagChildSolved, MPI_COMM_WORLD);
-      }
-      //цикл по нашим соседям
-      for (int k = 0; k < Neighbours.size(); k++)
-      {
-        MPI_Recv(&f, 1, MPI_CHAR, Neighbours[k], TagChildSolved, MPI_COMM_WORLD, &status);
-
-        if (isPrintOptimEstimation && f && (parameters.GetProcRank() > Neighbours[k]))
-          isPrintOptimEstimation = false;
-
-        IsStop = IsStop || f;
-      }
-    
-
-  }
 
   return IsStop;
 }

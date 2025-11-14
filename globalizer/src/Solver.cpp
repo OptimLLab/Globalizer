@@ -122,7 +122,8 @@ void Solver::MpiCalculation()
     inputSet.Resize(parameters.mpiBlockSize);
     outputSet.Resize(parameters.mpiBlockSize);
 
-    for (unsigned int j = 0; j < parameters.mpiBlockSize; j++) {
+    for (unsigned int j = 0; j < parameters.mpiBlockSize; j++) 
+    {
       inputSet.trials[j] = TrialFactory::CreateTrial();
       // Получаем координаты точки
       MPI_Recv(trail->y, parameters.Dimension, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD, &status);
@@ -277,12 +278,14 @@ int Solver::Solve()
   }
   if (parameters.GetProcRank() == 0)
   {
-    if (parameters.GetProcNum() > 1) {
+    if (parameters.GetProcNum() > 1) 
+    {
       int childNum = parameters.GetProcNum() - 1;
       int curr_child = 0;
       for (unsigned int i = 0; i < childNum; i++) {
         ///curr_child = parameters.parallel_tree.ProcChild[i];!!!!!
         int finish = 1;
+        curr_child = i + 1;
         MPI_Send(&finish, 1, MPI_INT, curr_child, TagChildSolved, MPI_COMM_WORLD);
       }
     }

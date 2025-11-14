@@ -107,7 +107,7 @@ void Parameters::SetDefaultParameters()
   InitOption(disablePrintParameters, 0, "-dpp", "disable print parameters", 1);
   InitOption(logFileNamePrefix, globalizer_log, "-logFName", "prefix in log file name", 1);
 
-  InitOption(calculationsArray, -1_0, "-ca", "ChildInProcLevel", 2);
+  InitOption(calculationsArray, -1, "-ca", "ChildInProcLevel", 1);
 
   InitOption(TypeSolver, SingleSearch, "-ts", "TypeSolver ", 1);
   InitOption(DimInTask, 0_0_0_0, "-dt", "DimInSeparableTask", 4);
@@ -173,29 +173,74 @@ int Parameters::CheckValueParameters(int index)
     if (NumPoints <= 0)
       NumPoints = 1;
 
-  
-    if (calculationsArray.GetSize() < mNeedMPIProcessorCount)
+    if (TypeCalculation == AsyncMPI || TypeCalculation == MPI_calc)
+    {
+      mNeedMPIProcessorCount = 2;
+    }
+    else
+    {
+      mNeedMPIProcessorCount = 1;
+    }
+
+    if (calculationsArray[0] != (int)TypeCalculation)
+    {
+      calculationsArray[0] = (int)TypeCalculation;
+    }
+    else if (calculationsArray.GetSize() < mNeedMPIProcessorCount)
     {
       int tempSize = calculationsArray.GetSize();
       int val = -1;
-      if (calculationsArray.GetIsChange())
-        val = (int)TypeCalculation;
 
-      calculationsArray.SetSize(mNeedMPIProcessorCount);
-      for (int i = tempSize; i < mNeedMPIProcessorCount; i++)
-        calculationsArray[i] = val;
+      if (!(calculationsArray.GetIsChange()))
+      {
+        calculationsArray.SetSize(mNeedMPIProcessorCount);
+        if (calculationsArray[0] != (int)TypeCalculation)
+        {
+          calculationsArray[0] = (int)TypeCalculation;
+        }
+        for (int ica = 1; ica < mNeedMPIProcessorCount; ica++)
+        {
+          calculationsArray[ica] = 0;
+        }
+      }
+      else
+      {
+        calculationsArray.SetSize(mNeedMPIProcessorCount);
+        if (calculationsArray[0] != (int)TypeCalculation)
+        {
+          calculationsArray[0] = (int)TypeCalculation;
+        }
+        for (int ica = tempSize; ica < mNeedMPIProcessorCount; ica++)
+        {
+          calculationsArray[ica] = 0;
+        }
+      }
     }
 
 
     // TODO::dmsi Убрать, если асинхронная схема научится работать с пачками точек
-    if (TypeCalculation == AsyncMPI) {
+    if (TypeCalculation == AsyncMPI) 
+    {
       mpiBlockSize = 1;
     }
     //Если запуск на mpi (синхронном или асинхронном), но не блочная схема, то NumPoints может принимать только одно значение
-    if ((TypeCalculation == 7) && (GetProcNum() > 1) && (GetProcRank() == 0)) {
-      int val = (GetProcNum() - 1) * mpiBlockSize;
-      if (val != NumPoints) {
-        NumPoints = (GetProcNum() - 1) * mpiBlockSize;
+    if (TypeCalculation == MPI_calc)
+    {
+      if (GetProcNum() < mNeedMPIProcessorCount)
+      {
+        std::cout << "GetProcNum() < mNeedMPIProcessorCount" << std::endl;
+        TypeCalculation = OMP;
+        mIsInit = true;
+        CheckValueParameters(index);
+      }
+      if ((GetProcNum() > 1) && (GetProcRank() == 0))
+      {
+        int val = (GetProcNum() - 1) * mpiBlockSize;
+        if (val != NumPoints)
+        {
+          std::cout << "Warning (GetProcNum() - 1) * NumPoints!!!" << std::endl;
+          NumPoints = (GetProcNum() - 1) * mpiBlockSize;
+        }
       }
     }
 

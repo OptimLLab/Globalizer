@@ -16,7 +16,7 @@ git submodule update
 call conda init
 
 echo [1/5] Creating a Conda Environment...
-call conda create -p "%ROOT_DIR%\build_64\Globalizer_env" python=3.13 -y
+call conda create -p "%ROOT_DIR%\build_64\Globalizer_env" python=3.12 -y
 
 echo [2/5] activate a Conda Environment...
 call conda activate "%ROOT_DIR%\build_64\Globalizer_env"
@@ -29,14 +29,18 @@ call conda install -p "%ROOT_DIR%\build_64\Globalizer_env" conda-forge::pytorch-
 call conda install -p "%ROOT_DIR%\build_64\Globalizer_env" lightning -y
 call conda install -p "%ROOT_DIR%\build_64\Globalizer_env" scikit-learn -y
 
-echo [4/5] CMake Configuration...
-call cmake -G "Visual Studio 17 2022" -DGLOBALIZER_BUILD_PROBLEMS=ON -DGLOBALIZER_BUILD_GCGEN=ON -DBUILD_ALL_TASK=ON -DGLOBALIZER_MAX_DIMENSION=130 -DGLOBALIZER_MAX_Number_Of_Function=70 -DGLOBALIZER_BUILD_TESTS=ON ..
+echo [4/5] Start Intell OneAPI
+
+call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64 vs2022
+
+echo [5/5] CMake Configuration...
+call cmake -DGLOBALIZER_BUILD_PROBLEMS=ON  -DGLOBALIZER_BUILD_GCGEN=ON -DBUILD_ALL_TASK=ON -DGLOBALIZER_MAX_DIMENSION=130 -DGLOBALIZER_MAX_Number_Of_Function=70 -DGLOBALIZER_BUILD_TESTS=ON -DGLOBALIZER_USE_MPI=ON -DGLOBALIZER_MPI=intel ..
 
 if %errorlevel% neq 0 goto error
 
-echo [5/5] Opening Visual Studio...
+echo [6/6] Opening Visual Studio...
 if exist "globalizer.sln" (
-    start "" "globalizer.sln"
+    call "globalizer.sln"
 ) else (
     echo Error: globalizer.sln not found!
 )

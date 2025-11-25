@@ -221,6 +221,9 @@ public:
   /// Значения функций в начальная точка для решения задачи оптимизации
   TDoubles<Parameters> startPointValues;
 
+  /// Использовать  расширенный консольный интерфейс 
+  TBool<Parameters> IsUseExtendedConsole;
+
   /// Проверка правильности при изменение параметров
   virtual int CheckValueParameters(int index = 0);
   /// Возвращает номер текущего процесса

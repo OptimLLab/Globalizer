@@ -26,15 +26,17 @@ int main(int argc, char* argv[])
     else
       gkls = Hard;
 
+    if (!(parameters.Dimension.GetIsChange()))
+      parameters.Dimension = 2;
     int N = parameters.Dimension;
-
+    print << N << "\n";
     TGKLSProblem* gkls_problem = new TGKLSProblem(parameters.maxCountLocalPoint, N, gkls, TD);
 
     // Создаем обертку для GKLS задачи под интерфейс IOptProblem
     GlobalizerOptProblem* wrapped_problem = new GlobalizerOptProblem(gkls_problem);
 
     wrapped_problem->Initialize();
-    parameters.Dimension = 2;
+
     Solver solver(wrapped_problem);
     if (solver.Solve() != SYSTEM_OK)
         throw EXCEPTION("Error: solver.Solve crash!!!");

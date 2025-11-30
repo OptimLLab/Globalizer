@@ -7,3 +7,7 @@
 [submodule "third_party/GCGen"]
 	path = third_party/GCGen
 	url = https://github.com/OptimLLab/GCGen.git
+
+[submodule "third_party/mpfr_gmp_mpir"]
+	path = third_party/mpfr_gmp_mpir
+	url = https://github.com/Alexander-S-Zaitsev/MPFR_GMP_MPIR.git

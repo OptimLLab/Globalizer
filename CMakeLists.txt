@@ -54,6 +54,7 @@ endif()
 
 include(cmake/globalizer_utils.cmake)
 include(cmake/globalizer_mpi.cmake)
+include(cmake/globalizer_lib.cmake)
 if (GLOBALIZER_USE_DOXYGEN)
   include(cmake/globalizer_doxygen.cmake)
 endif()
@@ -126,11 +127,14 @@ if (${GLOBALIZER_ONE_MPI_PROCESS_PER_NODE})
 endif()
 
 
-
+#add MPFR_GMP_MPIR
 if (${GLOBALIZER_USE_MP})
-  setup_mpir(GLOBALIZER_MPIR_LIB_DIR GLOBALIZER_MPIR_INCLUDES GLOBALIZER_MPIR_LIB)
-  setup_mpfr(GLOBALIZER_MPFR_LIB_DIR GLOBALIZER_MPFR_INCLUDES GLOBALIZER_MPFR_LIB)
-  setup_mpreal(GLOBALIZER_MPREAL_INCLUDES)
+	add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/mpfr_gmp_mpir)
+
+	setup_mpir(GLOBALIZER_MPIR_LIB_DIR GLOBALIZER_MPIR_INCLUDES GLOBALIZER_MPIR_LIB)
+	setup_gmp(GLOBALIZER_GMP_LIB_DIR GLOBALIZER_GMP_INCLUDES GLOBALIZER_GMP_LIB)
+	setup_mpfr(GLOBALIZER_MPFR_LIB_DIR GLOBALIZER_MPFR_INCLUDES GLOBALIZER_MPFR_LIB)
+	setup_mpreal(GLOBALIZER_MPREAL_INCLUDES)
 else()
   add_definitions(-DNO_MPREAL)
 endif()
@@ -151,6 +155,7 @@ set(GLOBALIZER_local_method_DIR ${GLOBALIZER_COMMON_SRC_DIR}/method/local_method
 include_directories(
   ${GLOBALIZER_MPI_INCLUDES}
   ${GLOBALIZER_MPIR_INCLUDES}
+  ${GLOBALIZER_GMP_INCLUDES}
   ${GLOBALIZER_MPFR_INCLUDES}
   ${GLOBALIZER_MPREAL_INCLUDES}
   
@@ -167,6 +172,7 @@ include_directories(
 
 link_directories(
   ${GLOBALIZER_MPIR_LIB_DIR}
+  ${GLOBALIZER_GMP_LIB_DIR}
   ${GLOBALIZER_MPFR_LIB_DIR}
 )
 
@@ -331,6 +337,7 @@ if (${IS_CLANG_COMPILER})
   target_link_libraries(${GLOBALIZER_LIB_NAME}
     ${GLOBALIZER_MPI_LIB}
     ${GLOBALIZER_MPFR_LIB}
+	${GLOBALIZER_GMP_LIB}
     ${GLOBALIZER_MPIR_LIB}
     ${DISLIN_LIB}
 	OpenMP::OpenMP_CXX  )
@@ -338,6 +345,7 @@ else()
   target_link_libraries(${GLOBALIZER_LIB_NAME}
     ${GLOBALIZER_MPI_LIB}
     ${GLOBALIZER_MPFR_LIB}
+	${GLOBALIZER_GMP_LIB}
     ${GLOBALIZER_MPIR_LIB}
     ${DISLIN_LIB})
 
@@ -403,7 +411,17 @@ if (IS_MICROSOFT_COMPILER)
   endif()
   
   set_property(TARGET ${3RD_PARTY_PROJECT} PROPERTY FOLDER "3rd-party")
- 
+  
+  set(MultiplePrecision "")
+  
+  if(${GLOBALIZER_USE_MP})
+	list (APPEND MultiplePrecision "bootstrap" "gen-bases" "gen-fac" "gen-fac-table" "gen-fib" "gen-fib-table"
+	"gen-jacobitab" "gen-mp-bases" "gen-mpn-jacobitab" "gen-mpn-perfsqr" "gen-psqr" "gen-trialdivtab" 
+	"gen-trialdivtab-h" "libgmp" "libmpf" "libmpn" "libmpq" "libmpz" "libprintf" "librandom" "libscanf"
+	"mpfr" "MPFR_GMP_MPIR_test" "mpir")
+  endif()
+  
+  set_property(TARGET ${MultiplePrecision} PROPERTY FOLDER "multiple precision")
 
   source_group("Header Files" FILES ${ROOT_HEADERS})
   source_group("Header Files\\Parameters" FILES ${PARAMETERS_HEADERS})

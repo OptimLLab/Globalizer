@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -55,8 +55,8 @@ int main(int argc, char* argv[])
 
   GlobalizerInitialization(argc, argv);
 
-  parameters.Dimension = 2;
-  ProblemName problemName = STRONGINC3_FUNCTION_POINTER;
+  parameters.Dimension = 8;
+  ProblemName problemName = RASTRIGIN;
   IProblem* problem = nullptr;
 
   if (problemName == RASTRIGIN)

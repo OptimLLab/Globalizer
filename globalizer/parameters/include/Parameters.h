@@ -79,66 +79,66 @@ public:
   //Параметры командной строки
 
   /// число точек, порождаемых методом на 1 итерации
-  TInt<Parameters> NumPoints; 
-  TInt<Parameters> StepPrintMessages; 
+  TInt<Parameters> NumPoints;
+  TInt<Parameters> StepPrintMessages;
   /// Через какое количество итераций сохранять точки
-  TInt<Parameters> StepSavePoint; 
+  TInt<Parameters> StepSavePoint;
   TETypeMethod<Parameters> TypeMethod;
   TETypeCalculation<Parameters> TypeCalculation;
-  TETypeProcess<Parameters> TypeProcess; 
+  TETypeProcess<Parameters> TypeProcess;
   TInt<Parameters> NumThread;
   ///размер CUDA блока
-  TInt<Parameters> SizeInBlock; 
+  TInt<Parameters> SizeInBlock;
   /// Печатать ли отчетет в файл
   TBool<Parameters> IsPrintFile;
   /// Файл для печати результата, если "000" то не печатаем
-  TString<Parameters> ResulLog; 
+  TString<Parameters> ResulLog;
   ///размерность исходной задачи
-  TInt<Parameters> Dimension; 
+  TInt<Parameters> Dimension;
   /// надежность метода (> 1)
-  TDouble<Parameters> r; 
+  TDouble<Parameters> r;
   ///Добавка при динамичеки изменяемом r, r = r + rDynamic / (Iteration ^ (1/N))
   TDouble<Parameters> rDynamic;
   ///параметр eps-резервирования
-  TDouble<Parameters> rEps; 
+  TDouble<Parameters> rEps;
   ///единая точность
-  TDouble<Parameters> Epsilon; 
+  TDouble<Parameters> Epsilon;
   ///Коментарий к эксперименту
-  TString<Parameters> Comment; 
+  TString<Parameters> Comment;
 
   TDoubles<Parameters> M_constant;
   /// плотность построения развертки (точность 1/2^m по к-те)
-  TInt<Parameters> m; 
+  TInt<Parameters> m;
   ///кол-во используемых ускорителей
-  TInt<Parameters> deviceCount; 
+  TInt<Parameters> deviceCount;
   /// тип развертки (сдвиговая, вращаемая)
-  TEMapType<Parameters> MapType; 
+  TEMapType<Parameters> MapType;
   /// Флаг для проверки работы асинхронной схемы, если не 0, то вычисления проводятся в строго заданном порядке
-  TInt<Parameters> DebugAsyncCalculation; 
+  TInt<Parameters> DebugAsyncCalculation;
 
   /// Печатать ли информацию о сечении в многошаговой схеме
   TBool<Parameters> IsPrintSectionPoint;
 
   /// максимальное число итераций для процессов на каждом уровне //  размер - NumOfProcLevels{100, 100, 100, 100};// // параметры метода
-  TInts<Parameters> MaxNumOfPoints; 
+  TInts<Parameters> MaxNumOfPoints;
   TFlag<Parameters> HELP;
   TFlag<Parameters> IsPlot;
   TInt<Parameters> PlotGridSize;
   /// Число испытаний за итерацию будет вычисляться на каждой итерации в методе CalculateNumPoint()
   TFlag<Parameters> IsCalculateNumPoint;
   ///Назначать каждому процессу свое устройство (ускоритель)
-  TBool<Parameters> IsSetDevice; 
+  TBool<Parameters> IsSetDevice;
   ///Индекс используемого устройства (ускорителей), если -1 используется первые deviceCount устройств
   TInt<Parameters> deviceIndex;
 
   TInt<Parameters> ProcRank;
   ///cпособ использования локального метода(только для синхронного типа процесса)
-  TELocalMethodScheme<Parameters> localRefineSolution; 
+  TELocalMethodScheme<Parameters> localRefineSolution;
 
   /// Количество итераций локального метода
   TInt<Parameters> localIteration;
   /// Точность локального метода
-  TDouble<Parameters> localVerificationEpsilon; 
+  TDouble<Parameters> localVerificationEpsilon;
   /// Количество точек точек параллельно вычисляемых локальным методом
   TInt<Parameters> localVerificationNumPoint;
 
@@ -146,33 +146,33 @@ public:
   TInt<Parameters> HDSolverIterationCount;
 
   ///параметр смешивания в локально-глобальном алгоритме
-  TInt<Parameters> localMix; 
+  TInt<Parameters> localMix;
   ///степень локальной адаптации в локально-глобальном алгоритме
   TDouble<Parameters> localAlpha;
   ///Распределение типов вычислений по
-  TInts<Parameters> calculationsArray; 
+  TInts<Parameters> calculationsArray;
   ///флаг сепарабельного поиска на первой итерации
-  TESeparableMethodType<Parameters> sepS;  
+  TESeparableMethodType<Parameters> sepS;
   ///флаг случайного поиска на первой итерации
-  TBool<Parameters> rndS;  
+  TBool<Parameters> rndS;
   ///путь к библиотеке с задачей
-  TString<Parameters> libPath;  
+  TString<Parameters> libPath;
   ///путь конфигарационному файлу задачи
-  TString<Parameters> libConfigPath; 
+  TString<Parameters> libConfigPath;
   /// тип критерия остановки
-  TEStopCondition<Parameters> stopCondition; 
+  TEStopCondition<Parameters> stopCondition;
   /// Критерий применим только к верхнему уровню или к любому (для адаптивной схемы)
   TBool<Parameters> isStopByAnyLevel;
   /// Печатать ли результаты работы алгоритма в консоль
   TBool<Parameters> isPrintResultToConsole;
   ///путь, по которому будут сохранены многомерные точки, поставленные методом корневого процесса
-  TString<Parameters> iterPointsSavePath; 
+  TString<Parameters> iterPointsSavePath;
   ///флаг, включающий печать дополнительной статистики: оценки констант Гёльдера и значения функций в точке оптимума
-  TFlag<Parameters> printAdvancedInfo; 
+  TFlag<Parameters> printAdvancedInfo;
   ///флаг, выключающий печать параметров при запуске системы
-  TFlag<Parameters> disablePrintParameters; 
+  TFlag<Parameters> disablePrintParameters;
   ///префикс в имени лог-файла
-  TString<Parameters> logFileNamePrefix; 
+  TString<Parameters> logFileNamePrefix;
 
   TETypeSolver<Parameters> TypeSolver;
   /// размерности каждой из подзадач в режиме сепарабильного или сикуенсального поиска
@@ -203,7 +203,7 @@ public:
   /// Тип локального уточнения: 0 - без него; 1 - минимаксное; 2 - адаптивное; 3 - адаптивно-минимаксное
   TELocalTuningType<Parameters> LocalTuningType;
   /// Параметр кси, используемый в локальном уточении
-  TDouble<Parameters> ltXi;  
+  TDouble<Parameters> ltXi;
 
   /// Загружать начальныеточки из файла или распределять их равномерно
   TBool<Parameters> isLoadFirstPointFromFile;

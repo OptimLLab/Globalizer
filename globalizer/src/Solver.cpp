@@ -249,7 +249,7 @@ int Solver::Solve()
       if (addPoints != nullptr)
         mProcess->InsertPoints(*addPoints);
       mProcess->Solve();
-    }  
+    }
 
   }
   catch (const Exception& e)

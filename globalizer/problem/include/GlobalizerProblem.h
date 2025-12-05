@@ -280,11 +280,12 @@ public:
   virtual int GetOptimumPoint(double* x) const
   {
     std::vector<double> y(problem->GetNumberOfContinuousVariable());
-    std::vector<std::string> u(problem->GetNumberOfContinuousVariable());
+    std::vector<std::string> u(problem->GetNumberOfDiscreteVariable());
 
     int err = problem->GetOptimumPoint(y, u);
 
-    YUtoX(y, u, x);
+    if (err == IGlobalOptimizationProblem::PROBLEM_OK)
+        YUtoX(y, u, x);
 
     return err;
   }
@@ -298,7 +299,7 @@ public:
   virtual double CalculateFunctionals(const double* x, int fNumber)
   {
     std::vector<double> y(problem->GetNumberOfContinuousVariable());
-    std::vector<std::string> u(problem->GetNumberOfContinuousVariable());
+    std::vector<std::string> u(problem->GetNumberOfDiscreteVariable());
 
     XtoYU(x, y, u);
 

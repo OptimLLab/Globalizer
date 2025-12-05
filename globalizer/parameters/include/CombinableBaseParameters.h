@@ -1,4 +1,3 @@
-
 /////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
@@ -6,7 +5,7 @@
 //                       Copyright (c) 2016 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      CombinableBaseParameter.h                                                  //
+//  File:      CombinableBaseParameter.h                                   //
 //                                                                         //
 //  Purpose:   Header file for random generator class                      //
 //                                                                         //
@@ -18,24 +17,24 @@
 #define __COMBINABLE_BASE_PARAMETERS_H__
 
 /**
-\file CombinableBaseParameter.h
-
-\authors Лебедев И.
-\date 2015-2016
-\copyright ННГУ им. Н.И. Лобачевского
-
-\brief Объявление базоых классов для свойств
-
-*/
+ * \file CombinableBaseParameter.h
+ *
+ * \authors Лебедев И.
+ * \date 2015-2016
+ * \copyright ННГУ им. Н.И. Лобачевского
+ *
+ * \brief Объявление базоых классов для свойств
+ *
+ */
 
 #include "Types.h"
 
 /**
-Базовый класс параметров
-При создание наследника необходимо переопределить констану OWNER_NAME
-и в конструкторе задать mOwner
-(mOwner = this;)
-*/
+ * Базовый класс параметров
+ * При создание наследника необходимо переопределить констану OWNER_NAME
+ * и в конструкторе задать mOwner
+ * (mOwner = this;)
+ */
 class CombinableBaseParameters
 {
 protected:
@@ -47,7 +46,12 @@ protected:
   bool mIsMPIInit;
 public:
 
-  /// Задает начальные параметры
+  /**
+   * Задает начальные параметры
+   * \param[in] argc Количество аргументов командной строки
+   * \param[in] argv Массив аргументов командной строки
+   * \param[in] isMPIInit Флаг инициализации MPI
+   */
   virtual void SetInitParam(int argc = 0, char* argv[] = 0, bool isMPIInit = false)
   {
     mArgumentCount = argc;

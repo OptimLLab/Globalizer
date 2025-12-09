@@ -1,11 +1,11 @@
-/////////////////////////////////////////////////////////////////////////////
+п»ї/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
 //                       Copyright (c) 2016 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      TypedProperty.h                                                  //
+//  File:      TypedProperty.h                                             //
 //                                                                         //
 //  Purpose:   Header file for random generator class                      //
 //                                                                         //
@@ -17,103 +17,101 @@
 #define __TYPED_PROPERTY_H__
 
 /**
-\file TypedProperty.h
-
-\authors Лебедев И.
-\date 2015-2016
-\copyright ННГУ им. Н.И. Лобачевского
-
-\brief Объявление базоых классов для свойств
-
-*/
+ * \file TypedProperty.h
+ *
+ * \authors Р›РµР±РµРґРµРІ Р.
+ * \date 2015-2016
+ * \copyright РќРќР“РЈ РёРј. Рќ.Р. Р›РѕР±Р°С‡РµРІСЃРєРѕРіРѕ
+ *
+ * \brief РћР±СЉСЏРІР»РµРЅРёРµ Р±Р°Р·РѕС‹С… РєР»Р°СЃСЃРѕРІ РґР»СЏ СЃРІРѕР№СЃС‚РІ
+ *
+ */
 
 #include "BaseProperty.h"
 
+ /* ======================================================================== *\
+ **  РћР±СЉСЏРІР»РµРЅРёРµ РєР»Р°СЃСЃРѕРІ                                                      **
+ \* ======================================================================== */
 
 
-/* ======================================================================== *\
-**  Объявление классов                                                      **
-\* ======================================================================== */
-
-
-/**
-Базовый класс для свойств
-*/
+ /**
+  * Р‘Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РґР»СЏ СЃРІРѕР№СЃС‚РІ
+  */
 template <class Type, class Owner>
 class TypedProperty : public BaseProperty<Owner>
 {
 protected:
   typedef typename BaseProperty<Owner>::tCheckValue tCheckValue;
 
-  /// Тип метода возвращающего внешние данные
-  typedef Type(Owner::*tGetter)() const;
-  /// Тип метода задающего внешние данные
-  typedef void (Owner::*tSetter)(Type);
+  /// РўРёРї РјРµС‚РѕРґР° РІРѕР·РІСЂР°С‰Р°СЋС‰РµРіРѕ РІРЅРµС€РЅРёРµ РґР°РЅРЅС‹Рµ
+  typedef Type(Owner::* tGetter)() const;
+  /// РўРёРї РјРµС‚РѕРґР° Р·Р°РґР°СЋС‰РµРіРѕ РІРЅРµС€РЅРёРµ РґР°РЅРЅС‹Рµ
+  typedef void (Owner::* tSetter)(Type);
 
-  /// Индек свойства
+  /// РРЅРґРµРє СЃРІРѕР№СЃС‚РІР°
   int mIndex;
 
-  /// Метод возвращающий внешние данные
+  /// РњРµС‚РѕРґ РІРѕР·РІСЂР°С‰Р°СЋС‰РёР№ РІРЅРµС€РЅРёРµ РґР°РЅРЅС‹Рµ
   tGetter mGetter;
-  /// Метод задающий внешние данные
+  /// РњРµС‚РѕРґ Р·Р°РґР°СЋС‰РёР№ РІРЅРµС€РЅРёРµ РґР°РЅРЅС‹Рµ
   tSetter mSetter;
-  /// Внешняя проверка данных
+  /// Р’РЅРµС€РЅСЏСЏ РїСЂРѕРІРµСЂРєР° РґР°РЅРЅС‹С…
   tCheckValue mCheckValue;
-  /// Внутренные данные
+  /// Р’РЅСѓС‚СЂРµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ
   Type mValue;
-  /// Какие данные использовать анутренние или внешние
+  /// РљР°РєРёРµ РґР°РЅРЅС‹Рµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Р°РЅСѓС‚СЂРµРЅРЅРёРµ РёР»Рё РІРЅРµС€РЅРёРµ
   bool mIsHaveValue;
-  /// Было ли изменено свойство после инициализации
+  /// Р‘С‹Р»Рѕ Р»Рё РёР·РјРµРЅРµРЅРѕ СЃРІРѕР№СЃС‚РІРѕ РїРѕСЃР»Рµ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё
   bool mIsChange;
-  /// Является ли свойство флагом, и задавать значение не требуется
+  /// РЇРІР»СЏРµС‚СЃСЏ Р»Рё СЃРІРѕР№СЃС‚РІРѕ С„Р»Р°РіРѕРј, Рё Р·Р°РґР°РІР°С‚СЊ Р·РЅР°С‡РµРЅРёРµ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ
   bool mIsFlag;
 
-  /// Копирование внутренних значений
+  /// РљРѕРїРёСЂРѕРІР°РЅРёРµ РІРЅСѓС‚СЂРµРЅРЅРёС… Р·РЅР°С‡РµРЅРёР№
   virtual void CopyValue(Type value);
 public:
 
-  /// Задает использовать ли внутренние данные или внешние
+  /// Р—Р°РґР°РµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Р»Рё РІРЅСѓС‚СЂРµРЅРЅРёРµ РґР°РЅРЅС‹Рµ РёР»Рё РІРЅРµС€РЅРёРµ
   void SetIsHaveValue(bool isHaveValue);
-  /// Какие данные используются, внутренние или внешние
+  /// РљР°РєРёРµ РґР°РЅРЅС‹Рµ РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ, РІРЅСѓС‚СЂРµРЅРЅРёРµ РёР»Рё РІРЅРµС€РЅРёРµ
   bool GetIsHaveValue();
 
-  /// Задает индекс свойства для проверки
+  /// Р—Р°РґР°РµС‚ РёРЅРґРµРєСЃ СЃРІРѕР№СЃС‚РІР° РґР»СЏ РїСЂРѕРІРµСЂРєРё
   void SetIndex(int index);
-  /// Возвращает индекс свойства для проверки
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ РёРЅРґРµРєСЃ СЃРІРѕР№СЃС‚РІР° РґР»СЏ РїСЂРѕРІРµСЂРєРё
   int GetIndex();
 
-  /// Перегруженный оператор приведения типа, геттер
+  /// РџРµСЂРµРіСЂСѓР¶РµРЅРЅС‹Р№ РѕРїРµСЂР°С‚РѕСЂ РїСЂРёРІРµРґРµРЅРёСЏ С‚РёРїР°, РіРµС‚С‚РµСЂ
   virtual operator Type() const;
-  /// Перегруженный оператор присваивания, сеттер
+  /// РџРµСЂРµРіСЂСѓР¶РµРЅРЅС‹Р№ РѕРїРµСЂР°С‚РѕСЂ РїСЂРёСЃРІР°РёРІР°РЅРёСЏ, СЃРµС‚С‚РµСЂ
   virtual void operator =(Type data);
 
-  /// Перегрузка оператора копрования двух объектов
+  /// РџРµСЂРµРіСЂСѓР·РєР° РѕРїРµСЂР°С‚РѕСЂР° РєРѕРїСЂРѕРІР°РЅРёСЏ РґРІСѓС… РѕР±СЉРµРєС‚РѕРІ
   virtual void operator = (TypedProperty<Type, Owner>& data);
-  /// Перегрузка оператора копрования для указателя
+  /// РџРµСЂРµРіСЂСѓР·РєР° РѕРїРµСЂР°С‚РѕСЂР° РєРѕРїСЂРѕРІР°РЅРёСЏ РґР»СЏ СѓРєР°Р·Р°С‚РµР»СЏ
   virtual void operator = (TypedProperty<Type, Owner>* data);
 
-  /// Копирует данные из указателя в этот объект
+  /// РљРѕРїРёСЂСѓРµС‚ РґР°РЅРЅС‹Рµ РёР· СѓРєР°Р·Р°С‚РµР»СЏ РІ СЌС‚РѕС‚ РѕР±СЉРµРєС‚
   virtual void Copy(void* data);
-  /// Задает данные приводя к void* к типу объекта
+  /// Р—Р°РґР°РµС‚ РґР°РЅРЅС‹Рµ РїСЂРёРІРѕРґСЏ Рє void* Рє С‚РёРїСѓ РѕР±СЉРµРєС‚Р°
   virtual void SetValue(void* data);
-  /// Возвращает указатель на данные хранящиеся в объекте
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РґР°РЅРЅС‹Рµ С…СЂР°РЅСЏС‰РёРµСЃСЏ РІ РѕР±СЉРµРєС‚Рµ
   virtual void* GetValue();
-  /// Инициализация методов
-  virtual void Init(Owner * owner, tGetter getMethod, tSetter setMethod, tCheckValue checkMethod);
+  /// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјРµС‚РѕРґРѕРІ
+  virtual void Init(Owner* owner, tGetter getMethod, tSetter setMethod, tCheckValue checkMethod);
 
-  /// Возвращиет данные в соответствии с правилами
+  /// Р’РѕР·РІСЂР°С‰РёРµС‚ РґР°РЅРЅС‹Рµ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ РїСЂР°РІРёР»Р°РјРё
   virtual Type GetData();
-  /// Возвращает принадлежащие объекту данные
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ РїСЂРёРЅР°РґР»РµР¶Р°С‰РёРµ РѕР±СЉРµРєС‚Сѓ РґР°РЅРЅС‹Рµ
   virtual Type GetAvailableData() const;
-  /// Было ли изменено свойство после инициализации
+  /// Р‘С‹Р»Рѕ Р»Рё РёР·РјРµРЅРµРЅРѕ СЃРІРѕР№СЃС‚РІРѕ РїРѕСЃР»Рµ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё
   virtual bool GetIsChange();
 
   TypedProperty();
   TypedProperty(Type value);
-  TypedProperty(Owner * owner, tGetter getMethod, tSetter setMethod, tCheckValue checkMethod, Type value);
+  TypedProperty(Owner* owner, tGetter getMethod, tSetter setMethod, tCheckValue checkMethod, Type value);
   virtual ~TypedProperty();
 
-  /// Задает функцию сеттер
+  /// Р—Р°РґР°РµС‚ С„СѓРЅРєС†РёСЋ СЃРµС‚С‚РµСЂ
   virtual void SetSetter(tSetter setter)
   {
     mSetter = setter;
@@ -123,12 +121,12 @@ public:
     else
       mIsHaveValue = true;
   }
-  ///// Возвращает функцию сеттер
+  ///// Р’РѕР·РІСЂР°С‰Р°РµС‚ С„СѓРЅРєС†РёСЋ СЃРµС‚С‚РµСЂ
   virtual tSetter GetSetter()
   {
     return mSetter;
   }
-  /// Задает функцию геттер
+  /// Р—Р°РґР°РµС‚ С„СѓРЅРєС†РёСЋ РіРµС‚С‚РµСЂ
   virtual void SetGetter(tGetter getter)
   {
     mGetter = getter;
@@ -138,29 +136,29 @@ public:
     else
       mIsHaveValue = true;
   }
-  ///// Возвращает функцию геттер
+  ///// Р’РѕР·РІСЂР°С‰Р°РµС‚ С„СѓРЅРєС†РёСЋ РіРµС‚С‚РµСЂ
   virtual tGetter GetGetter() const
   {
     return mGetter;
   }
-  /// Задает функцию проверяющую значение
+  /// Р—Р°РґР°РµС‚ С„СѓРЅРєС†РёСЋ РїСЂРѕРІРµСЂСЏСЋС‰СѓСЋ Р·РЅР°С‡РµРЅРёРµ
   virtual void SetCheckValue(tCheckValue checkValue)
   {
     mCheckValue = checkValue;
   }
-  /// Возвращает функцию проверяющую значения
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ С„СѓРЅРєС†РёСЋ РїСЂРѕРІРµСЂСЏСЋС‰СѓСЋ Р·РЅР°С‡РµРЅРёСЏ
   virtual tCheckValue GetCheckValue()
   {
     return mCheckValue;
   }
 
-  /// Является ли свойство флагом, и задавать значение не требуется.
+  /// РЇРІР»СЏРµС‚СЃСЏ Р»Рё СЃРІРѕР№СЃС‚РІРѕ С„Р»Р°РіРѕРј, Рё Р·Р°РґР°РІР°С‚СЊ Р·РЅР°С‡РµРЅРёРµ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
   virtual bool IsFlag()
   {
     return mIsFlag;
   }
 
-  /// Проверяет правильность значения
+  /// РџСЂРѕРІРµСЂСЏРµС‚ РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ Р·РЅР°С‡РµРЅРёСЏ
   virtual int CheckValue()
   {
     int err = 0;
@@ -171,13 +169,12 @@ public:
 
 };
 
-
 /* ======================================================================== *\
-**  Реализация методов класса     TypedProperty                                 **
+**  Р РµР°Р»РёР·Р°С†РёСЏ РјРµС‚РѕРґРѕРІ РєР»Р°СЃСЃР°     TypedProperty                             **
 \* ======================================================================== */
 
 // ------------------------------------------------------------------------------------------------
-/// Копирование внутренних значений
+/// РљРѕРїРёСЂРѕРІР°РЅРёРµ РІРЅСѓС‚СЂРµРЅРЅРёС… Р·РЅР°С‡РµРЅРёР№
 template <class Type, class Owner>
 void TypedProperty<Type, Owner>::CopyValue(Type value)
 {
@@ -185,7 +182,7 @@ void TypedProperty<Type, Owner>::CopyValue(Type value)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Задает использовать ли внутренние данные или внешние
+/// Р—Р°РґР°РµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Р»Рё РІРЅСѓС‚СЂРµРЅРЅРёРµ РґР°РЅРЅС‹Рµ РёР»Рё РІРЅРµС€РЅРёРµ
 template <class Type, class Owner>
 void TypedProperty<Type, Owner>::SetIsHaveValue(bool isHaveValue)
 {
@@ -193,7 +190,7 @@ void TypedProperty<Type, Owner>::SetIsHaveValue(bool isHaveValue)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Какие данные используются, внутренние или внешние
+/// РљР°РєРёРµ РґР°РЅРЅС‹Рµ РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ, РІРЅСѓС‚СЂРµРЅРЅРёРµ РёР»Рё РІРЅРµС€РЅРёРµ
 template <class Type, class Owner>
 bool TypedProperty<Type, Owner>::GetIsHaveValue()
 {
@@ -201,7 +198,7 @@ bool TypedProperty<Type, Owner>::GetIsHaveValue()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Задает индекс свойства для проверки
+/// Р—Р°РґР°РµС‚ РёРЅРґРµРєСЃ СЃРІРѕР№СЃС‚РІР° РґР»СЏ РїСЂРѕРІРµСЂРєРё
 template <class Type, class Owner>
 void TypedProperty<Type, Owner>::SetIndex(int index)
 {
@@ -209,7 +206,7 @@ void TypedProperty<Type, Owner>::SetIndex(int index)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Возвращает индекс свойства для проверки
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РёРЅРґРµРєСЃ СЃРІРѕР№СЃС‚РІР° РґР»СЏ РїСЂРѕРІРµСЂРєРё
 template <class Type, class Owner>
 int TypedProperty<Type, Owner>::GetIndex()
 {
@@ -217,7 +214,7 @@ int TypedProperty<Type, Owner>::GetIndex()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Перегруженный оператор приведения типа, геттер
+/// РџРµСЂРµРіСЂСѓР¶РµРЅРЅС‹Р№ РѕРїРµСЂР°С‚РѕСЂ РїСЂРёРІРµРґРµРЅРёСЏ С‚РёРїР°, РіРµС‚С‚РµСЂ
 template <class Type, class Owner>
 TypedProperty<Type, Owner>::operator Type() const
 {
@@ -228,7 +225,7 @@ TypedProperty<Type, Owner>::operator Type() const
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Перегруженный оператор присваивания, сеттер
+/// РџРµСЂРµРіСЂСѓР¶РµРЅРЅС‹Р№ РѕРїРµСЂР°С‚РѕСЂ РїСЂРёСЃРІР°РёРІР°РЅРёСЏ, СЃРµС‚С‚РµСЂ
 template <class Type, class Owner>
 void TypedProperty<Type, Owner>::operator =(Type data)
 {
@@ -248,7 +245,7 @@ void TypedProperty<Type, Owner>::operator =(Type data)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Перегрузка оператора копрования двух объектов
+/// РџРµСЂРµРіСЂСѓР·РєР° РѕРїРµСЂР°С‚РѕСЂР° РєРѕРїСЂРѕРІР°РЅРёСЏ РґРІСѓС… РѕР±СЉРµРєС‚РѕРІ
 template <class Type, class Owner>
 void TypedProperty<Type, Owner>::operator = (TypedProperty<Type, Owner>& data)
 {
@@ -263,7 +260,7 @@ void TypedProperty<Type, Owner>::operator = (TypedProperty<Type, Owner>& data)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Перегрузка оператора копрования для указателя
+/// РџРµСЂРµРіСЂСѓР·РєР° РѕРїРµСЂР°С‚РѕСЂР° РєРѕРїСЂРѕРІР°РЅРёСЏ РґР»СЏ СѓРєР°Р·Р°С‚РµР»СЏ
 template <class Type, class Owner>
 void TypedProperty<Type, Owner>::operator = (TypedProperty<Type, Owner>* data)
 {
@@ -278,7 +275,7 @@ void TypedProperty<Type, Owner>::operator = (TypedProperty<Type, Owner>* data)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Копирует данные из указателя в этот объект
+/// РљРѕРїРёСЂСѓРµС‚ РґР°РЅРЅС‹Рµ РёР· СѓРєР°Р·Р°С‚РµР»СЏ РІ СЌС‚РѕС‚ РѕР±СЉРµРєС‚
 template <class Type, class Owner>
 void TypedProperty<Type, Owner>::Copy(void* data)
 {
@@ -286,7 +283,7 @@ void TypedProperty<Type, Owner>::Copy(void* data)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Задает данные приводя к void* к типу объекта
+/// Р—Р°РґР°РµС‚ РґР°РЅРЅС‹Рµ РїСЂРёРІРѕРґСЏ Рє void* Рє С‚РёРїСѓ РѕР±СЉРµРєС‚Р°
 template <class Type, class Owner>
 void TypedProperty<Type, Owner>::SetValue(void* data)
 {
@@ -294,7 +291,7 @@ void TypedProperty<Type, Owner>::SetValue(void* data)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Возвращает указатель на данные хранящиеся в объекте
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РґР°РЅРЅС‹Рµ С…СЂР°РЅСЏС‰РёРµСЃСЏ РІ РѕР±СЉРµРєС‚Рµ
 template <class Type, class Owner>
 void* TypedProperty<Type, Owner>::GetValue()
 {
@@ -308,9 +305,9 @@ void* TypedProperty<Type, Owner>::GetValue()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Инициализация методов
+/// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјРµС‚РѕРґРѕРІ
 template <class Type, class Owner>
-void TypedProperty<Type, Owner>::Init(Owner * owner, tGetter getMethod, tSetter setMethod, tCheckValue checkMethod)
+void TypedProperty<Type, Owner>::Init(Owner* owner, tGetter getMethod, tSetter setMethod, tCheckValue checkMethod)
 {
   this->mOwner = owner;
   mGetter = getMethod;
@@ -324,7 +321,7 @@ void TypedProperty<Type, Owner>::Init(Owner * owner, tGetter getMethod, tSetter 
 };
 
 // ------------------------------------------------------------------------------------------------
-/// Возвращиет данные в соответствии с правилами
+/// Р’РѕР·РІСЂР°С‰РёРµС‚ РґР°РЅРЅС‹Рµ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ РїСЂР°РІРёР»Р°РјРё
 template <class Type, class Owner>
 Type TypedProperty<Type, Owner>::GetData()
 {
@@ -332,7 +329,7 @@ Type TypedProperty<Type, Owner>::GetData()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Возвращает принадлежащие объекту данные
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РїСЂРёРЅР°РґР»РµР¶Р°С‰РёРµ РѕР±СЉРµРєС‚Сѓ РґР°РЅРЅС‹Рµ
 template <class Type, class Owner>
 Type TypedProperty<Type, Owner>::GetAvailableData() const
 {
@@ -340,7 +337,7 @@ Type TypedProperty<Type, Owner>::GetAvailableData() const
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Было ли изменено свойство после инициализации
+/// Р‘С‹Р»Рѕ Р»Рё РёР·РјРµРЅРµРЅРѕ СЃРІРѕР№СЃС‚РІРѕ РїРѕСЃР»Рµ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё
 template <class Type, class Owner>
 bool TypedProperty<Type, Owner>::GetIsChange()
 {
@@ -372,7 +369,7 @@ TypedProperty<Type, Owner>::TypedProperty(Type value) : BaseProperty<Owner>(0), 
 
 // ------------------------------------------------------------------------------------------------
 template <class Type, class Owner>
-TypedProperty<Type, Owner>::TypedProperty(Owner * owner, tGetter getMethod, tSetter setMethod, tCheckValue checkMethod, Type value) :
+TypedProperty<Type, Owner>::TypedProperty(Owner* owner, tGetter getMethod, tSetter setMethod, tCheckValue checkMethod, Type value) :
   BaseProperty<Owner>(owner), mGetter(getMethod), mSetter(setMethod), mCheckValue(checkMethod)
 {
   CopyValue(value);

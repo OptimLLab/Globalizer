@@ -13,6 +13,16 @@
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+\file parameters.cpp
+
+\authors Lebedev I.
+\copyright ННГУ им. Н.И. Лобачевского
+
+\brief Реализация класса параметров
+
+*/
+
 #include <mpi.h>
 
 #include <cstring>
@@ -41,7 +51,7 @@ Parameters parameters;
 void Parameters::SetDefaultParameters()
 {
   InitOption(HELP, 0, "-HELP", "Print Help", 1);
-  InitOption(IsPlot, 0, "-PLOT", "Plot level line", 1); 
+  InitOption(IsPlot, 0, "-PLOT", "Plot level line", 1);
   InitOption(PlotGridSize, 300, "-PGS", "Drawing mesh precision", 1);
   InitOption(IsCalculateNumPoint, 0, "-ICNP", "Number of trials will be calculated at each iteration", 1);
   Separator = std::string("_"); //Переопределяем сепаратор на значение по умолчанию
@@ -56,17 +66,17 @@ void Parameters::SetDefaultParameters()
   InitOption(NumThread, 1, "-nt", "Num OpenMP Thread", 1);
   InitOption(SizeInBlock, 32, "-sb", "Size In CUDA Block", 1);
   InitOption(IsPrintFile, false, "-IsPF", "Is Print report to File", 1);
-  
+
   InitOption(Dimension, -1, "-N", "Dimension", 1);
-  
+
   InitOption(r, 4.0, "-r", "r", 1);
-  
+
   InitOption(rDynamic, 0, "-rd", "Additive when dynamics change r, r = r + rDynamic / (Iteration ^ (1 / N))", 1);
   InitOption(rEps, 0.01, "-rE", "eps-reserv", 1);
   InitOption(Comment, 000, "-Comment", "Comment", 1);//ResulLog
   InitOption(ResulLog, 000, "-ResulLog", "ResulLog", 1);
   InitOption(Epsilon, 0.01, "-E", "Epsilon", 1);
-  
+
   InitOption(M_constant, 1, "-M_constant", "Initial M_constant estimations for each function", 1);
   InitOption(m, 10, "-m", "Number of evolnents", 1);
   InitOption(deviceCount, -1, "-dc", "Device count, def: -1 auto", 1);
@@ -90,15 +100,15 @@ void Parameters::SetDefaultParameters()
   InitOption(localVerificationNumPoint, 1, "-lvnp", "The number of iterations of a large-dimensional problem solver", 1);
 
   InitOption(HDSolverIterationCount, 1, "-hdsic", "local Verification NumPoint", 1);
-  
+
   InitOption(localMix, 0, "-lm", "local mix parameter", 1);
   InitOption(localAlpha, 15, "-la", "parameter alpha in mixed algorithm", 1);
   InitOption(sepS, Off, "-sepS", "enables separable optimization on start", 1);
   InitOption(rndS, false, "-rndS", "enables random optimization on start", 1);
   InitOption(libPath, DEFAULT_LIB, "-lib", "path to a library with the optimization problem", 1);
-  
+
   InitOption(libConfigPath, \0, "-libConf", "path to config a of library with the optimization problem", 1);
-  
+
   InitOption(stopCondition, Accuracy, "-stopCond", "stop condition type", 1);
   InitOption(isStopByAnyLevel, true, "-isbal", "Is Stop By Any Level", 1);
   InitOption(isPrintResultToConsole, true, "-isPRC", "Should print the results of the algorithm to the console", 1);
@@ -113,28 +123,28 @@ void Parameters::SetDefaultParameters()
   InitOption(DimInTask, 0_0_0_0, "-dt", "DimInSeparableTask", 4);
 
   InitOption(mpiBlockSize, 1, "-mbs", "Size of blocks in mpi calculation", 1);
-  
+
   InitOption(isUseTaskR, false, "-iutr", "isUseTaskR", 1);
   InitOption(isUseFullRecount, false, "-iufr", "isUseFullRecount", 1);
 
   InitOption(isUseIntervalR, false, "-iuir", "isUseIntervalR", 1);
   InitOption(isUseGlobalZ, false, "-iugz", "isUseGlobalZ", 1);
   InitOption(isNotUseZ, false, "-inuz", "isNotUseZ", 1);
-  
+
 
   InitOption(TypeAddLocalPoint, NotTakenIntoAccountInStoppingCriterion, "-talp", "The type of adding local refinement points (0 - as normal points, 1 - local method points are not counted in the precision stopping criterion)", 1);
   InitOption(maxCountLocalPoint, 5, "-mclp", "Maximum number of points set by the local method", 1);
   InitOption(isCalculationInBorderPoint, false, "-icibp", "Is Calculation Function In Border Point", 1);
   InitOption(LocalTuningType, WithoutLocalTuning, "-ltt", "Type of local tuning: 0 - without it, 1 - LT, 2 - LTA, 3 - LTMA", 1);
   InitOption(ltXi, 1e-6, "-ltXi", "Parameter of local tuning", 1);
-  
-  
+
+
   InitOption(isLoadFirstPointFromFile, false, "-islfp", "is load first point from file", 1);
   InitOption(FirstPointFilePath, \0, "-fpf", "path from first point file", 1);
 
   InitOption(ProcRank, -1, "-ProcRank", "Rank of process, def: -1 auto", 1);
 
-  InitOption(functionSignMultiplier, 1.0_1.0_1.0_1.0 , "-fsm", "The multiplier in front of the function that determines whether we minimize or maximize the function", 4);
+  InitOption(functionSignMultiplier, 1.0_1.0_1.0_1.0, "-fsm", "The multiplier in front of the function that determines whether we minimize or maximize the function", 4);
 
   InitOption(startPoint, MaxDouble, "-sp", "The starting point for solving the optimization problem", 0);
   InitOption(startPointValues, MaxDouble, "-spv", "The values of the functions in the starting point for solving the optimization problem", 0);
@@ -219,7 +229,7 @@ int Parameters::CheckValueParameters(int index)
 
 
     // TODO::dmsi Убрать, если асинхронная схема научится работать с пачками точек
-    if (TypeCalculation == AsyncMPI) 
+    if (TypeCalculation == AsyncMPI)
     {
       mpiBlockSize = 1;
     }
@@ -244,7 +254,7 @@ int Parameters::CheckValueParameters(int index)
       }
     }
 
-   
+
 
     mIsInit = true;
   }
@@ -341,15 +351,15 @@ void Parameters::Init(int argc, char* argv[], bool isMPIInit)
   if ((mIsPrintHelp) || (HELP))
     if (mProcRank == 0)
       PrintHelp();
-/*
-  if (mProcRank == 0)
+  /*
+    if (mProcRank == 0)
 
-#ifdef CUDA_VALUE_DOUBLE_PRECISION
-    std::cout << "\nDOUBLE PRECISION\n";
-#else
-    std::cout << "\nSINGLE PRECISION\n";
-#endif //CUDA_VALUE_DOUBLE_PRECISION
-*/
+  #ifdef CUDA_VALUE_DOUBLE_PRECISION
+      std::cout << "\nDOUBLE PRECISION\n";
+  #else
+      std::cout << "\nSINGLE PRECISION\n";
+  #endif //CUDA_VALUE_DOUBLE_PRECISION
+  */
 
   if (IsSetDevice)
     SetDeviceIndex();
@@ -470,7 +480,7 @@ void Parameters::SetDeviceIndex()
   if (mProcRank == 0)
   {
     //printf("pn=%d\n", GetProcNum());
-    char** allCompName = new char*[GetProcNum() + 1];
+    char** allCompName = new char* [GetProcNum() + 1];
 
     for (int i = 1; i < GetProcNum(); i++)
     {

@@ -786,11 +786,11 @@ void TStrings<Owner>::operator = (std::string data)
   //sscanf(data.data(), "%d", &mValue);
 
   int l = 0;
-  char *s = new char[data.size() + 1];
+  char* s = new char[data.size() + 1];
 
   strcpy(s, data.c_str());
 
-  char *pp = strtok(s, this->mSeparator.c_str());
+  char* pp = strtok(s, this->mSeparator.c_str());
   std::string tt[100];
   std::string t = "";
   while (pp != 0)
@@ -926,11 +926,11 @@ void TInts<Owner>::operator = (std::string data)
   //sscanf(data.data(), "%d", &mValue);
 
   int l = 0;
-  char *s = new char[data.size() + 1];
+  char* s = new char[data.size() + 1];
 
   strcpy(s, data.c_str());
 
-  char *pp = strtok(s, this->mSeparator.c_str());
+  char* pp = strtok(s, this->mSeparator.c_str());
   int tt[100];
   int t = 0;
   while (pp != 0)
@@ -1066,11 +1066,11 @@ void TDoubles<Owner>::operator = (std::string data)
   //sscanf(data.data(), "%d", &mValue);
 
   int l = 0;
-  char *s = new char[data.size() + 1];
+  char* s = new char[data.size() + 1];
 
   strcpy(s, data.c_str());
 
-  char *pp = strtok(s, this->mSeparator.c_str());
+  char* pp = strtok(s, this->mSeparator.c_str());
   double tt[100];
   double t = 0;
   while (pp != 0)

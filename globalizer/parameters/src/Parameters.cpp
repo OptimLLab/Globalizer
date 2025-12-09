@@ -47,7 +47,7 @@ void Parameters::SetDefaultParameters()
   Separator = std::string("_"); //Переопределяем сепаратор на значение по умолчанию
   SetSeparator();
   InitOption(NumPoints, 1, "-np", "the number of points per iteration", 1);
-  InitOption(StepPrintMessages, 1000, "-spm", "StepPrintMessages", 1);
+  InitOption(StepPrintMessages, 100000, "-spm", "StepPrintMessages", 1);
   InitOption(StepSavePoint, 1000000, "-ssp", "After how many iterations to save points", 1);
 
   InitOption(TypeMethod, StandartMethod, "-tm", "HybridMethod or StandartMethod or ManyNumPointMethod", 1);
@@ -78,7 +78,7 @@ void Parameters::SetDefaultParameters()
   InitOption(DebugAsyncCalculation, 0, "-dac", "Helps debug in async calculation", 1); // Должен существовать файл: ../_build/async.txt
   InitOption(IsPrintSectionPoint, false, "-IsPSP", "Whether to print section information in a Block Scheme", 1);
 
-  InitOption(MaxNumOfPoints, 7000000, "-MaxNP", "MaxNumOfPoints", 1);
+  InitOption(MaxNumOfPoints, 100000, "-MaxNP", "MaxNumOfPoints", 1);
   
   InitOption(IsSetDevice, false, "-sd", "Assign each process their device", 1);
   InitOption(deviceIndex, -1, "-di", "Device Index, def: -1 auto", 1);
@@ -139,7 +139,7 @@ void Parameters::SetDefaultParameters()
   InitOption(startPoint, MaxDouble, "-sp", "The starting point for solving the optimization problem", 0);
   InitOption(startPointValues, MaxDouble, "-spv", "The values of the functions in the starting point for solving the optimization problem", 0);
 
-  
+  InitOption(IsUseExtendedConsole, false, "-IsUEC", "Use the extended console interface", 1);
   
 
   ProcRank.SetGetter(&Parameters::GetProcRank);
@@ -400,6 +400,20 @@ Parameters::~Parameters()
 bool Parameters::IsProblem()
 {
   return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+int Parameters::GetMaxNumOMP()
+{
+  int maxNumOMP = 1;
+#ifndef USE_OneAPI
+#pragma omp parallel
+  {
+    if (omp_get_thread_num() == 0)
+      maxNumOMP = omp_get_num_threads();
+  }
+#endif
+  return maxNumOMP;
 }
 
 // ------------------------------------------------------------------------------------------------

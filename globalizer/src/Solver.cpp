@@ -87,12 +87,46 @@ int Solver::CheckParameters()
 
   double optimumPoint[MaxDim * MaxNumOfGlobMinima];
   int n;
-  if (mProblem->GetOptimumPoint(optimumPoint) == IProblem::UNDEFINED &&
-    mProblem->GetAllOptimumPoint(optimumPoint, n) == IProblem::UNDEFINED &&
-    parameters.stopCondition == OptimumVicinity)
+
+  if (mProblem->GetOptimumPoint(optimumPoint) == IProblem::OK)
   {
-    print << "Stop by reaching optimum vicinity is unsupported by this problem\n";
-    return 1;
+    if (parameters.stopCondition.GetIsChange() == false)
+    {
+      parameters.stopCondition = OptimumVicinity2;
+    }
+  }
+  else
+  {
+    if (mProblem->GetAllOptimumPoint(optimumPoint, n) == IProblem::UNDEFINED)
+    {
+      if (parameters.stopCondition != Accuracy)
+      {
+        print << "Stop by reaching optimum vicinity is unsupported by this problem\n";
+        print << "Stop Condition change to Accuracy!!!\n";
+        parameters.stopCondition = Accuracy;
+      }
+    }
+  }
+
+  IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(mProblem);
+  if (newProblem != 0)
+  {
+    if (newProblem->GetNumberOfDiscreteVariable() != 0)
+    {
+      if (parameters.TypeMethod != IntegerMethod)
+      {
+        print << "Change type solver method to IntegerMethod!!!" << "\n";
+        parameters.TypeMethod = IntegerMethod;
+      }
+    }
+  }
+
+  if (parameters.MaxNumOfPoints[0] > 100 && parameters.Dimension > 2 && parameters.Dimension < 10
+    && parameters.NumThread.GetIsChange() == false && parameters.NumPoints.GetIsChange() == false
+    && parameters.TypeCalculation == OMP)
+  {
+    parameters.NumThread = std::max(int(parameters.GetMaxNumOMP() / 2), 1);
+    parameters.NumPoints = parameters.NumThread;
   }
 
   return 0;

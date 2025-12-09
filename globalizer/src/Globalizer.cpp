@@ -20,7 +20,7 @@ void GlobalizerInitialization(int argc, char* argv[], bool isMPIInit,
     MPI_Init(&argc, &argv);
 
   // Инициализация параметров
-  parameters.Init(argc, argv, true);
+  parameters.Init(argc, argv, isMPIInit);
 
   if (mLogFileName == "")
     mLogFileName = parameters.logFileNamePrefix;

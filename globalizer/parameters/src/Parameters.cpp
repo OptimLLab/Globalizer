@@ -78,7 +78,7 @@ void Parameters::SetDefaultParameters()
   InitOption(DebugAsyncCalculation, 0, "-dac", "Helps debug in async calculation", 1); // Должен существовать файл: ../_build/async.txt
   InitOption(IsPrintSectionPoint, false, "-IsPSP", "Whether to print section information in a Block Scheme", 1);
 
-  InitOption(MaxNumOfPoints, 100000, "-MaxNP", "MaxNumOfPoints", 1);
+  InitOption(MaxNumOfPoints, 1000000, "-MaxNP", "MaxNumOfPoints", 1);
   
   InitOption(IsSetDevice, false, "-sd", "Assign each process their device", 1);
   InitOption(deviceIndex, -1, "-di", "Device Index, def: -1 auto", 1);

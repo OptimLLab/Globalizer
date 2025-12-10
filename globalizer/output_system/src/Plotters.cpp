@@ -4,10 +4,13 @@
 #include <string>
 #include <iostream>
 
-#include <Python.h>
 #include <filesystem>
 
+#ifdef USE_PYTHON
+#include <Python.h>
+#endif
 
+#ifdef USE_PYTHON
 void make_problem_info_file(IProblem* problem, SolutionResult* result, const char* problem_file_name = "_problem_info.txt",
     Plotter::CalcsTypes calcs_type = Plotter::ObjectiveFunction, std::initializer_list<int> params = { 0, 1 }, int points_count = 100) {
 
@@ -86,8 +89,9 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
 
     fclose(pf);
 }
+#endif
 
-
+#ifdef USE_PYTHON
 void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initializer_list<int> params,
     wchar_t* output_file_name, FigureTypes figure_type, CalcsTypes calcs_type,
     bool show_figure, bool move_points_under_graph) {
@@ -175,6 +179,7 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
             __show_figure,
             NULL
     };
+
     PySys_SetArgvEx(sizeof(args) / sizeof(wchar_t*) - 1, args, 0);
 
 
@@ -197,7 +202,10 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
         Py_Finalize();
     }
 
+
     delete __build_path;
     delete __script_path;
     delete __params;
+
 }
+#endif

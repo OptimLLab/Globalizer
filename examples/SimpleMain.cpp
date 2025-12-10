@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -118,6 +118,7 @@ int main(int argc, char* argv[])
   if (solver.Solve() != SYSTEM_OK)
     throw EXCEPTION("Error: solver.Solve crash!!!");
 
+#ifdef USE_PYTHON
   if (problemName == RASTRIGIN)
   {
       draw_plot(problem, solver.GetSolutionResult(), { 0, 1 }, L"output_surface_interpolation.png", Plotter::Surface, Plotter::Interpolation, true);
@@ -130,6 +131,7 @@ int main(int argc, char* argv[])
   {
       draw_plot(problem, solver.GetSolutionResult(), { 0, 1 }, L"output_lines_levels_interpolation.png", Plotter::LevelLayers, Plotter::Interpolation, true);
   }
+#endif
 
   return 0;
 }

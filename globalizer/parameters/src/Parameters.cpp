@@ -148,6 +148,7 @@ void Parameters::SetDefaultParameters()
 
   InitOption(startPoint, MaxDouble, "-sp", "The starting point for solving the optimization problem", 0);
   InitOption(startPointValues, MaxDouble, "-spv", "The values of the functions in the starting point for solving the optimization problem", 0);
+  InitOption(IsUseStartPoint, false, "-IsUSP", "Use the starting point from the task", 1);
 
   InitOption(IsUseExtendedConsole, false, "-IsUEC", "Use the extended console interface", 1);
   

@@ -221,6 +221,9 @@ public:
   /// Значения функций в начальная точка для решения задачи оптимизации
   TDoubles<Parameters> startPointValues;
 
+  /// Использовать  стартовую точку из задачи 
+  TBool<Parameters> IsUseStartPoint;
+
   /// Использовать  расширенный консольный интерфейс 
   TBool<Parameters> IsUseExtendedConsole;
 

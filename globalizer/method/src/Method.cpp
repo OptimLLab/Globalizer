@@ -295,7 +295,7 @@ void Method::FirstIteration()
   // Равномерно ставим NumPoints точек c шагом h
   // А надо бы случайно...
   double h = 1.0 / (parameters.NumPoints + 1);
-  if (parameters.startPoint.GetIsChange()) //берем начальную точку из параметров
+  if (parameters.startPoint.GetIsChange() && parameters.IsUseStartPoint) //берем начальную точку из параметров
   {
 
     int firstPointCount = parameters.NumPoints - 1;

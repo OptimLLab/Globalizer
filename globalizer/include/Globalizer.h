@@ -31,6 +31,8 @@
 #include "GlobalizerProblem.h"
 #include "HDSolver.h"
 
+#include "Plotters.h"
+
 #ifdef _GLOBALIZER_BENCHMARKS
 #include "IGlobalOptimizationProblem.h"
 #include "GlobalOptimizationProblemManager.h"

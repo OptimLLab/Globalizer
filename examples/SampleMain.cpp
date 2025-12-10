@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
   if (solver.Solve() != SYSTEM_OK)
     throw EXCEPTION("Error: solver.Solve crash!!!");
 
-  // example for cmd: -lib rastrigin.dll -N 3 -sip my_points.txt
+  // Пример параметров командной строки для запуска: -lib rastrigin.dll -N 3 -sip my_points.txt
   draw_plot(solver.GetProblem(), solver.GetSolutionResult(), { 0, 1 }, L"output_lines_levels_objective_dll.png", Plotter::LevelLayers, Plotter::ObjectiveFunction, true);
 
 #endif

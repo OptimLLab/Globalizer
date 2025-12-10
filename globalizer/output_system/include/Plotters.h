@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../include/Globalizer.h"
+#include "Globalizer.h"
 
 /**
 \file Plotters.h

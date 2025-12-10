@@ -164,9 +164,6 @@ class Plotter3D(Plotter):
         z = nn.predict(xy)
         z = z.reshape(points_count, points_count)
 
-        # полученная аппроксимация
-        #self.plot_surface(x1, x2, z, colormap, transparency)
-
         if self.plotterType == 'lines layers':
             self.plot_contour(x1, x2, z, colormap=colormap, linewidths=linewidths, levels=levels)
         elif self.plotterType == 'surface':

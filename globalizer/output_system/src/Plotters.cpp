@@ -17,8 +17,6 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
         throw std::logic_error("Error: cant open file");
     }
 
-    // запись в файл необходимой информации о задаче
-
     fprintf(pf, "%d ", problem->GetDimension());
 
     double* left_bound = new double[problem->GetDimension()];
@@ -33,8 +31,6 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
         fprintf(pf, "%lf_", right_bound[i]);
     }
     fprintf(pf, "%lf\n", right_bound[problem->GetDimension() - 1]);
-
-    // рассчет и запись в файл точек сетки для построения точных графиков
 
     if (calcs_type == Plotter::ObjectiveFunction) {
         double* section = (result->BestTrial)->y;

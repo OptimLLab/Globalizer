@@ -22,11 +22,10 @@ class DrawingProcess:
         '''
         plotter_type: 'lines layers' 'surface'
         object_function_plotter_type: 'objective function' 'approximation' 'interpolation' 'by points' 'only points'
-        'lines layers' + 'approximation' - не желательно
+        Comments:
+        'lines layers' + 'approximation', 'lines layers' + 'by points'- не желательно
         'surface' + 'objective function' - визуализирует в объеме линии уровня вместо поверхности
         '''
-
-
         painter = StaticPainter(parameters_numbers,
                                 self.eps,
                                 self.dim,

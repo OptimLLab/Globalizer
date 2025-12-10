@@ -14,7 +14,6 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-
 #include "Globalizer.h"
 
 enum ProblemName { RASTRIGIN, STRONGINC3_LAMBDA_EXPRESSION, STRONGINC3_FUNCTION_POINTER};
@@ -55,8 +54,8 @@ int main(int argc, char* argv[])
 
   GlobalizerInitialization(argc, argv);
 
-  parameters.Dimension = 8;
-  ProblemName problemName = RASTRIGIN;
+  parameters.Dimension = 3;
+  ProblemName problemName = STRONGINC3_FUNCTION_POINTER;
   IProblem* problem = nullptr;
 
   if (problemName == RASTRIGIN)
@@ -79,6 +78,7 @@ int main(int argc, char* argv[])
   }
   else if (problemName == STRONGINC3_LAMBDA_EXPRESSION)
   {
+      parameters.Dimension = 2;
     problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
       {0.0, -1.0}, // нижняя граница
       {4.0, 3.0}, // верхняя граница
@@ -100,11 +100,12 @@ int main(int argc, char* argv[])
   }
   else if (problemName == STRONGINC3_FUNCTION_POINTER)
   {
+      parameters.Dimension = 2;
     problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
       { 0.0, -1.0 }, // нижняя граница
       { 4.0, 3.0 }, // верхняя граница
       StronginC3Functionals, // задача
-      4 // количество функций (3 ограничения + 1 критерий)      
+      4 // количество функций (3 ограничения + 1 критерий)
     );
   }
 
@@ -117,6 +118,20 @@ int main(int argc, char* argv[])
   if (solver.Solve() != SYSTEM_OK)
     throw EXCEPTION("Error: solver.Solve crash!!!");
 
+  if (problemName == RASTRIGIN)
+  {
+      draw_plot(problem, solver.GetSolutionResult(), { 0, 1 }, L"output_surface_interpolation.png", Plotter::Surface, Plotter::Interpolation, true);
+  }
+  else if (problemName == STRONGINC3_LAMBDA_EXPRESSION)
+  {
+      draw_plot(problem, solver.GetSolutionResult(), { 0, 1 }, L"output_lines_levels_objective.png", Plotter::LevelLayers, Plotter::ObjectiveFunction, true);
+  }
+  else if (problemName == STRONGINC3_FUNCTION_POINTER)
+  {
+      draw_plot(problem, solver.GetSolutionResult(), { 0, 1 }, L"output_lines_levels_interpolation.png", Plotter::LevelLayers, Plotter::Interpolation, true);
+  }
+
   return 0;
 }
+
 // - end of file ----------------------------------------------------------------------------------

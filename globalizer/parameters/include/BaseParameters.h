@@ -1,3 +1,4 @@
+
 /////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
@@ -5,7 +6,7 @@
 //                       Copyright (c) 2016 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      property.h                                                  //
+//  File:      BaseParameters.h                                            //
 //                                                                         //
 //  Purpose:   Header file for random generator class                      //
 //                                                                         //
@@ -17,25 +18,25 @@
 #define __BASE_PARAMETERS_H__
 
 /**
-\file baseParameters.h
-
-\authors Лебедев И.
-\date 2015-2016
-\copyright ННГУ им. Н.И. Лобачевского
-
-\brief Объявление базовых классов для свойств
-
-*/
+ * \file BaseParameters.h
+ *
+ * \authors Лебедев И.
+ * \date 2015-2016
+ * \copyright ННГУ им. Н.И. Лобачевского
+ *
+ * \brief Объявление базовых классов для свойств
+ *
+ */
 
 #include "Types.h"
 #include "CombinableBaseParameters.h"
 
-/**
-Базовый класс параметров
-При создании наследника необходимо переопределить константу OWNER_NAME
-и в конструкторе задать mOwner
-(mOwner = this;)
-*/
+ /**
+  * Базовый класс параметров
+  * При создании наследника необходимо переопределить константу OWNER_NAME
+  * и в конструкторе задать mOwner
+  * (mOwner = this;)
+  */
 template <class Owner>
 class BaseParameters : public CombinableBaseParameters
 {
@@ -69,18 +70,22 @@ protected:
   /// Путь по умолчанию до конфигурационного файла
   std::string mConfigPath;
 
-  /// Проверка правильности после окончания чтения параметров
+  /**
+   * Проверка правильности после окончания чтения параметров
+   * \param[in] index Индекс параметра (-1 для проверки всех)
+   * \return Код ошибки
+   */
   virtual int CheckValue(int index = -1);
 
   /**
-      Инициализация параметра
-      \param[in] option - параметр, который инициализируем
-      \param[in] sizeVal - размер массива значений; для типов данных, не являющихся массивами, всегда равен 1
-      \param[in] name - имя свойства
-      \param[in] help - выводимая на консоль справка
-      \param[in] com - короткая строка для запуска(ключ командной строки)
-      \param[in] defVal - значение по умолчанию
-      */
+   * Инициализация параметра
+   * \param[in] option - параметр, который инициализируем
+   * \param[in] name - имя свойства
+   * \param[in] defVal - значение по умолчанию
+   * \param[in] com - короткая строка для запуска(ключ командной строки)
+   * \param[in] help - выводимая на консоль справка
+   * \param[in] sizeVal - размер массива значений; для типов данных, не являющихся массивами, всегда равен 1
+   */
   virtual void InitializationOption(BaseProperty<Owner>* option, std::string name, std::string defVal,
     std::string com, std::string help, int sizeVal);
   /// Добавляет опцию в общий список
@@ -88,12 +93,12 @@ protected:
   /// Задание значений по умолчанию базовых параметров
   virtual void SetBaseDefaultParameters();
   /**
-  Задание значений по умолчанию для всех параметров
-  Пример:
-  InitOption(имя_параметра, значение_по_умолчанию, "короткая_команда", "справка_по_параметру", кол-во_элементов);
-  * кол-во элементов для не-массивов всегда равно 1.
-  InitOption(Separator, _, "-Separator", "Separator", 1);
-  */
+   * Задание значений по умолчанию для всех параметров
+   * Пример:
+   * InitOption(имя_параметра, значение_по_умолчанию, "короткая_команда", "справка_по_параметру", кол-во_элементов);
+   * * кол-во элементов для не-массивов всегда равно 1.
+   * InitOption(Separator, _, "-Separator", "Separator", 1);
+   */
   virtual void SetDefaultParameters() = 0;
   /// Чтение параметров из файла ConfigPath
   //virtual void ReadConfigFile();
@@ -104,7 +109,7 @@ protected:
 
 
 public:
-   /// Печатать или нет справку при пустой командной строке
+  /// Печатать или нет справку при пустой командной строке
   TBool<BaseParameters<Owner>> IsPrintHelpWithoutArguments;
   /// Запускать ли при пустой командной строке
   TBool<BaseParameters<Owner>> IsStartWithoutArguments;
@@ -120,9 +125,11 @@ public:
   bool IsStart();
 
   /**
-  Проверка правильности при изменении параметров
-  При переопределении необходимо вызвать метод базового класса!
-  */
+   * Проверка правильности при изменении параметров
+   * При переопределении необходимо вызвать метод базового класса!
+   * \param[in] index Индекс параметра для проверки
+   * \return Код ошибки
+   */
   virtual int CheckValueParameters(int index = 0);
 
   /// Печать значения параметра с именем name
@@ -137,14 +144,14 @@ public:
   void* GetVal(std::string name);
 
   /**
-  Инициализация параметра
-  \param[in] pt - тип параметра
-  \param[in] sizeVal - размер массива значений; для типов данных, не являющихся массивами, всегда равен 1
-  \param[in] name - имя свойства
-  \param[in] help - выводимая на консоль справка
-  \param[in] com - короткая строка для запуска (ключ командной строки)
-  \param[in] defVal - значение по умолчанию
-  */
+   * Инициализация параметра
+   * \param[in] pt - тип параметра
+   * \param[in] name - имя свойства
+   * \param[in] defVal - значение по умолчанию
+   * \param[in] com - короткая строка для запуска (ключ командной строки)
+   * \param[in] help - выводимая на консоль справка
+   * \param[in] sizeVal - размер массива значений; для типов данных, не являющихся массивами, всегда равен 1
+   */
   virtual void AddOption(EParameterType pt, std::string name, std::string defVal,
     std::string com, std::string help, int sizeVal);
 
@@ -224,7 +231,7 @@ void BaseParameters<Owner>::AddOption(BaseProperty<Owner>* option)
     delete[] mBaseTypeOptions;
 
     mOptions = new BaseProperty<Owner>*[mOptionsSize * 2];
-    mBaseTypeOptions = new IBaseValueClass*[mOptionsSize * 2];
+    mBaseTypeOptions = new IBaseValueClass * [mOptionsSize * 2];
 
     for (int i = 0; i < mOptionsSize * 2; i++)
     {
@@ -409,9 +416,11 @@ bool BaseParameters<Owner>::IsStart()
 
 // ------------------------------------------------------------------------------------------------
 /**
-  Проверка правильности при изменении параметров
-  При переопределении необходимо вызвать метод базового класса!
-*/
+ * Проверка правильности при изменении параметров
+ * При переопределении необходимо вызвать метод базового класса!
+ * \param[in] index Индекс параметра для проверки
+ * \return Код ошибки
+ */
 template <class Owner>
 int BaseParameters<Owner>::CheckValueParameters(int index)
 {
@@ -568,14 +577,14 @@ void* BaseParameters<Owner>::GetVal(std::string name)
 
 // ------------------------------------------------------------------------------------------------
 /**
-  Инициализация параметра
-  \param[in] pt     - тип параметра
-  \param[in] sizeVal - размер массива значений; для типов данных, не являющихся массивами, всегда равен 1
-  \param[in] name   - имя свойства
-  \param[in] help   - выводимая на консоль справка
-  \param[in] com    - короткая строка для запуска (ключ командной строки)
-  \param[in] defVal - значение по умолчанию
-*/
+ * Инициализация параметра
+ * \param[in] pt     - тип параметра
+ * \param[in] name   - имя свойства
+ * \param[in] defVal - значение по умолчанию
+ * \param[in] com    - короткая строка для запуска (ключ командной строки)
+ * \param[in] help   - выводимая на консоль справка
+ * \param[in] sizeVal - размер массива значений; для типов данных, не являющихся массивами, всегда равен 1
+ */
 template <class Owner>
 void BaseParameters<Owner>::AddOption(EParameterType pt, std::string name, std::string defVal,
   std::string com, std::string help, int sizeVal)
@@ -622,7 +631,7 @@ void BaseParameters<Owner>::CombineOptions(IBaseValueClass** otherOptions, int c
   int newOtherOptionsCount = mOtherOptionsCount + count;
   if (newOtherOptionsCount >= mOtherOptionsSize)
   {
-    IBaseValueClass** bufOptions = new IBaseValueClass*[mOtherOptionsSize];
+    IBaseValueClass** bufOptions = new IBaseValueClass * [mOtherOptionsSize];
     for (int i = 0; i < mOtherOptionsSize; i++)
     {
       bufOptions[i] = mOtherOptions[i];
@@ -630,7 +639,7 @@ void BaseParameters<Owner>::CombineOptions(IBaseValueClass** otherOptions, int c
 
     delete[] mOtherOptions;
 
-    mOtherOptions = new IBaseValueClass*[mOtherOptionsSize * 2];
+    mOtherOptions = new IBaseValueClass * [mOtherOptionsSize * 2];
 
     for (int i = 0; i < mOtherOptionsSize * 2; i++)
     {
@@ -723,8 +732,8 @@ void BaseParameters<Owner>::Init(int argc, char* argv[], bool isMPIInit)
   mOtherOptionsSize = 200;
 
   mOptions = new BaseProperty<Owner>*[mOptionsSize];
-  mOtherOptions = new IBaseValueClass*[mOtherOptionsSize];
-  mBaseTypeOptions = new IBaseValueClass*[mOptionsSize];
+  mOtherOptions = new IBaseValueClass * [mOtherOptionsSize];
+  mBaseTypeOptions = new IBaseValueClass * [mOptionsSize];
   for (int i = 0; i < mOptionsSize; i++)
   {
     mOptions[i] = 0;
@@ -804,8 +813,8 @@ BaseParameters<Owner>::BaseParameters(BaseParameters& _parameters) : CombinableB
   mOtherOptionsCount = _parameters.mOtherOptionsCount;
 
   mOptions = new BaseProperty<Owner>*[mOptionsSize];
-  mOtherOptions = new IBaseValueClass*[mOtherOptionsSize];
-  mBaseTypeOptions = new IBaseValueClass*[mOptionsSize];
+  mOtherOptions = new IBaseValueClass * [mOtherOptionsSize];
+  mBaseTypeOptions = new IBaseValueClass * [mOptionsSize];
   for (int i = 0; i < mOptionsSize; i++)
   {
     mOptions[i] = 0;

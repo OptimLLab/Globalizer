@@ -1,11 +1,11 @@
-/////////////////////////////////////////////////////////////////////////////
+п»ї/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
 //                       Copyright (c) 2016 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      ParameterProperty.h                                                  //
+//  File:      ParameterProperty.h                                         //
 //                                                                         //
 //  Purpose:   Header file for random generator class                      //
 //                                                                         //
@@ -21,11 +21,11 @@
 /**
 \file ParameterProperty.h
 
-\authors Лебедев И.
+\authors Р›РµР±РµРґРµРІ Р.
 \date 2015-2016
-\copyright ННГУ им. Н.И. Лобачевского
+\copyright РќРќР“РЈ РёРј. Рќ.Р. Р›РѕР±Р°С‡РµРІСЃРєРѕРіРѕ
 
-\brief Объявление базоых классов для свойств
+\brief РћР±СЉСЏРІР»РµРЅРёРµ Р±Р°Р·РѕС‹С… РєР»Р°СЃСЃРѕРІ РґР»СЏ СЃРІРѕР№СЃС‚РІ
 
 */
 
@@ -34,11 +34,11 @@
 //
 
 /* ======================================================================== *\
-**  Объявление классов                                                      **
+**  РћР±СЉСЏРІР»РµРЅРёРµ РєР»Р°СЃСЃРѕРІ                                                      **
 \* ======================================================================== */
 
 /**
-Базовый класс для свойств параметров, имеет полную реализацию
+Р‘Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РґР»СЏ СЃРІРѕР№СЃС‚РІ РїР°СЂР°РјРµС‚СЂРѕРІ, РёРјРµРµС‚ РїРѕР»РЅСѓСЋ СЂРµР°Р»РёР·Р°С†РёСЋ
 */
 template <class Type, class Owner>
 class ParameterProperty : public TypedProperty<Type, Owner>
@@ -47,101 +47,101 @@ protected:
   typedef typename BaseProperty<Owner>::tCheckValue tCheckValue;
   typedef typename TypedProperty<Type, Owner>::tGetter tGetter;
   typedef typename TypedProperty<Type, Owner>::tSetter tSetter;
-  /// Разделитель массива
+  /// Р Р°Р·РґРµР»РёС‚РµР»СЊ РјР°СЃСЃРёРІР°
   std::string mSeparator;
-  /// Размер массива
+  /// Р Р°Р·РјРµСЂ РјР°СЃСЃРёРІР°
   int mSize;
-  /// Имя свойства
+  /// РРјСЏ СЃРІРѕР№СЃС‚РІР°
   std::string mName;
-  /// Текст справки
+  /// РўРµРєСЃС‚ СЃРїСЂР°РІРєРё
   std::string mHelp;
-  /// Короткое имя для домандной строки
+  /// РљРѕСЂРѕС‚РєРѕРµ РёРјСЏ РґР»СЏ РґРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
   std::string mLink;
 
-  /// Полное консольное имя из имени
+  /// РџРѕР»РЅРѕРµ РєРѕРЅСЃРѕР»СЊРЅРѕРµ РёРјСЏ РёР· РёРјРµРЅРё
   std::string GetFullLink();
 
 public:
 
-  /// Перегрузка оператора копрования двух объектов
-  virtual void operator = (ParameterProperty<Type, Owner>&  data);
-  /// Перегрузка оператора копрования для указателя
+  /// РџРµСЂРµРіСЂСѓР·РєР° РѕРїРµСЂР°С‚РѕСЂР° РєРѕРїСЂРѕРІР°РЅРёСЏ РґРІСѓС… РѕР±СЉРµРєС‚РѕРІ
+  virtual void operator = (ParameterProperty<Type, Owner>& data);
+  /// РџРµСЂРµРіСЂСѓР·РєР° РѕРїРµСЂР°С‚РѕСЂР° РєРѕРїСЂРѕРІР°РЅРёСЏ РґР»СЏ СѓРєР°Р·Р°С‚РµР»СЏ
   virtual void operator = (ParameterProperty<Type, Owner>* data);
 
-  /// Создает объект data
+  /// РЎРѕР·РґР°РµС‚ РѕР±СЉРµРєС‚ data
   virtual void Clone(BaseProperty<Owner>** data);
 
-  /// Задает разделитель элементов массива
+  /// Р—Р°РґР°РµС‚ СЂР°Р·РґРµР»РёС‚РµР»СЊ СЌР»РµРјРµРЅС‚РѕРІ РјР°СЃСЃРёРІР°
   virtual void SetSeparator(std::string separator);
-  /// Возвращает разделитель элементов массива
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЂР°Р·РґРµР»РёС‚РµР»СЊ СЌР»РµРјРµРЅС‚РѕРІ РјР°СЃСЃРёРІР°
   virtual std::string GetSeparator();
 
-  /// Задает размер массива элементов
+  /// Р—Р°РґР°РµС‚ СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° СЌР»РµРјРµРЅС‚РѕРІ
   virtual void SetSize(int size);
-  /// Возвращает Размер массива элементов
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ Р Р°Р·РјРµСЂ РјР°СЃСЃРёРІР° СЌР»РµРјРµРЅС‚РѕРІ
   virtual int GetSize();
 
-  /// Имя свойства
+  /// РРјСЏ СЃРІРѕР№СЃС‚РІР°
   virtual std::string GetName();
-  /// Текст справки
+  /// РўРµРєСЃС‚ СЃРїСЂР°РІРєРё
   virtual std::string GetHelp();
-  /// Короткое имя для домандной строки
+  /// РљРѕСЂРѕС‚РєРѕРµ РёРјСЏ РґР»СЏ РґРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
   virtual std::string GetLink();
 
-  /// Имя свойства
+  /// РРјСЏ СЃРІРѕР№СЃС‚РІР°
   virtual void SetName(std::string name);
-  /// Текст справки
+  /// РўРµРєСЃС‚ СЃРїСЂР°РІРєРё
   virtual void SetHelp(std::string help);
-  /// Короткое имя для домандной строки
+  /// РљРѕСЂРѕС‚РєРѕРµ РёРјСЏ РґР»СЏ РґРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
   virtual void SetLink(std::string link);
-  /// Возвращает справку по свойству
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїСЂР°РІРєСѓ РїРѕ СЃРІРѕР№СЃС‚РІСѓ
   virtual std::string GetHelpString();
-  /// Возвращает текущего состояния параметра
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ С‚РµРєСѓС‰РµРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїР°СЂР°РјРµС‚СЂР°
   virtual std::string GetCurrentStringValue();
 
-  /// Приводит к строке
+  /// РџСЂРёРІРѕРґРёС‚ Рє СЃС‚СЂРѕРєРµ
   virtual std::string ToString();
-  /// Получение значения из строки
+  /// РџРѕР»СѓС‡РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ РёР· СЃС‚СЂРѕРєРё
   virtual void FromString(std::string val);
 
-  /// Совпадает ли имя параметра со введенной строкой
+  /// РЎРѕРІРїР°РґР°РµС‚ Р»Рё РёРјСЏ РїР°СЂР°РјРµС‚СЂР° СЃРѕ РІРІРµРґРµРЅРЅРѕР№ СЃС‚СЂРѕРєРѕР№
   virtual bool IsNameEqual(std::string name);
 
-  /** Инициализация свойства
-  \param[in] owner - класс владелец свойства
-  \param[in] checkMethod - метод проверки правильности введенных данных
-  \param[in] index - номер свойства
-  \param[in] separator - разделитель элементов массива
-  \param[in] size - размер массива значений, для типов данных не являющимися масивами - всегда равен 1
-  \param[in] name - имя свойства
-  \param[in] help - выводимая на консоль справка
-  \param[in] link - короткая строка для запуска
-  \param[in] defValue - значение по умолчанию
+  /** РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРІРѕР№СЃС‚РІР°
+  \param[in] owner - РєР»Р°СЃСЃ РІР»Р°РґРµР»РµС† СЃРІРѕР№СЃС‚РІР°
+  \param[in] checkMethod - РјРµС‚РѕРґ РїСЂРѕРІРµСЂРєРё РїСЂР°РІРёР»СЊРЅРѕСЃС‚Рё РІРІРµРґРµРЅРЅС‹С… РґР°РЅРЅС‹С…
+  \param[in] index - РЅРѕРјРµСЂ СЃРІРѕР№СЃС‚РІР°
+  \param[in] separator - СЂР°Р·РґРµР»РёС‚РµР»СЊ СЌР»РµРјРµРЅС‚РѕРІ РјР°СЃСЃРёРІР°
+  \param[in] size - СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° Р·РЅР°С‡РµРЅРёР№, РґР»СЏ С‚РёРїРѕРІ РґР°РЅРЅС‹С… РЅРµ СЏРІР»СЏСЋС‰РёРјРёСЃСЏ РјР°СЃРёРІР°РјРё - РІСЃРµРіРґР° СЂР°РІРµРЅ 1
+  \param[in] name - РёРјСЏ СЃРІРѕР№СЃС‚РІР°
+  \param[in] help - РІС‹РІРѕРґРёРјР°СЏ РЅР° РєРѕРЅСЃРѕР»СЊ СЃРїСЂР°РІРєР°
+  \param[in] link - РєРѕСЂРѕС‚РєР°СЏ СЃС‚СЂРѕРєР° РґР»СЏ Р·Р°РїСѓСЃРєР°
+  \param[in] defValue - Р·РЅР°С‡РµРЅРёРµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
   */
-  virtual void InitializationParameterProperty(Owner * owner,
+  virtual void InitializationParameterProperty(Owner* owner,
     tCheckValue checkMethod, int index, std::string separator, int size, std::string name,
     std::string help, std::string link, std::string defValue);
 
-  /** Инициализация свойства
-  \param[in] owner - класс владелец свойства
-  \param[in] getMethod - геттер
-  \param[in] setMethod - сеттер
-  \param[in] checkMethod - метод проверки правильности введенных данных
-  \param[in] index - номер свойства
-  \param[in] separator - разделитель элементов массива
-  \param[in] size - размер массива значений, для типов данных не являющимися масивами - всегда равен 1
-  \param[in] name - имя свойства
-  \param[in] help - выводимая на консоль справка
-  \param[in] link - короткая строка для запуска
-  \param[in] defValue - значение по умолчанию
+  /** РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРІРѕР№СЃС‚РІР°
+  \param[in] owner - РєР»Р°СЃСЃ РІР»Р°РґРµР»РµС† СЃРІРѕР№СЃС‚РІР°
+  \param[in] getMethod - РіРµС‚С‚РµСЂ
+  \param[in] setMethod - СЃРµС‚С‚РµСЂ
+  \param[in] checkMethod - РјРµС‚РѕРґ РїСЂРѕРІРµСЂРєРё РїСЂР°РІРёР»СЊРЅРѕСЃС‚Рё РІРІРµРґРµРЅРЅС‹С… РґР°РЅРЅС‹С…
+  \param[in] index - РЅРѕРјРµСЂ СЃРІРѕР№СЃС‚РІР°
+  \param[in] separator - СЂР°Р·РґРµР»РёС‚РµР»СЊ СЌР»РµРјРµРЅС‚РѕРІ РјР°СЃСЃРёРІР°
+  \param[in] size - СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° Р·РЅР°С‡РµРЅРёР№, РґР»СЏ С‚РёРїРѕРІ РґР°РЅРЅС‹С… РЅРµ СЏРІР»СЏСЋС‰РёРјРёСЃСЏ РјР°СЃРёРІР°РјРё - РІСЃРµРіРґР° СЂР°РІРµРЅ 1
+  \param[in] name - РёРјСЏ СЃРІРѕР№СЃС‚РІР°
+  \param[in] help - РІС‹РІРѕРґРёРјР°СЏ РЅР° РєРѕРЅСЃРѕР»СЊ СЃРїСЂР°РІРєР°
+  \param[in] link - РєРѕСЂРѕС‚РєР°СЏ СЃС‚СЂРѕРєР° РґР»СЏ Р·Р°РїСѓСЃРєР°
+  \param[in] defValue - Р·РЅР°С‡РµРЅРёРµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
   */
-  virtual void InitializationParameterProperty(Owner * owner, tGetter getMethod, tSetter setMethod,
+  virtual void InitializationParameterProperty(Owner* owner, tGetter getMethod, tSetter setMethod,
     tCheckValue checkMethod, int index, std::string separator, int size, std::string name,
     std::string help, std::string link, std::string defValue);
 
   ParameterProperty();
   ParameterProperty(Type value);
-  ParameterProperty(Owner * owner, tGetter getMethod, tSetter setMethod,
+  ParameterProperty(Owner* owner, tGetter getMethod, tSetter setMethod,
     tCheckValue checkMethod, Type value);
 
 
@@ -151,13 +151,13 @@ public:
 
 
 /* ======================================================================== *\
-**  Реализация методов класса     ParameterProperty                                 **
+**  Р РµР°Р»РёР·Р°С†РёСЏ РјРµС‚РѕРґРѕРІ РєР»Р°СЃСЃР°     ParameterProperty                                 **
 \* ======================================================================== */
 
 // ------------------------------------------------------------------------------------------------
-/// Перегрузка оператора копрования двух объектов
+/// РџРµСЂРµРіСЂСѓР·РєР° РѕРїРµСЂР°С‚РѕСЂР° РєРѕРїСЂРѕРІР°РЅРёСЏ РґРІСѓС… РѕР±СЉРµРєС‚РѕРІ
 template <class Type, class Owner>
-void ParameterProperty<Type, Owner>::operator = (ParameterProperty<Type, Owner>&  data)
+void ParameterProperty<Type, Owner>::operator = (ParameterProperty<Type, Owner>& data)
 {
   mSeparator = data.mSeparator;
   mSize = data.mSize;
@@ -169,7 +169,7 @@ void ParameterProperty<Type, Owner>::operator = (ParameterProperty<Type, Owner>&
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Перегрузка оператора копрования для указателя
+/// РџРµСЂРµРіСЂСѓР·РєР° РѕРїРµСЂР°С‚РѕСЂР° РєРѕРїСЂРѕРІР°РЅРёСЏ РґР»СЏ СѓРєР°Р·Р°С‚РµР»СЏ
 template <class Type, class Owner>
 void ParameterProperty<Type, Owner>::operator = (ParameterProperty<Type, Owner>* data)
 {
@@ -183,17 +183,17 @@ void ParameterProperty<Type, Owner>::operator = (ParameterProperty<Type, Owner>*
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Создает объект data
+/// РЎРѕР·РґР°РµС‚ РѕР±СЉРµРєС‚ data
 template <class Type, class Owner>
 void ParameterProperty<Type, Owner>::Clone(BaseProperty<Owner>** data)
 {
   *data = new ParameterProperty<Type, Owner>();
 
-  *((ParameterProperty<Type, Owner>*)*data) = *this;
+  *((ParameterProperty<Type, Owner>*) * data) = *this;
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Задает разделитель элементов массива
+/// Р—Р°РґР°РµС‚ СЂР°Р·РґРµР»РёС‚РµР»СЊ СЌР»РµРјРµРЅС‚РѕРІ РјР°СЃСЃРёРІР°
 template <class Type, class Owner>
 void ParameterProperty<Type, Owner>::SetSeparator(std::string separator)
 {
@@ -201,7 +201,7 @@ void ParameterProperty<Type, Owner>::SetSeparator(std::string separator)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Возвращает разделитель элементов массива
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЂР°Р·РґРµР»РёС‚РµР»СЊ СЌР»РµРјРµРЅС‚РѕРІ РјР°СЃСЃРёРІР°
 template <class Type, class Owner>
 std::string ParameterProperty<Type, Owner>::GetSeparator()
 {
@@ -209,7 +209,7 @@ std::string ParameterProperty<Type, Owner>::GetSeparator()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Задает размер массива элементов
+/// Р—Р°РґР°РµС‚ СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° СЌР»РµРјРµРЅС‚РѕРІ
 template <class Type, class Owner>
 void ParameterProperty<Type, Owner>::SetSize(int size)
 {
@@ -218,7 +218,7 @@ void ParameterProperty<Type, Owner>::SetSize(int size)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Возвращает Размер массива элементов
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ Р Р°Р·РјРµСЂ РјР°СЃСЃРёРІР° СЌР»РµРјРµРЅС‚РѕРІ
 template <class Type, class Owner>
 int ParameterProperty<Type, Owner>::GetSize()
 {
@@ -226,7 +226,7 @@ int ParameterProperty<Type, Owner>::GetSize()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Имя свойства
+/// РРјСЏ СЃРІРѕР№СЃС‚РІР°
 template <class Type, class Owner>
 std::string ParameterProperty<Type, Owner>::GetName()
 {
@@ -234,7 +234,7 @@ std::string ParameterProperty<Type, Owner>::GetName()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Текст справки
+/// РўРµРєСЃС‚ СЃРїСЂР°РІРєРё
 template <class Type, class Owner>
 std::string ParameterProperty<Type, Owner>::GetHelp()
 {
@@ -242,7 +242,7 @@ std::string ParameterProperty<Type, Owner>::GetHelp()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Короткое имя для домандной строки
+/// РљРѕСЂРѕС‚РєРѕРµ РёРјСЏ РґР»СЏ РґРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
 template <class Type, class Owner>
 std::string ParameterProperty<Type, Owner>::GetLink()
 {
@@ -250,7 +250,7 @@ std::string ParameterProperty<Type, Owner>::GetLink()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Имя свойства
+/// РРјСЏ СЃРІРѕР№СЃС‚РІР°
 template <class Type, class Owner>
 void ParameterProperty<Type, Owner>::SetName(std::string name)
 {
@@ -258,7 +258,7 @@ void ParameterProperty<Type, Owner>::SetName(std::string name)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Текст справки
+/// РўРµРєСЃС‚ СЃРїСЂР°РІРєРё
 template <class Type, class Owner>
 void ParameterProperty<Type, Owner>::SetHelp(std::string help)
 {
@@ -266,7 +266,7 @@ void ParameterProperty<Type, Owner>::SetHelp(std::string help)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Короткое имя для домандной строки
+/// РљРѕСЂРѕС‚РєРѕРµ РёРјСЏ РґР»СЏ РґРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
 template <class Type, class Owner>
 void ParameterProperty<Type, Owner>::SetLink(std::string link)
 {
@@ -274,7 +274,7 @@ void ParameterProperty<Type, Owner>::SetLink(std::string link)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Возвращает справку по свойству
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїСЂР°РІРєСѓ РїРѕ СЃРІРѕР№СЃС‚РІСѓ
 template <class Type, class Owner>
 std::string ParameterProperty<Type, Owner>::GetHelpString()
 {
@@ -284,7 +284,7 @@ std::string ParameterProperty<Type, Owner>::GetHelpString()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Возвращает текущего состояния параметра
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ С‚РµРєСѓС‰РµРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїР°СЂР°РјРµС‚СЂР°
 template <class Type, class Owner>
 std::string ParameterProperty<Type, Owner>::GetCurrentStringValue()
 {
@@ -294,7 +294,7 @@ std::string ParameterProperty<Type, Owner>::GetCurrentStringValue()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Приводит к строке
+/// РџСЂРёРІРѕРґРёС‚ Рє СЃС‚СЂРѕРєРµ
 template <class Type, class Owner>
 std::string ParameterProperty<Type, Owner>::ToString()
 {
@@ -302,13 +302,13 @@ std::string ParameterProperty<Type, Owner>::ToString()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Получение значения из строки
+/// РџРѕР»СѓС‡РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ РёР· СЃС‚СЂРѕРєРё
 template <class Type, class Owner>
 void ParameterProperty<Type, Owner>::FromString(std::string val)
 {}
 
 // ------------------------------------------------------------------------------------------------
-/// Полное консольное имя из имени
+/// РџРѕР»РЅРѕРµ РєРѕРЅСЃРѕР»СЊРЅРѕРµ РёРјСЏ РёР· РёРјРµРЅРё
 template <class Type, class Owner>
 std::string ParameterProperty<Type, Owner>::GetFullLink()
 {
@@ -316,7 +316,7 @@ std::string ParameterProperty<Type, Owner>::GetFullLink()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Совпадает ли имя параметра со введенной строкой
+/// РЎРѕРІРїР°РґР°РµС‚ Р»Рё РёРјСЏ РїР°СЂР°РјРµС‚СЂР° СЃРѕ РІРІРµРґРµРЅРЅРѕР№ СЃС‚СЂРѕРєРѕР№
 template <class Type, class Owner>
 bool ParameterProperty<Type, Owner>::IsNameEqual(std::string name)
 {
@@ -327,7 +327,7 @@ bool ParameterProperty<Type, Owner>::IsNameEqual(std::string name)
     std::string LGetLink = GetLink();
     std::string LGetName = GetName();
 
-    for (int i = 0; i < lName.length(); i++) 
+    for (int i = 0; i < lName.length(); i++)
       lName[i] = std::tolower(lName[i]);
 
     for (int i = 0; i < LGetFullLink.length(); i++)
@@ -341,7 +341,7 @@ bool ParameterProperty<Type, Owner>::IsNameEqual(std::string name)
 
 
     if ((lName == LGetFullLink) || (lName == LGetLink) || (lName == LGetName))
-      return true;  
+      return true;
     else
       return false;
   }
@@ -351,7 +351,7 @@ bool ParameterProperty<Type, Owner>::IsNameEqual(std::string name)
 
 // ------------------------------------------------------------------------------------------------
 template <class Type, class Owner>
-void ParameterProperty<Type, Owner>::InitializationParameterProperty(Owner * owner,
+void ParameterProperty<Type, Owner>::InitializationParameterProperty(Owner* owner,
   tCheckValue checkMethod, int index, std::string separator, int size, std::string name,
   std::string help, std::string link, std::string defValue)
 {
@@ -370,7 +370,7 @@ void ParameterProperty<Type, Owner>::InitializationParameterProperty(Owner * own
 
 // ------------------------------------------------------------------------------------------------
 template <class Type, class Owner>
-void ParameterProperty<Type, Owner>::InitializationParameterProperty(Owner * owner, tGetter getMethod, tSetter setMethod,
+void ParameterProperty<Type, Owner>::InitializationParameterProperty(Owner* owner, tGetter getMethod, tSetter setMethod,
   tCheckValue checkMethod, int index, std::string separator, int size, std::string name,
   std::string help, std::string link, std::string defValue)
 {
@@ -413,7 +413,7 @@ ParameterProperty<Type, Owner>::ParameterProperty(Type value) : mSize(1), TypedP
 
 // ------------------------------------------------------------------------------------------------
 template <class Type, class Owner>
-ParameterProperty<Type, Owner>::ParameterProperty(Owner * owner, tGetter getMethod,
+ParameterProperty<Type, Owner>::ParameterProperty(Owner* owner, tGetter getMethod,
   tSetter setMethod, tCheckValue checkMethod, Type value) :
   mSize(1), TypedProperty<Type, Owner>(this->mOwner, this->mGetter, this->mSetter, this->mCheckValue, value)
 {

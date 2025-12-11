@@ -22,6 +22,7 @@ echo [2/5] activate a Conda Environment...
 call conda activate "%ROOT_DIR%\build_64\Globalizer_env"
 
 echo [3/5] Installing the library...
+call pip install -r ..\third_party\Problems\Problems\iOptProblem\requirements.txt
 call conda install -p "%ROOT_DIR%\build_64\Globalizer_env" numpy -y
 call conda install -p "%ROOT_DIR%\build_64\Globalizer_env" jsonschema -y
 call conda install -p "%ROOT_DIR%\build_64\Globalizer_env" pytorch::pytorch -y
@@ -34,7 +35,7 @@ echo [4/5] Start Intell OneAPI
 call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64 vs2022
 
 echo [5/5] CMake Configuration...
-call cmake -DGLOBALIZER_BUILD_PROBLEMS=ON  -DGLOBALIZER_BUILD_GCGEN=ON -DBUILD_ALL_TASK=ON -DGLOBALIZER_MAX_DIMENSION=130 -DGLOBALIZER_MAX_Number_Of_Function=70 -DGLOBALIZER_BUILD_TESTS=ON -DGLOBALIZER_USE_MPI=ON -DGLOBALIZER_MPI=intel ..
+call cmake -DGLOBALIZER_BUILD_PROBLEMS=ON  -DGLOBALIZER_BUILD_GCGEN=ON -DBUILD_ALL_TASK=ON -DGLOBALIZER_MAX_DIMENSION=130 -DGLOBALIZER_MAX_Number_Of_Function=70 -DGLOBALIZER_BUILD_TESTS=ON -DGLOBALIZER_USE_MPI=ON -DGLOBALIZER_MPI=intel -DGLOBALIZER_PYTHON=ON ..
 
 if %errorlevel% neq 0 goto error
 

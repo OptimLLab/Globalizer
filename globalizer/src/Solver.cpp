@@ -40,16 +40,6 @@ void Solver::ClearData()
   mProcess = nullptr;
 }
 
-//#ifdef USE_PYTHON
-//PyObject* makeFloatList(const double* array, int size)
-//{
-//  PyObject* l = PyList_New(size);
-//  for (int i = 0; i != size; i++)
-//    PyList_SET_ITEM(l, i, PyFloat_FromDouble(array[i]));
-//  return l;
-//}
-//#endif
-
 // ------------------------------------------------------------------------------------------------
 Solver::Solver(IProblem* problem)
 {

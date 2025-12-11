@@ -18,7 +18,7 @@
 // ------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-  GlobalizerInitialization(argc, argv, true, true);
+  GlobalizerInitialization(argc, argv, true);
 
 #ifdef _GLOBALIZER_BENCHMARKS
   GlobalOptimizationProblemManager manager;

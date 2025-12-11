@@ -80,12 +80,17 @@ public:
 
   /// число точек, порождаемых методом на 1 итерации
   TInt<Parameters> NumPoints;
+  /// Шаг печать информации в консоль
   TInt<Parameters> StepPrintMessages;
   /// Через какое количество итераций сохранять точки
   TInt<Parameters> StepSavePoint;
+  /// Тип метода АГП
   TETypeMethod<Parameters> TypeMethod;
+  /// Организация проведения испытаний
   TETypeCalculation<Parameters> TypeCalculation;
+  /// Тип процесса
   TETypeProcess<Parameters> TypeProcess;
+  /// Число параллельных потоков\процессов задействованых в проведении испытаний
   TInt<Parameters> NumThread;
   ///размер CUDA блока
   TInt<Parameters> SizeInBlock;
@@ -121,9 +126,29 @@ public:
 
   /// максимальное число итераций для процессов на каждом уровне //  размер - NumOfProcLevels{100, 100, 100, 100};// // параметры метода
   TInts<Parameters> MaxNumOfPoints;
+  /// Распечатать справку
   TFlag<Parameters> HELP;
+  /// Нарисовать график функции
   TFlag<Parameters> IsPlot;
+  /// Плотность линий уровней
   TInt<Parameters> PlotGridSize;
+  /** тип визуализации целевой функции
+  доступные режимы : 
+  0 - LevelLayers - линии уровней
+  1 - Surface - поверхность
+  */
+  TInt<Parameters> FigureType;
+  /** тип вычислений значений для визуализации целевой функции   
+  доступные режимы: 
+  0 - ObjectiveFunction - по сетке 100 * 100
+  1 - Approximation - аппроксимация по имеющейся поисковой информации
+  2 - Interpolation - интерполяция по имеющейся поисковой информации
+  3 - ByPoints
+  4 - OnlyPoints
+  */
+  TInt<Parameters> CalcsType;
+  /// флаг о необходимости открыть полученный рисунок в интерактивном окне на экране
+  TBool<Parameters> ShowFigure;
   /// Число испытаний за итерацию будет вычисляться на каждой итерации в методе CalculateNumPoint()
   TFlag<Parameters> IsCalculateNumPoint;
   ///Назначать каждому процессу свое устройство (ускоритель)

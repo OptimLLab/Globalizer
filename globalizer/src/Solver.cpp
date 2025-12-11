@@ -2,7 +2,7 @@
 
 #include "Solver.h"
 
-
+#include "Plotters.h"
 
 #include "MethodFactory.h"
 
@@ -14,6 +14,11 @@
 
 #include "OMPCalculation.h"
 #include "CudaCalculation.h"
+
+#include <iostream>
+#include <string>
+#include <locale>
+#include <codecvt>
 //
 //#ifdef USE_PYTHON
 //
@@ -133,6 +138,14 @@ int Solver::CheckParameters()
       && parameters.r.GetIsChange() == false)
     {
       parameters.r = parameters.r * 2;
+    }
+  }
+
+  if (parameters.IsPlot)
+  {
+    if (parameters.iterPointsSavePath.GetIsChange() == false)
+    {
+      parameters.iterPointsSavePath = "Globalizer_iterPointsSavePath.txt";
     }
   }
 
@@ -290,6 +303,23 @@ int Solver::Solve()
       if (addPoints != nullptr)
         mProcess->InsertPoints(*addPoints);
       mProcess->Solve();
+
+      if (parameters.IsPlot)
+      {
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        std::wstring wstring = converter.from_bytes(parameters.GetPlotFileName());
+        wchar_t* output_file_name = new wchar_t[wstring.size() + 1];
+        wcscpy_s(output_file_name, wstring.size() + 1, wstring.c_str());
+        bool show_figure = parameters.ShowFigure;
+        bool move_points_under_graph = false;
+        Plotter::FigureTypes figure_type = static_cast<Plotter::FigureTypes>(parameters.FigureType.operator int());
+        Plotter::CalcsTypes calcs_type = static_cast<Plotter::CalcsTypes>(parameters.CalcsType.operator int());;
+#ifdef USE_PYTHON
+        draw_plot(this->mProblem, GetSolutionResult(), { 0, 1 }, output_file_name, figure_type, calcs_type, show_figure, move_points_under_graph);
+#else
+        print << "Plotter is not work!!!\nPython libraries doesn't find!!!\n";
+#endif
+      }
     }
 
   }

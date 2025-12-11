@@ -88,7 +88,7 @@ void CreateCurentProblemsParameters(int argc, char* argv[])
   parameters.AddOption(Pstring, "functionScriptName", "TestsProblem", "-functionScriptName", "", 1);
   parameters.AddOption(Pstring, "functionClassName", "TestsProblem", "-functionClassName", "", 1);
   parameters.AddOption(Pint, "problemIndex", "1", "-problemIndex", "", 1);
-  parameters.AddOption(Pstring, "GKLSClass", "Simple", "-GKLSClass", "", 1);
+  parameters.AddOption(Pstring, "GKLSClass", "simple", "-GKLSClass", "", 1);
   parameters.AddOption(Pstring, "GKLSFuncionType", "TD", "-GKLSFuncionType", "", 1);
 
   parameters.ReadAddParameters(argc, argv);

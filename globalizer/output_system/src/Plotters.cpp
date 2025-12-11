@@ -1,4 +1,5 @@
-#include "Globalizer.h"
+#include "Plotters.h"
+#include "Trial.h"
 
 #include <vector>
 #include <string>
@@ -200,41 +201,69 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
 
   PySys_SetArgvEx(sizeof(args) / sizeof(wchar_t*) - 1, args, 0);
 
+  // ИСПРАВЛЕННАЯ ЧАСТЬ:
+  std::cout << "The Python charting script has been launched...\n";
 
-  FILE* file = nullptr;
-  file = fopen(script_path.string().c_str(), "r");
-  if (file == NULL)
+  // Способ 1: Чтение файла и выполнение через PyRun_SimpleString
+  std::ifstream file_stream(script_path.string());
+  if (!file_stream.is_open())
   {
-    std::cout << "Python script wasn\'t opened!\n";
+    std::cerr << "Python script wasn't opened! File: " << script_path.string() << std::endl;
+
+    // Освобождаем память
+    free(__build_path);
+    free(__script_path);
+    free(__params);
+
+    if (Py_IsInitialized()) {
+      Py_Finalize();
+    }
+    return;
+  }
+
+  std::cout << "The Python charting script has been opened...\n";
+
+  // Читаем весь файл
+  std::stringstream buffer;
+  buffer << file_stream.rdbuf();
+  std::string python_code = buffer.str();
+  file_stream.close();
+
+  // Выполняем скрипт
+  int py_result = PyRun_SimpleString(python_code.c_str());
+
+  if (py_result != 0)
+  {
+    std::cerr << "An error occurred while executing the script...\n";
+    if (PyErr_Occurred())
+    {
+      PyErr_Print();
+
+      // Дополнительная информация об ошибке
+      PyObject* ptype, * pvalue, * ptraceback;
+      PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+
+      if (pvalue != nullptr) {
+        PyObject* pvalue_str = PyObject_Str(pvalue);
+        if (pvalue_str != nullptr) {
+          const char* error_msg = PyUnicode_AsUTF8(pvalue_str);
+          if (error_msg != nullptr) {
+            std::cerr << "Python error: " << error_msg << std::endl;
+          }
+          Py_DECREF(pvalue_str);
+        }
+      }
+
+      PyErr_Restore(ptype, pvalue, ptraceback);
+    }
   }
   else
   {
-    char buffer[256];
-    while (fgets(buffer, sizeof(buffer), file)) 
-    {
-      std::cout << buffer;
-    }
-
-    std::cout << "The Python charting script has been opened...\n";
-    std::cout << "The Python charting script has been launched...\n";
-    int closeit = 1;  // Закрыть файл после выполнения
-    // Выполняем скрипт
-    int result = PyRun_SimpleFileEx(file, script_path.string().c_str(), 1); // 1 = закрыть файл
-
-    if (result != 0)
-    {
-      std::cerr << "An error occurred while executing the script...\n";
-      if (PyErr_Occurred())
-      {
-        PyErr_Print();
-      }
-    }
-
-    std::cout << "The Python charting script has terminated.\n";
-
+    std::cout << "Python script executed successfully.\n";
   }
 
-  if (Py_IsInitialized()) {
+  if (Py_IsInitialized()) 
+  {
     Py_Finalize();
   }
 

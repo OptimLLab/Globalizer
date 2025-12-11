@@ -251,6 +251,7 @@ ${GLOBALIZER_BENCHMARKS_Interface_SOURCES}
 list(REMOVE_ITEM ALL_SRC_FILES ${GLOBALIZER_COMMON_SRC_DIR}/Main.cpp)
 
 if (${GLOBALIZER_PYTHON})
+  set(Python_FIND_DEBUG OFF)
   find_package (Python COMPONENTS Interpreter Development NumPy)
 
 #set(EXTRA_DEFINES "")

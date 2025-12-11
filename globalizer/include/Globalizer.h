@@ -31,8 +31,6 @@
 #include "GlobalizerProblem.h"
 #include "HDSolver.h"
 
-#include "Plotters.h"
-
 #ifdef _GLOBALIZER_BENCHMARKS
 #include "IGlobalOptimizationProblem.h"
 #include "GlobalOptimizationProblemManager.h"
@@ -64,3 +62,9 @@ void GlobalizerInitialization(int argc=0, char* argv[]=nullptr,
   int processNumber = -1, bool isPrintToFile = false, 
   std::string* errorsName = nullptr, int* errorsCode = nullptr, 
   int errorsCount = 0);
+
+/** Создает параметры для тестовых задач //временное решение!!!
+  \param[in] argc - Количество аргументов командной строки
+  \param[in] argv - Аргументы командной строки
+*/
+void CreateCurentProblemsParameters(int argc, char* argv[]);

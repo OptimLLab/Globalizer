@@ -144,7 +144,10 @@ void Process::Solve()
   {
     //print << "\n";
     PrintOptimEstimationToFile(OptimEstimation);
-    PrintOptimEstimationToConsole(OptimEstimation);
+    if (parameters.IsUseExtendedConsole)
+      OldPrintOptimEstimationToConsole(OptimEstimation);
+    else
+      PrintOptimEstimationToConsole(OptimEstimation);
     PrintResultToFile(OptimEstimation);
   }
 }
@@ -199,6 +202,165 @@ void Process::PrintOptimEstimationToFile(Trial OptimEstimation)
 
     fclose(pf);
   }
+}
+
+// ------------------------------------------------------------------------------------------------
+void Process::OldPrintOptimEstimationToConsole(Trial OptimEstimation)
+{
+  int NumberOfTrials;
+  double ValueDifference = HUGE_VAL;
+  double PointDifference = HUGE_VAL;
+  int numOfOptima = 1;
+  double* allOptimumPoints = new double[MAX_TRIAL_DIMENSION * MAX_NUM_MIN];
+  double* allPointDifference = new double[MAX_NUM_MIN];
+
+  printf("ProcLevel = %d\n", pTask->GetProcLevel());
+  printf("Iteration = %d \n", pMethod->GetIterationCount());
+  printf("Point = %d \n", pMethod->GetIterationCount() * parameters.NumPoints);
+
+  printf("min = %lf \n", OptimEstimation.FuncValues[OptimEstimation.index]);
+  for (int i = 0; i < pTask->GetN(); i++)
+  {
+    printf("x[%d] = %lf \n", i, OptimEstimation.y[i]);
+  }
+
+  printf("\n");
+  printf("constants = ");
+  for (int i = 0; i < pTask->GetN(); i++)
+  {
+    printf("%lf,_", OptimEstimation.y[i]);
+  }
+
+  printf("\n");
+
+  if (pTask->GetIsOptimumValueDefined())
+  {
+    ValueDifference = OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue();
+    printf("\nValue difference  = %lf \n", ValueDifference);
+  }
+
+  if (pTask->GetIsOptimumPointDefined())
+  {
+    PointDifference = 0.0;
+    for (int i = 0; i < pTask->GetN(); i++)
+    {
+      PointDifference = GLOBALIZER_MAX(fabs(OptimEstimation.y[i] - pTask->GetOptimumPoint()[i]), PointDifference);
+    }
+    if (pTask->getProblem()->GetAllOptimumPoint(allOptimumPoints, numOfOptima) != IProblem::UNDEFINED)
+    {
+      PointDifference = 0.0;
+      for (int j = 0; j < numOfOptima; j++)
+      {
+        allPointDifference[j] = 0.0;
+        for (int i = 0; i < pTask->GetN(); i++)
+        {
+          allPointDifference[j] = GLOBALIZER_MAX(fabs(OptimEstimation.y[i] -
+            allOptimumPoints[j * pTask->GetN() + i]), allPointDifference[j]);
+        }
+        if ((allPointDifference[j] < PointDifference) || (j == 0))
+        {
+          PointDifference = allPointDifference[j];
+        }
+      }
+    }
+    printf("Coordinates max difference = %lf \n", PointDifference);
+  }
+
+  //if (pTask->GetIsOptimumPointDefined() || pTask->GetIsOptimumValueDefined())
+  //{
+  //  printf("Global optimum %s\n", (PointDifference < parameters.Epsilon ||
+  //                                 ValueDifference < parameters.Epsilon) ? "FOUND!" : "NOT FOUND" );
+  //}
+
+
+  bool res = false;
+
+  switch (1)
+  {
+  case Accuracy:
+    if (pMethod->GetAchievedAccuracy() < parameters.Epsilon)
+      res = true;
+    break;
+  case OptimumVicinity:
+  {
+    res = true;
+    //numOfOptima = ;
+    if (pTask->getProblem()->GetAllOptimumPoint(allOptimumPoints, numOfOptima) == IProblem::UNDEFINED)
+    {
+      for (int i = 0; i < parameters.Dimension; i++)
+      {
+
+        double fabsx = fabs(OptimEstimation.y[i] - pTask->GetOptimumPoint()[i]);
+        double fm = parameters.Epsilon * (pTask->GetB()[i] - pTask->GetA()[i]);
+        if (fabsx > fm)
+        {
+          res = res && false;
+        }
+      }
+    }
+    else
+    {
+      for (int j = 0; j < numOfOptima; j++)
+      {
+        for (int i = 0; i < parameters.Dimension; i++)
+        {
+          double fabsx = fabs(OptimEstimation.y[i] - allOptimumPoints[parameters.Dimension * j + i]);
+          double fm = parameters.Epsilon * (pTask->GetB()[i] - pTask->GetA()[i]);
+          if (fabsx > fm)
+          {
+            res = res && false;
+            break;
+          }
+          if (i == parameters.Dimension - 1)
+          {
+            res = true;
+          }
+        }
+        if (res == true)
+        {
+          break;
+        }
+      }
+    }
+  }
+  break;
+  case OptimumVicinity2:
+  {
+    res = true;
+    for (int i = 0; i < pTask->GetN(); i++)
+    {
+      if (fabs(OptimEstimation.y[i] - pTask->GetOptimumPoint()[i]) > parameters.Epsilon)
+      {
+        res = false;
+        break;
+      }
+    }
+  }
+  break;
+  case OptimumValue:
+    if (OptimEstimation.index == pTask->GetNumOfFunc() - 1 &&
+      OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue() <
+      parameters.Epsilon)
+      res = true;
+    break;
+  }
+  delete[] allOptimumPoints;
+
+  printf("Global optimum %s\n", (res) ? "FOUND!" : "NOT FOUND");
+
+  NumberOfTrials = pMethod->GetNumberOfTrials();
+  pMethod->PrintSection();
+
+  printf("\nNumberOfTrials = %d\n", NumberOfTrials);
+  for (int i = 0; i < pTask->GetNumOfFunc(); i++)
+    printf("Number of calculations function %d of = %d\n", i,
+      pMethod->GetFunctionCalculationCount()[i]);
+
+  printf("\nLocalPointCount = %d\n", pMethod->GetLocalPointCount());
+  printf("\nNumberLocalMethodtStart = %d\n", pMethod->GetNumberLocalMethodtStart());
+
+  printf("\nSolve time = %lf\n\n\n", duration);
+
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -32,6 +32,12 @@
 #include <omp.h>
 #include "iostream"
 
+#include <string>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+
 
 #ifdef WIN32
 #include <windows.h>
@@ -51,13 +57,16 @@ Parameters parameters;
 void Parameters::SetDefaultParameters()
 {
   InitOption(HELP, 0, "-HELP", "Print Help", 1);
-  InitOption(IsPlot, 0, "-PLOT", "Plot level line", 1);
+  InitOption(IsPlot, 0, "-PLOT", "Draw a graph of the function", 1);
+  InitOption(ShowFigure, false, "-ShowFigure", "a flag indicating the need to open the resulting drawing in an interactive window on the screen", 1);
+  InitOption(FigureType, 0, "-FigureType", "type of visualization of the target function (available modes : 0 - LevelLayers, 1 - Surface)", 1);
+  InitOption(CalcsType, 0, "-CalcsType", "the type of value calculations for visualizing the objective function (available modes: ObjectiveFunction, Approximation, Interpolation, ByPoints, OnlyPoints)", 1);
   InitOption(PlotGridSize, 300, "-PGS", "Drawing mesh precision", 1);
   InitOption(IsCalculateNumPoint, 0, "-ICNP", "Number of trials will be calculated at each iteration", 1);
   Separator = std::string("_"); //Переопределяем сепаратор на значение по умолчанию
   SetSeparator();
   InitOption(NumPoints, 1, "-np", "the number of points per iteration", 1);
-  InitOption(StepPrintMessages, 1000, "-spm", "StepPrintMessages", 1);
+  InitOption(StepPrintMessages, 100000, "-spm", "StepPrintMessages", 1);
   InitOption(StepSavePoint, 1000000, "-ssp", "After how many iterations to save points", 1);
 
   InitOption(TypeMethod, StandartMethod, "-tm", "HybridMethod or StandartMethod or ManyNumPointMethod", 1);
@@ -88,7 +97,7 @@ void Parameters::SetDefaultParameters()
   InitOption(DebugAsyncCalculation, 0, "-dac", "Helps debug in async calculation", 1); // Должен существовать файл: ../_build/async.txt
   InitOption(IsPrintSectionPoint, false, "-IsPSP", "Whether to print section information in a Block Scheme", 1);
 
-  InitOption(MaxNumOfPoints, 7000000, "-MaxNP", "MaxNumOfPoints", 1);
+  InitOption(MaxNumOfPoints, 1000000, "-MaxNP", "MaxNumOfPoints", 1);
 
   InitOption(IsSetDevice, false, "-sd", "Assign each process their device", 1);
   InitOption(deviceIndex, -1, "-di", "Device Index, def: -1 auto", 1);
@@ -148,8 +157,9 @@ void Parameters::SetDefaultParameters()
 
   InitOption(startPoint, MaxDouble, "-sp", "The starting point for solving the optimization problem", 0);
   InitOption(startPointValues, MaxDouble, "-spv", "The values of the functions in the starting point for solving the optimization problem", 0);
+  InitOption(IsUseStartPoint, false, "-IsUSP", "Use the starting point from the task", 1);
 
-
+  InitOption(IsUseExtendedConsole, false, "-IsUEC", "Use the extended console interface", 1);
 
 
   ProcRank.SetGetter(&Parameters::GetProcRank);
@@ -313,12 +323,35 @@ void Parameters::PrintParametersToFile(FILE* pf)
 }
 
 // ------------------------------------------------------------------------------------------------
+std::string getCurrentDateTime() 
+{
+  // Получаем текущее время
+  auto now = std::chrono::system_clock::now();
+  std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+  // Преобразуем в локальное время
+  std::tm* local_time = std::localtime(&now_time);
+
+  // Форматируем в строку
+  std::ostringstream oss;
+  oss << std::put_time(local_time, "%Y_%m_%d_%H_%M_%S");
+  return oss.str();
+}
+
+// ------------------------------------------------------------------------------------------------
 /// Возвращает имя файла для сохранения картинки построенных линий уровней
 std::string Parameters::GetPlotFileName()
 {
   if (ConfigPath.ToString() == "")
   {
-    return "globalizer_" + this->libPath.ToString() + ".png";
+    std::string res = "";
+    res += "globalizer_";
+    if (this->libPath.GetIsChange())
+      res += this->libPath.ToString();
+    else
+      res += getCurrentDateTime();
+    res += +".png";
+    return res;
   }
   else
   {
@@ -405,11 +438,26 @@ Parameters::Parameters(Parameters& _parameters) : BaseParameters<Parameters>::Ba
 
 // ------------------------------------------------------------------------------------------------
 Parameters::~Parameters()
-{}
+{
+}
 
 bool Parameters::IsProblem()
 {
   return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+int Parameters::GetMaxNumOMP()
+{
+  int maxNumOMP = 1;
+#ifndef USE_OneAPI
+#pragma omp parallel
+  {
+    if (omp_get_thread_num() == 0)
+      maxNumOMP = omp_get_num_threads();
+  }
+#endif
+  return maxNumOMP;
 }
 
 // ------------------------------------------------------------------------------------------------

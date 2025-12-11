@@ -240,8 +240,8 @@ public:
     NumberOfDiscreteVariable = problem->GetNumberOfDiscreteVariable();
 
     std::vector<double> x(this->mDim);
-    A.resize(this->mDim);
-    B.resize(this->mDim);
+    A.resize(problem->GetNumberOfContinuousVariable());
+    B.resize(problem->GetNumberOfContinuousVariable());
     problem->GetBounds(A, B);
 
     std::vector< std::vector<std::string>> values;
@@ -341,10 +341,10 @@ public:
   */
   virtual void GetBounds(double* lower, double* upper)
   {
-    std::vector<double> lower_(mDim);
-    std::vector<double> upper_(mDim);
+    std::vector<double> lower_(problem->GetNumberOfContinuousVariable());
+    std::vector<double> upper_(problem->GetNumberOfContinuousVariable());
     problem->GetBounds(lower_, upper_);
-    for (int i = 0; i < mDim; i++)
+    for (int i = 0; i < problem->GetNumberOfContinuousVariable(); i++)
     {
       lower[i] = lower_[i];
       upper[i] = upper_[i];

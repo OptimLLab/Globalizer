@@ -173,6 +173,9 @@ public:
   virtual ~BaseParameters();
   /// Является ли класс задачей
   virtual bool IsProblem();
+
+  /// Дополнительное чтение параметров из консоли
+  virtual void ReadAddParameters(int argc, char* argv[]);
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -852,6 +855,12 @@ template <class Owner>
 bool BaseParameters<Owner>::IsProblem()
 {
   return true;
+}
+
+template<class Owner>
+inline void BaseParameters<Owner>::ReadAddParameters(int argc, char* argv[])
+{
+  ReadParameters(argc, argv);
 }
 
 #endif //__BASE_PARAMETERS_H__

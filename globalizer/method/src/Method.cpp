@@ -295,15 +295,20 @@ void Method::FirstIteration()
   // Равномерно ставим NumPoints точек c шагом h
   // А надо бы случайно...
   double h = 1.0 / (parameters.NumPoints + 1);
-  if (parameters.startPoint.GetIsChange()) //берем начальную точку из параметров
+  if (parameters.startPoint.GetIsChange() && parameters.IsUseStartPoint) //берем начальную точку из параметров
   {
 
-    std::vector<Trial*> newPoint(1);
+    int firstPointCount = parameters.NumPoints - 1;
+    
 
-
+    std::vector<Trial*> newPoint(parameters.NumPoints);
     newPoint[0] = TrialFactory::CreateTrial();
     
     pTask.CopyPoint(parameters.startPoint.GetData(), newPoint[0]);
+
+    InformationForCalculation inputlocal;
+    TResultForCalculation outputlocal;
+    int sfipi = 0;
 
     if (parameters.startPointValues.GetIsChange())
     {
@@ -315,38 +320,59 @@ void Method::FirstIteration()
           newPoint[0]->index = ifv;
         }
       }
+      inputlocal.Resize(firstPointCount);
+      outputlocal.Resize(firstPointCount);
+      sfipi = 0;
     }
     else
     {
-      InformationForCalculation inputlocal;
-      TResultForCalculation outputlocal;
-      inputlocal.Resize(1);
-      outputlocal.Resize(1);
-
+      inputlocal.Resize(parameters.NumPoints);
+      outputlocal.Resize(parameters.NumPoints);
       inputlocal.trials[0] = newPoint[0];
-
-      calculation.Calculate(inputlocal, outputlocal);
-
-      for (int j = 0; j < pTask.GetNumOfFunc(); j++)
-      {
-        functionCalculationCount[j] = outputlocal.countCalcTrials[j];
-      }
-      UpdateOptimumEstimation(*(newPoint[0]));
-
+      sfipi = 1;
     }
 
-    newPoint[0]->K = 1;
+    h = 1.0 / (firstPointCount + 1);
+    for (int ifip = 0; ifip < firstPointCount; ifip++)
+    {      
+      int ind = ifip + 1;
+      
+      newPoint[ind] = TrialFactory::CreateTrial();
 
-    Extended genX(0.0);
-    evolvent.GetInverseImage(newPoint[0]->y, genX);
+      pData->GetTrials().push_back(newPoint[ind]);
+      newPoint[ind]->SetX((ifip + 1)* h);
 
-    newPoint[0]->SetX(genX);
+      // Вычисляем образ точки итерации - образ записывается в начальные позиции массива y
+      CalculateImage(*newPoint[ind]);
 
-    pData->GetTrials().push_back(newPoint[0]);
+      newPoint[ind]->leftInterval = NewInterval[0];
+      newPoint[ind]->rightInterval = NewInterval[0];
+      inputlocal.trials[sfipi + ifip] = newPoint[ind];
+    }
 
+    calculation.Calculate(inputlocal, outputlocal);
 
-    this->InsertPoints(newPoint);
+    for (int j = 0; j < pTask.GetNumOfFunc(); j++)
+    {
+      functionCalculationCount[j] = outputlocal.countCalcTrials[j];
+    }
+    
 
+    for (int ifip = 0; ifip < newPoint.size(); ifip++)
+    {
+      UpdateOptimumEstimation(*(newPoint[ifip]));
+      newPoint[ifip]->K = 1;
+
+      Extended genX(0.0);
+      evolvent.GetInverseImage(newPoint[ifip]->y, genX);
+
+      newPoint[ifip]->SetX(genX);
+
+      //pData->GetTrials().push_back(newPoint[ifip]);
+    }
+
+      this->InsertPoints(newPoint);
+    
     this->iteration.IterationCount += 1;
     parameters.iterationNumber = iteration.IterationCount;
   }

@@ -2,7 +2,7 @@
 
 #include "Solver.h"
 
-
+#include "Plotters.h"
 
 #include "MethodFactory.h"
 
@@ -15,12 +15,12 @@
 #include "OMPCalculation.h"
 #include "CudaCalculation.h"
 
-#ifdef USE_PYTHON
+#include <iostream>
+#include <string>
+#include <locale>
+#include <codecvt>
+#include <cwchar>
 
-#include "ml_wrapper.h"
-#include <numpy/arrayobject.h>
-
-#endif
 
 // ------------------------------------------------------------------------------------------------
 void Solver::ClearData()
@@ -39,16 +39,6 @@ void Solver::ClearData()
 
   mProcess = nullptr;
 }
-
-#ifdef USE_PYTHON
-PyObject* makeFloatList(const double* array, int size)
-{
-  PyObject* l = PyList_New(size);
-  for (int i = 0; i != size; i++)
-    PyList_SET_ITEM(l, i, PyFloat_FromDouble(array[i]));
-  return l;
-}
-#endif
 
 // ------------------------------------------------------------------------------------------------
 Solver::Solver(IProblem* problem)
@@ -87,12 +77,61 @@ int Solver::CheckParameters()
 
   double optimumPoint[MaxDim * MaxNumOfGlobMinima];
   int n;
-  if (mProblem->GetOptimumPoint(optimumPoint) == IProblem::UNDEFINED &&
-    mProblem->GetAllOptimumPoint(optimumPoint, n) == IProblem::UNDEFINED &&
-    parameters.stopCondition == OptimumVicinity)
+
+  if (mProblem->GetOptimumPoint(optimumPoint) == IProblem::OK)
   {
-    print << "Stop by reaching optimum vicinity is unsupported by this problem\n";
-    return 1;
+    if (parameters.stopCondition.GetIsChange() == false)
+    {
+      parameters.stopCondition = OptimumVicinity2;
+    }
+  }
+  else
+  {
+    if (mProblem->GetAllOptimumPoint(optimumPoint, n) == IProblem::UNDEFINED)
+    {
+      if (parameters.stopCondition != Accuracy)
+      {
+        print << "Stop by reaching optimum vicinity is unsupported by this problem\n";
+        print << "Stop Condition change to Accuracy!!!\n";
+        parameters.stopCondition = Accuracy;
+      }
+    }
+  }
+
+  IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(mProblem);
+  if (newProblem != 0)
+  {
+    if (newProblem->GetNumberOfDiscreteVariable() != 0)
+    {
+      if (parameters.TypeMethod != IntegerMethod)
+      {
+        parameters.TypeMethod = IntegerMethod;
+      }
+    }
+  }
+
+  if (parameters.MaxNumOfPoints[0] > 100 
+    && parameters.NumThread.GetIsChange() == false && parameters.NumPoints.GetIsChange() == false
+    && parameters.TypeCalculation == OMP)
+  {
+    if (parameters.Dimension > 2 && parameters.Dimension < 10 && parameters.startPoint.GetIsChange() == false)
+    {
+      parameters.NumThread = std::max(int(parameters.GetMaxNumOMP() / 2), 1);
+      parameters.NumPoints = parameters.NumThread;
+    }
+    if (parameters.Dimension > 5
+      && parameters.r.GetIsChange() == false)
+    {
+      parameters.r = parameters.r * 2;
+    }
+  }
+
+  if (parameters.IsPlot)
+  {
+    if (parameters.iterPointsSavePath.GetIsChange() == false)
+    {
+      parameters.iterPointsSavePath = "Globalizer_iterPointsSavePath.txt";
+    }
   }
 
   return 0;
@@ -249,6 +288,24 @@ int Solver::Solve()
       if (addPoints != nullptr)
         mProcess->InsertPoints(*addPoints);
       mProcess->Solve();
+
+      if (parameters.IsPlot)
+      {
+#ifdef USE_PYTHON
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        std::wstring wstring = converter.from_bytes(parameters.GetPlotFileName());
+        wchar_t* output_file_name = new wchar_t[wstring.size() + 1];
+        wcscpy(output_file_name, wstring.c_str());
+        bool show_figure = parameters.ShowFigure;
+        bool move_points_under_graph = false;
+        Plotter::FigureTypes figure_type = static_cast<Plotter::FigureTypes>(parameters.FigureType.operator int());
+        Plotter::CalcsTypes calcs_type = static_cast<Plotter::CalcsTypes>(parameters.CalcsType.operator int());;
+
+        draw_plot(this->mProblem, GetSolutionResult(), { 0, 1 }, output_file_name, figure_type, calcs_type, show_figure, move_points_under_graph);
+#else
+        print << "Plotter is not work!!!\nPython libraries doesn't find!!!\n";
+#endif
+      }
     }
 
   }

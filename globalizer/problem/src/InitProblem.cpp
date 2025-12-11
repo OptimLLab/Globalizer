@@ -66,7 +66,22 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
   return 0;
 }
 
+
 #ifdef _GLOBALIZER_BENCHMARKS
+void ReadParameters(IGlobalOptimizationProblem*& problem)
+{
+  std::vector<std::string> names; 
+  std::vector<std::string> values;
+  problem->GetParameters(names, values);
+
+  for (int i = 0; i < names.size(); i++)
+  {
+    values[i] = parameters.GetStringVal(names[i]);
+    if (values[i] != "")
+      problem->SetParameter(names[i], values[i]);
+  }
+}
+
 // ------------------------------------------------------------------------------------------------
 int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemManager, IGlobalOptimizationProblem*& problem)
 {
@@ -79,8 +94,7 @@ int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemMan
 
   IGlobalOptimizationProblem* baseProblem = problemManager.GetProblem();
 
-  baseProblem->SetParameter("Method", parameters.Comment.ToString());
-  baseProblem->SetParameter("DataSet", parameters.libConfigPath.ToString());
+  ReadParameters(baseProblem);
 
   baseProblem->Initialize();
 

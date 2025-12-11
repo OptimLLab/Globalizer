@@ -71,6 +71,8 @@ protected:
   void PrintOptimEstimationToFile(Trial OptimEstimation);
   /// печать текущего минимума на экран
   virtual void PrintOptimEstimationToConsole(Trial OptimEstimation);
+  /// Старый вариант печати в консоль
+  virtual void OldPrintOptimEstimationToConsole(Trial OptimEstimation);
   /// Печать результата в файл
   virtual void PrintResultToFile(Trial OptimEstimation);
 

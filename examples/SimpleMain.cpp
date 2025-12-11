@@ -77,7 +77,11 @@ int main(int argc, char* argv[])
       std::vector<double>(parameters.Dimension, 0) // координаты глобального минимума
     );
     parameters.FigureType = 1; // 0 - LevelLayers - линии уровней (по умолчанию); 1 - Surface - поверхность
-    parameters.CalcsType = 2;// 
+    parameters.CalcsType = 2;// 0 - ObjectiveFunction - строит линии уровня / поверхность по сетке 100 * 100,
+    //1 - Approximation - строит аппроксимацию линий уровня / поверхности по имеющейся поисковой информации,
+    //  2 - Interpolation - строит интерполяцию линий уровня / поверхности по имеющейся поисковой информации,
+    //  3 - ByPoints - строит поверхность путем "натягивагия" ее на точки поисковой информации без сглаживания,
+    //  4 - OnlyPoints - отображает только распределение точек поисковой информации в области поиска.
   }
   else if (problemName == STRONGINC3_LAMBDA_EXPRESSION)
   {
@@ -110,7 +114,7 @@ int main(int argc, char* argv[])
       StronginC3Functionals, // задача
       4 // количество функций (3 ограничения + 1 критерий)
     );
-    parameters.CalcsType = 2;// 
+    parameters.CalcsType = 2;
   }
 
   problem->Initialize();

@@ -113,38 +113,50 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
 #ifdef USE_PYTHON
 void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initializer_list<int> params,
   wchar_t* output_file_name, FigureTypes figure_type, CalcsTypes calcs_type,
-  bool show_figure, bool move_points_under_graph) {
-
-  if (parameters.libPath.ToString() == "iOptProblem.dll" || params.size() == 1) {
-    printf("TBD...");
-    return;
-  }
-
-  if (problem == nullptr) {
+  bool show_figure, bool move_points_under_graph) 
+{
+  if (problem == nullptr) 
+  {
     throw std::invalid_argument("Error: problem is not init");
   }
 
-  if (result == nullptr) {
+  if (result == nullptr) 
+  {
     throw std::invalid_argument("Error: solution is not init");
   }
 
-  if (params.size() > 2 || params.size() == 0) {
+  if (params.size() > 2 || params.size() == 0) 
+  {
     throw std::invalid_argument("Error: the number of parameters must be 1 or 2");
   }
 
-  for (const int* param = params.begin(); param != params.end(); param++) {
-    if (*param >= problem->GetDimension() || *param < 0) {
+  for (const int* param = params.begin(); param != params.end(); param++) 
+  {
+    if (*param >= problem->GetDimension() || *param < 0) 
+    {
       throw std::invalid_argument("Error: invalid parameter value");
     }
   }
 
-  if (params.size() == 2 && (*(params.begin() + 0) == *(params.begin() + 1))) {
+  if (params.size() == 2 && (*(params.begin() + 0) == *(params.begin() + 1))) 
+  {
     throw std::invalid_argument("Error: parameters cannot match");
   }
-
-  if (!Py_IsInitialized()) {
+  PyThreadState* main_ts = nullptr;
+  bool isPythonInit = false;
+  if (!Py_IsInitialized())
+  {
     Py_Initialize();
+
+    PyErr_Print();
+    PyEval_InitThreads();
+
+    PyErr_Print();
+    main_ts = PyEval_SaveThread();  // Освобождаем GIL в каждом потоке
+    isPythonInit = true;
   }
+  PyGILState_STATE gstate = PyGILState_Ensure();
+
 
   std::filesystem::path build_path = std::filesystem::absolute(".\\");
   std::filesystem::path script_path = std::filesystem::absolute("..\\lib\\plotters\\start_cpp.py");
@@ -154,7 +166,8 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
 
   std::wstring _params = L"[";
   _params += std::to_wstring(*(params.begin()));
-  if (params.size() > 1) {
+  if (params.size() > 1) 
+  {
     _params += L", ";
     _params += std::to_wstring(*(params.begin() + 1));
   }
@@ -184,7 +197,8 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
     calcs_type == Plotter::ByPoints ? L"by points" :
     L"only points";
 
-  wchar_t* args[] = {
+  wchar_t* args[] = 
+  {
           __script_path,
           __build_path,
           __solver_output_file,
@@ -215,8 +229,13 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
     free(__script_path);
     free(__params);
 
-    if (Py_IsInitialized()) {
-      Py_Finalize();
+    if (isPythonInit)
+    {
+      if (Py_IsInitialized())
+      {
+        PyEval_RestoreThread(main_ts);
+        Py_Finalize();
+      }
     }
     return;
   }
@@ -261,12 +280,15 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
   {
     std::cout << "Python script executed successfully.\n";
   }
-
-  if (Py_IsInitialized())
+  PyGILState_Release(gstate);
+  if (isPythonInit)
   {
-    Py_Finalize();
+    if (Py_IsInitialized())
+    {
+      PyEval_RestoreThread(main_ts);
+      Py_Finalize();
+    }
   }
-
 
   delete __build_path;
   delete __script_path;

@@ -32,6 +32,12 @@
 #include <omp.h>
 #include "iostream"
 
+#include <string>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+
 
 #ifdef WIN32
 #include <windows.h>
@@ -92,7 +98,7 @@ void Parameters::SetDefaultParameters()
   InitOption(IsPrintSectionPoint, false, "-IsPSP", "Whether to print section information in a Block Scheme", 1);
 
   InitOption(MaxNumOfPoints, 1000000, "-MaxNP", "MaxNumOfPoints", 1);
-  
+
   InitOption(IsSetDevice, false, "-sd", "Assign each process their device", 1);
   InitOption(deviceIndex, -1, "-di", "Device Index, def: -1 auto", 1);
 
@@ -154,7 +160,7 @@ void Parameters::SetDefaultParameters()
   InitOption(IsUseStartPoint, false, "-IsUSP", "Use the starting point from the task", 1);
 
   InitOption(IsUseExtendedConsole, false, "-IsUEC", "Use the extended console interface", 1);
-  
+
 
   ProcRank.SetGetter(&Parameters::GetProcRank);
   ProcRank.SetIsHaveValue(false);
@@ -317,12 +323,35 @@ void Parameters::PrintParametersToFile(FILE* pf)
 }
 
 // ------------------------------------------------------------------------------------------------
+std::string getCurrentDateTime() 
+{
+  // Получаем текущее время
+  auto now = std::chrono::system_clock::now();
+  std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+  // Преобразуем в локальное время
+  std::tm* local_time = std::localtime(&now_time);
+
+  // Форматируем в строку
+  std::ostringstream oss;
+  oss << std::put_time(local_time, "%Y_%m_%d_%H_%M_%S");
+  return oss.str();
+}
+
+// ------------------------------------------------------------------------------------------------
 /// Возвращает имя файла для сохранения картинки построенных линий уровней
 std::string Parameters::GetPlotFileName()
 {
   if (ConfigPath.ToString() == "")
   {
-    return "globalizer_" + this->libPath.ToString() + ".png";
+    std::string res = "";
+    res += "globalizer_";
+    if (this->libPath.GetIsChange())
+      res += this->libPath.ToString();
+    else
+      res += getCurrentDateTime();
+    res += +".png";
+    return res;
   }
   else
   {
@@ -409,7 +438,8 @@ Parameters::Parameters(Parameters& _parameters) : BaseParameters<Parameters>::Ba
 
 // ------------------------------------------------------------------------------------------------
 Parameters::~Parameters()
-{}
+{
+}
 
 bool Parameters::IsProblem()
 {

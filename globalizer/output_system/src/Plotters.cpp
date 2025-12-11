@@ -1,4 +1,4 @@
-#include "Plotters.h"
+ï»¿#include "Plotters.h"
 #include "Trial.h"
 
 #include <vector>
@@ -84,7 +84,7 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
         }
       }
     }
-    else if (params.size() == 1) 
+    else if (params.size() == 1)
     {
       for (int k = 0; k < points_count; k++) {
         x[*(params.begin() + 0)] = left_bound[*(params.begin() + 0)] + k * dx[0];
@@ -201,16 +201,16 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
 
   PySys_SetArgvEx(sizeof(args) / sizeof(wchar_t*) - 1, args, 0);
 
-  // ÈÑÏÐÀÂËÅÍÍÀß ×ÀÑÒÜ:
+  // Ð˜Ð¡ÐŸÐ ÐÐ’Ð›Ð•ÐÐÐÐ¯ Ð§ÐÐ¡Ð¢Ð¬:
   std::cout << "The Python charting script has been launched...\n";
 
-  // Ñïîñîá 1: ×òåíèå ôàéëà è âûïîëíåíèå ÷åðåç PyRun_SimpleString
+  // Ð¡Ð¿Ð¾ÑÐ¾Ð± 1: Ð§Ñ‚ÐµÐ½Ð¸Ðµ Ñ„Ð°Ð¹Ð»Ð° Ð¸ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ðµ Ñ‡ÐµÑ€ÐµÐ· PyRun_SimpleString
   std::ifstream file_stream(script_path.string());
   if (!file_stream.is_open())
   {
     std::cerr << "Python script wasn't opened! File: " << script_path.string() << std::endl;
 
-    // Îñâîáîæäàåì ïàìÿòü
+    // ÐžÑÐ²Ð¾Ð±Ð¾Ð¶Ð´Ð°ÐµÐ¼ Ð¿Ð°Ð¼ÑÑ‚ÑŒ
     free(__build_path);
     free(__script_path);
     free(__params);
@@ -223,13 +223,13 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
 
   std::cout << "The Python charting script has been opened...\n";
 
-  // ×èòàåì âåñü ôàéë
+  // Ð§Ð¸Ñ‚Ð°ÐµÐ¼ Ð²ÐµÑÑŒ Ñ„Ð°Ð¹Ð»
   std::stringstream buffer;
   buffer << file_stream.rdbuf();
   std::string python_code = buffer.str();
   file_stream.close();
 
-  // Âûïîëíÿåì ñêðèïò
+  // Ð’Ñ‹Ð¿Ð¾Ð»Ð½ÑÐµÐ¼ ÑÐºÑ€Ð¸Ð¿Ñ‚
   int py_result = PyRun_SimpleString(python_code.c_str());
 
   if (py_result != 0)
@@ -239,7 +239,7 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
     {
       PyErr_Print();
 
-      // Äîïîëíèòåëüíàÿ èíôîðìàöèÿ îá îøèáêå
+      // Ð”Ð¾Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ð°Ñ Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ Ð¾Ð± Ð¾ÑˆÐ¸Ð±ÐºÐµ
       PyObject* ptype, * pvalue, * ptraceback;
       PyErr_Fetch(&ptype, &pvalue, &ptraceback);
 
@@ -262,7 +262,7 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
     std::cout << "Python script executed successfully.\n";
   }
 
-  if (Py_IsInitialized()) 
+  if (Py_IsInitialized())
   {
     Py_Finalize();
   }

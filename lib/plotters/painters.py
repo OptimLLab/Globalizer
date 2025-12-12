@@ -152,7 +152,7 @@ class StaticPainter(Painter):
 
             if len(self.x_nc) > 0 and flag:
                 points = self.x_nc
-                values = self.z_nc
+                values = [self.sol_value - (max(values) - min(values)) * 0.3] * len(self.x_nc)
                 color = 'slategray'
                 flag = False
             else:

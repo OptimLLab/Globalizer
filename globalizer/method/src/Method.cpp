@@ -139,7 +139,16 @@ SearchData* Method::GetSearchData(Trial* trial)
 // ------------------------------------------------------------------------------------------------
 bool Method::IsIntervalInSegment(SearchInterval* basicInterval, SearchInterval* newInterval)
 {
+  if (basicInterval == NULL || newInterval == NULL)
+  {
+    return false;
+  }
+  if (basicInterval->LeftPoint == NULL || newInterval->LeftPoint == NULL)
+  {
+    return false;
+  }
   double start = basicInterval->LeftPoint->GetFloor();
+
   if (basicInterval->LeftPoint->GetFloor() != newInterval->LeftPoint->GetFloor())
     return false;
   double end = start + 1;
@@ -554,8 +563,6 @@ void Method::Recalc()
     // После пересчета флаг опускаем
     pData->SetRecalc(false);
   }
-
-  pData->pRecalcDatas.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1351,7 +1358,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     {
       pData->M[index] = newValue;
       pData->SetRecalc(true);
-      pData->pRecalcDatas.push_back(pData);
     }
     break;
   case 1:

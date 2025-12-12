@@ -97,8 +97,6 @@ protected:
    xl() < x < xr */
   TreeNode* FindIn(TreeNode *p, Trial* x) const;
 public:
-  /// Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
-  static std::vector<SearchData*> pRecalcDatas;
 
   SearchData(int _NumOfFuncs, int _MaxSize = DefaultSearchDataSize);
   SearchData(int _NumOfFuncs, int _MaxSize, int _queueSize);
@@ -186,8 +184,6 @@ public:
   /// Задает нужно ли пересчитывать характеристики
   void SetRecalc(bool f)
   {    
-    if (recalc == false)
-      pRecalcDatas.push_back(this);
     recalc = f;    
   }
   /// Лучшая точка, полученная для данной поисковой информации

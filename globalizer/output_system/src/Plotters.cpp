@@ -158,8 +158,8 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
   PyGILState_STATE gstate = PyGILState_Ensure();
 
 
-  std::filesystem::path build_path = std::filesystem::absolute(".\\");
-  std::filesystem::path script_path = std::filesystem::absolute("..\\lib\\plotters\\start_cpp.py");
+  std::filesystem::path build_path = std::filesystem::absolute("./");
+  std::filesystem::path script_path = std::filesystem::absolute("../lib/plotters/start_cpp.py");
 
   std::string solver_output_file = parameters.iterPointsSavePath.ToString();
   std::string problem_info_file = "_problem_info.txt";
@@ -179,23 +179,28 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
 
   make_problem_info_file(problem, result, problem_info_file.c_str(), calcs_type, params, 100);
 
-  wchar_t* __build_path = _wcsdup(build_path.wstring().c_str());
-  wchar_t* __script_path = _wcsdup(script_path.wstring().c_str());
-  wchar_t* __params = _wcsdup(_params.c_str());
+  wchar_t* __build_path = wcsdup(build_path.wstring().c_str());
+  wchar_t* __script_path = wcsdup(script_path.wstring().c_str());
+  wchar_t* __params = wcsdup(_params.c_str());
 
   wchar_t* __solver_output_file = _solver_output_file.data();
   wchar_t* __problem_info_file = _problem_info_file.data();
   wchar_t* __eps = _eps.data();
+  
+  wchar_t __show_figure[6]; 
+  wchar_t __move_points_under_graph[6];
+  wchar_t __figure_type[64];
+  wchar_t __calcs_type[64];
 
-  wchar_t* __show_figure = show_figure ? L"True" : L"False";
-  wchar_t* __move_points_under_graph = move_points_under_graph ? L"True" : L"False";
+  wcscpy(__show_figure, show_figure ? L"True" : L"False");
+  wcscpy(__move_points_under_graph, move_points_under_graph ? L"True" : L"False");
 
-  wchar_t* __figure_type = figure_type == Plotter::LevelLayers ? L"lines layers" : L"surface";
-  wchar_t* __calcs_type = calcs_type == Plotter::ObjectiveFunction ? L"objective function" :
+  wcscpy(__figure_type, figure_type == Plotter::LevelLayers ? L"lines layers" : L"surface");
+  wcscpy(__calcs_type, calcs_type == Plotter::ObjectiveFunction ? L"objective function" :
     calcs_type == Plotter::Approximation ? L"approximation" :
     calcs_type == Plotter::Interpolation ? L"interpolation" :
     calcs_type == Plotter::ByPoints ? L"by points" :
-    L"only points";
+    L"only points");
 
   wchar_t* args[] = 
   {

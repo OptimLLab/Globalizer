@@ -62,6 +62,7 @@ void Parameters::SetDefaultParameters()
   InitOption(FigureType, 0, "-FigureType", "type of visualization of the target function (available modes : 0 - LevelLayers, 1 - Surface)", 1);
   InitOption(CalcsType, 0, "-CalcsType", "the type of value calculations for visualizing the objective function (available modes: ObjectiveFunction, Approximation, Interpolation, ByPoints, OnlyPoints)", 1);
   InitOption(PlotGridSize, 300, "-PGS", "Drawing mesh precision", 1);
+  InitOption(PlotFileName, \0, "-PlotFileName", "The name of the file to save the image", 1);
   InitOption(IsCalculateNumPoint, 0, "-ICNP", "Number of trials will be calculated at each iteration", 1);
   Separator = std::string("_"); //Переопределяем сепаратор на значение по умолчанию
   SetSeparator();
@@ -342,7 +343,7 @@ std::string getCurrentDateTime()
 /// Возвращает имя файла для сохранения картинки построенных линий уровней
 std::string Parameters::GetPlotFileName()
 {
-  if (ConfigPath.ToString() == "")
+  if (PlotFileName.ToString() == "")
   {
     std::string res = "";
     res += "globalizer_";
@@ -355,11 +356,7 @@ std::string Parameters::GetPlotFileName()
   }
   else
   {
-    std::string res = "";
-    int i = ConfigPath.ToString().find('.');
-    res = ConfigPath.ToString().substr(0, i);
-    res += ".png";
-    return res;
+    return PlotFileName.ToString();
   }
 }
 

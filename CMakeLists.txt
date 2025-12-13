@@ -305,8 +305,10 @@ foreach(main_filename ${main_list})
     	
     if (${IS_CLANG_COMPILER})	
       target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES} OpenMP::OpenMP_CXX  )
-    else()
-      target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES})  
+    elseif (${IS_MICROSOFT_COMPILER})
+	  target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES}) 
+	else()
+      target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES} stdc++fs)  
     endif()
     
     set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${GLOBALIZER_EXECUTABLE_NAME_DEBUG})

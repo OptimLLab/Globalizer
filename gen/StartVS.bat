@@ -24,7 +24,8 @@ call conda activate "%ROOT_DIR%\build_64\Globalizer_env"
 
 echo [3/5] Installing the library...
 call pip install -r ..\third_party\Problems\Problems\iOptProblem\requirements.txt
-call python "%ROOT_DIR%third_party\Problems\Problems\iOptProblem\Tests\data\loader.py"
+call python "%ROOT_DIR%\third_party\Problems\Problems\iOptProblem\Tests\data\loader.py"
+call python "%ROOT_DIR%\third_party\Problems\Problems\iOptProblem\SVC_3D_Transformator.py"
 
 echo [4/5] Start Intell OneAPI
 

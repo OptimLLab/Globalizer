@@ -128,6 +128,8 @@ public:
   TInts<Parameters> MaxNumOfPoints;
   /// Распечатать справку
   TFlag<Parameters> HELP;
+  /// Имя файла для сохранения изображения
+  TString<Parameters> PlotFileName;
   /// Нарисовать график функции
   TFlag<Parameters> IsPlot;
   /// Плотность линий уровней

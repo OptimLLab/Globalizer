@@ -556,7 +556,7 @@ void Method::Recalc()
     for (SearcDataIterator it = pData->GetBeginIterator(); it; ++it)
     {
       it->R = CalculateGlobalR(*it);
-      it->locR = CalculateLocalR(*it);
+      //it->locR = CalculateLocalR(*it);
 
       pData->PushToQueue(*it);
     }
@@ -817,11 +817,11 @@ void Method::InsertLocalPoints(const std::vector<Trial*>& points, Task* task)
       // Удалять интервалы из очереди не надо - они уже удалены в GetBestIntervals
       // Вставляем два новых интервала
       p->R = CalculateGlobalR(p);
-      p->locR = CalculateLocalR(p);
+      //p->locR = CalculateLocalR(p);
       pData->PushToQueue(p);
 
       CoveringInterval->R = CalculateGlobalR(CoveringInterval);
-      CoveringInterval->locR = CalculateLocalR(CoveringInterval);
+      //CoveringInterval->locR = CalculateLocalR(CoveringInterval);
 
       pData->PushToQueue(CoveringInterval);
     }
@@ -1220,11 +1220,11 @@ void Method::RenewSearchData()
       // Удалять интервалы из очереди не надо - они уже удалены в GetBestIntervals
       // Вставляем два новых интервала
       p->R = CalculateGlobalR(p);
-      p->locR = CalculateLocalR(p);
+      //p->locR = CalculateLocalR(p);
       pData->PushToQueue(p);
 
       (interval)->R = CalculateGlobalR((interval));
-      (interval)->locR = CalculateLocalR((interval));
+      //(interval)->locR = CalculateLocalR((interval));
 
       pData->PushToQueue((interval));
     }

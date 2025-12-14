@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning)
+
 import sys, os
 
 sys.path.append(os.path.dirname(sys.argv[0]))

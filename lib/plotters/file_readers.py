@@ -17,7 +17,7 @@ def ReadTrialsFile(dir, file_for_reading):
                 iters_count = int(splitedline[0])
                 num_of_func = int(splitedline[1])
                 isFirst = False
-                for i in range((num_of_func - 1) * 2):
+                for i in range(max(1, (num_of_func - 1) * 2)):
                     cc.append([])
                 continue
             if iters_count == 0:

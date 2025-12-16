@@ -142,6 +142,10 @@ public:
   std::string GetStringVal(std::string name);
   /// Возвращает значение параметра с именем name
   void* GetVal(std::string name);
+  /// Возвращает целочисленное значение параметра с именем name
+  int GetIntVal(std::string name);
+  /// Возвращает вещественное значение параметра с именем name
+  double GetDoubleVal(std::string name);
 
   /**
    * Инициализация параметра
@@ -176,6 +180,10 @@ public:
 
   /// Дополнительное чтение параметров из консоли
   virtual void ReadAddParameters(int argc, char* argv[]);
+
+private:
+  /// Определить тип параметра
+  EParameterType DetermineParameterType(const std::string& value);
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -326,34 +334,78 @@ void BaseParameters<Owner>::ReadParameters(int argc, char* argv[])
 {
   for (int i = 1; i < argc; i++)
   {
-    std::string argument = argv[i];
+    std::string arg = argv[i];
+
+    // Пытаемся найти аргумент как зарегистрированный параметр
+    bool isRecognized = false;
     for (int j = 0; j < mOptionsCount; j++)
     {
-      if (mOptions[j]->IsNameEqual(argument))
+      if (mOptions[j]->IsNameEqual(arg))
       {
-        if (!mOptions[j]->IsPreChange())
+        if (!mOptions[j]->IsPreChange() && mOptions[j]->mIsEdit)
         {
-          if (mOptions[j]->mIsEdit)
+          if (mOptions[j]->IsFlag())
           {
-            if (!mOptions[j]->IsFlag())
+            mOptions[j]->FromString("1");
+            mOptions[j]->SetIsReadValue(true);
+          }
+          else
+          {
+            if (i + 1 < argc)
             {
-              i++;
-              if (i < argc)
-              {
-                std::string value = argv[i];
-                mOptions[j]->FromString(value);
-                mOptions[j]->SetIsReadValue(true);
-                break;
-              }
-            }
-            else
-            {
-              mOptions[j]->FromString("1");
+              std::string value = argv[i + 1];
+              mOptions[j]->FromString(value);
               mOptions[j]->SetIsReadValue(true);
-              break;
+              i++;
             }
           }
         }
+        isRecognized = true;
+        break;
+      }
+    }
+
+    // Если параметр не распознан и начинается с '-', считаем его именем параметра
+    if (!isRecognized && !arg.empty() && arg[0] == '-')
+    {
+      if (i + 1 < argc)
+      {
+        std::string paramName = arg;
+        std::string value = argv[i + 1];
+        EParameterType type = DetermineParameterType(value);
+
+        BaseProperty<Owner>* newOption = nullptr;
+        if (type == Pint)
+          newOption = new TInt<Owner>();
+        else if (type == Pdouble)
+          newOption = new TDouble<Owner>();
+        else
+          newOption = new TString<Owner>();
+
+        newOption->InitializationParameterProperty(
+          nullptr, nullptr, -1, Separator, 1,
+          paramName, "Dynamic parameter", paramName, value
+        );
+        newOption->FromString(value);
+        newOption->SetIsReadValue(true);
+        newOption->mIsEdit = true;
+
+        if (mOtherOptionsCount >= mOtherOptionsSize)
+        {
+          IBaseValueClass** buf = new IBaseValueClass * [mOtherOptionsSize];
+          for (int k = 0; k < mOtherOptionsSize; ++k)
+            buf[k] = mOtherOptions[k];
+          delete[] mOtherOptions;
+          mOtherOptionsSize *= 2;
+          mOtherOptions = new IBaseValueClass * [mOtherOptionsSize];
+          for (int k = 0; k < mOtherOptionsSize; ++k)
+            mOtherOptions[k] = (k < mOtherOptionsSize / 2) ? buf[k] : nullptr;
+          delete[] buf;
+        }
+
+        mOtherOptions[mOtherOptionsCount] = newOption;
+        mOtherOptionsCount++;
+        i++;
       }
     }
   }
@@ -573,6 +625,36 @@ void* BaseParameters<Owner>::GetVal(std::string name)
   }
 
   return NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
+/// Возвращает целое число с значением параметра с именем name
+template <class Owner>
+int BaseParameters<Owner>::GetIntVal(std::string name)
+{
+  std::string strVal = GetStringVal(name);
+  if (strVal.empty()) return 0;
+  try {
+    return std::stoi(strVal);
+  }
+  catch (...) {
+    return 0;
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+/// Возвращает double с значением параметра с именем name
+template <class Owner>
+double BaseParameters<Owner>::GetDoubleVal(std::string name)
+{
+  std::string strVal = GetStringVal(name);
+  if (strVal.empty()) return 0.0;
+  try {
+    return std::stod(strVal);
+  }
+  catch (...) {
+    return 0.0;
+  }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -861,6 +943,45 @@ template<class Owner>
 inline void BaseParameters<Owner>::ReadAddParameters(int argc, char* argv[])
 {
   ReadParameters(argc, argv);
+}
+
+// ------------------------------------------------------------------------------------------------
+template<class Owner>
+EParameterType BaseParameters<Owner>::DetermineParameterType(const std::string& value)
+{
+  if (value.empty())
+    return Pstring;
+
+  bool hasDecimalPoint = false;
+  bool hasDigits = false;
+  size_t startPos = 0;
+
+  if (value[0] == '+' || value[0] == '-')
+    startPos = 1;
+
+  for (size_t i = startPos; i < value.length(); ++i)
+  {
+    char c = value[i];
+    if (c == '.')
+    {
+      if (hasDecimalPoint)
+        return Pstring;
+      hasDecimalPoint = true;
+    }
+    else if (std::isdigit(c))
+    {
+      hasDigits = true;
+    }
+    else
+    {
+      return Pstring;
+    }
+  }
+
+  if (!hasDigits)
+    return Pstring;
+
+  return hasDecimalPoint ? Pdouble : Pint;
 }
 
 #endif //__BASE_PARAMETERS_H__

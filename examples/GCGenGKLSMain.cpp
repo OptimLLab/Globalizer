@@ -18,33 +18,29 @@
 
 int main(int argc, char* argv[])
 {
-    GlobalizerInitialization(argc, argv, true, true);
+  GlobalizerInitialization(argc, argv, true, true);
 
-    GKLSClass gkls = Simple;
-    if (parameters.GetStringVal("GKLSClass") == "simple")
-      gkls = Simple;
-    else
-      gkls = Hard;
+  std::string gklsStr = parameters.GetStringVal("-GKLSClass");
+  GKLSClass gkls = (gklsStr == "simple") ? Simple : Hard;
 
-    if (!(parameters.Dimension.GetIsChange()))
-      parameters.Dimension = 2; 
+  if (!(parameters.Dimension.GetIsChange()))
+    parameters.Dimension = 2;
 
-    int problemIndex = *((int*)parameters.GetVal("problemIndex"));
-    int dim = 2;
+  int problemIndex = parameters.GetIntVal("-problemIndex");
 
-    TGKLSProblem* gkls_problem = new TGKLSProblem(problemIndex, parameters.Dimension, gkls);
+  TGKLSProblem* gkls_problem = new TGKLSProblem(problemIndex, parameters.Dimension, gkls);
 
-    // Создаем обертку для GKLS задачи под интерфейс IOptProblem
-    GlobalizerOptProblem* wrapped_problem = new GlobalizerOptProblem(gkls_problem);
+  // Создаем обертку для GKLS задачи под интерфейс IOptProblem
+  GlobalizerOptProblem* wrapped_problem = new GlobalizerOptProblem(gkls_problem);
 
-    wrapped_problem->Initialize();
+  wrapped_problem->Initialize();
 
-    Solver solver(wrapped_problem);
-    if (solver.Solve() != SYSTEM_OK)
-        throw EXCEPTION("Error: solver.Solve crash!!!");
-    delete wrapped_problem;
+  Solver solver(wrapped_problem);
+  if (solver.Solve() != SYSTEM_OK)
+    throw EXCEPTION("Error: solver.Solve crash!!!");
+  delete wrapped_problem;
 
-    MPI_Finalize();
-    return 0;
+  MPI_Finalize();
+  return 0;
 }
 // - end of file ----------------------------------------------------------------------------------

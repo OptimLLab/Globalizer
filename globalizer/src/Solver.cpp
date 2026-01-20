@@ -109,7 +109,7 @@ int Solver::CheckParameters()
       }
     }
   }
-
+  /*
   if (parameters.MaxNumOfPoints[0] > 100 
     && parameters.NumThread.GetIsChange() == false && parameters.NumPoints.GetIsChange() == false
     && parameters.TypeCalculation == OMP)
@@ -125,7 +125,7 @@ int Solver::CheckParameters()
       parameters.r = parameters.r * 2;
     }
   }
-
+  */
   if (parameters.IsPlot)
   {
     if (parameters.iterPointsSavePath.GetIsChange() == false)

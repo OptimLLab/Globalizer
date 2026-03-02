@@ -645,24 +645,19 @@ bool SearchDataSerializer::SaveFullState(const std::string& filename)
   return true;
 }
 
-/// Добавление новых точек в существующий файл
-bool SearchDataSerializer::AppendNewPoints(const std::vector<Trial*>& newTrials,
-  const std::vector<SearchInterval*>& newIntervals,
-  Trial* newBestTrial)
-{
-  if (currentFileName.empty())
-  {
-    return false;
-  }
 
-  // Читаем существующий файл
-  std::ifstream infile(currentFileName.c_str());
+// ==================== ПОДФУНКЦИИ ДЛЯ AppendNewPoints ====================
+
+/// Чтение содержимого файла
+bool SearchDataSerializer::ReadFileContent(const std::string& filename, std::string& content)
+{
+  std::ifstream infile(filename.c_str());
   if (!infile.is_open())
   {
     return false;
   }
 
-  std::string content;
+  content.clear();
   std::string line;
   while (std::getline(infile, line))
   {
@@ -670,206 +665,13 @@ bool SearchDataSerializer::AppendNewPoints(const std::vector<Trial*>& newTrials,
   }
   infile.close();
 
-  // ==================== ОБНОВЛЕНИЕ search_data ====================
+  return true;
+}
 
-  // 1. Обновляем Count
-  size_t countPos = content.find("\"Count\": ");
-  if (countPos != std::string::npos)
-  {
-    size_t countEnd = content.find(",", countPos);
-    if (countEnd == std::string::npos)
-    {
-      countEnd = content.find("\n", countPos);
-    }
-    if (countEnd != std::string::npos)
-    {
-      std::string newCount = "\"Count\": " + IntToString(pSearchData->GetCount());
-      content.replace(countPos, countEnd - countPos, newCount);
-    }
-  }
-
-  // 2. Обновляем массив M (оценки констант Липшица)
-  size_t mPos = content.find("\"M\": [");
-  if (mPos != std::string::npos)
-  {
-    size_t mEnd = content.find("]", mPos);
-    if (mEnd != std::string::npos)
-    {
-      std::string newM = "\"M\": [";
-      for (int i = 0; i < pSearchData->NumOfFuncs; ++i)
-      {
-        if (i > 0) newM += ",";
-        newM += FormatDouble(pSearchData->M[i]);
-      }
-      newM += "]";
-      content.replace(mPos, mEnd - mPos + 1, newM);
-    }
-  }
-
-  // 3. Обновляем массив Z (минимальные значения функций)
-  size_t zPos = content.find("\"Z\": [");
-  if (zPos != std::string::npos)
-  {
-    size_t zEnd = content.find("]", zPos);
-    if (zEnd != std::string::npos)
-    {
-      std::string newZ = "\"Z\": [";
-      for (int i = 0; i < pSearchData->NumOfFuncs; ++i)
-      {
-        if (i > 0) newZ += ",";
-        newZ += FormatDouble(pSearchData->Z[i]);
-      }
-      newZ += "]";
-      content.replace(zPos, zEnd - zPos + 1, newZ);
-    }
-  }
-
-  // 4. Обновляем local_r
-  size_t localRPos = content.find("\"local_r\": ");
-  if (localRPos != std::string::npos)
-  {
-    size_t localREnd = content.find(",", localRPos);
-    if (localREnd == std::string::npos)
-    {
-      localREnd = content.find("\n", localRPos);
-    }
-    if (localREnd != std::string::npos)
-    {
-      std::string newLocalR = "\"local_r\": " + FormatDouble(pSearchData->local_r);
-      content.replace(localRPos, localREnd - localRPos, newLocalR);
-    }
-  }
-
-  // 5. Обновляем общее количество интервалов (если есть отдельное поле)
-  size_t intervalsCountPos = content.find("\"intervals_count\": ");
-  if (intervalsCountPos != std::string::npos)
-  {
-    size_t intervalsCountEnd = content.find(",", intervalsCountPos);
-    if (intervalsCountEnd == std::string::npos)
-    {
-      intervalsCountEnd = content.find("\n", intervalsCountPos);
-    }
-    if (intervalsCountEnd != std::string::npos)
-    {
-      std::string newIntervalsCount = "\"intervals_count\": " + IntToString(pSearchData->GetCount() - 1);
-      content.replace(intervalsCountPos, intervalsCountEnd - intervalsCountPos, newIntervalsCount);
-    }
-  }
-
-  // ==================== ОБНОВЛЕНИЕ best_trial ====================
-
-  // Обновляем лучшую точку
-  size_t bestTrialPos = content.find("\"best_trial\": ");
-  if (bestTrialPos != std::string::npos && newBestTrial != nullptr)
-  {
-    size_t bestTrialEnd = content.find("\n", bestTrialPos);
-    size_t commaPos = content.find(",", bestTrialPos);
-    if (commaPos < bestTrialEnd)
-    {
-      bestTrialEnd = commaPos;
-    }
-
-    std::string newBestStr = "\"best_trial\": " + TrialToJson(newBestTrial);
-    content.replace(bestTrialPos, bestTrialEnd - bestTrialPos, newBestStr);
-  }
-
-  // ==================== ДОБАВЛЕНИЕ НОВЫХ ТОЧЕК ====================
-
-  // Добавляем новые точки
-  if (newTrials.size() > 0)
-  {
-    size_t trialsPos = content.find("\"trials\": [");
-    if (trialsPos != std::string::npos)
-    {
-      size_t trialsEnd = content.find("]", trialsPos + 10);
-      if (trialsEnd != std::string::npos)
-      {
-        std::string newTrialsStr;
-        for (size_t i = 0; i < newTrials.size(); ++i)
-        {
-          if (i > 0) newTrialsStr += ",";
-          newTrialsStr += "\n    " + TrialToJson(newTrials[i]);
-        }
-
-        // Проверяем, не пустой ли массив
-        bool isEmptyArray = true;
-        for (size_t i = trialsPos + 10; i < trialsEnd; ++i)
-        {
-          if (!isspace(content[i]) && content[i] != '[' && content[i] != ']')
-          {
-            isEmptyArray = false;
-            break;
-          }
-        }
-
-        if (!isEmptyArray)
-        {
-          content.insert(trialsEnd, "," + newTrialsStr);
-        }
-        else
-        {
-          content.insert(trialsEnd, newTrialsStr + "\n  ");
-        }
-      }
-    }
-  }
-
-  // ==================== ДОБАВЛЕНИЕ НОВЫХ ИНТЕРВАЛОВ ====================
-
-  // Добавляем новые интервалы
-  if (newIntervals.size() > 0)
-  {
-    size_t intervalsPos = content.find("\"intervals\": [");
-    if (intervalsPos != std::string::npos)
-    {
-      size_t intervalsEnd = content.find("]", intervalsPos + 13);
-      if (intervalsEnd != std::string::npos)
-      {
-        std::string newIntervalsStr;
-        for (size_t i = 0; i < newIntervals.size(); ++i)
-        {
-          if (i > 0) newIntervalsStr += ",";
-          newIntervalsStr += "\n    " + IntervalToJson(newIntervals[i]);
-        }
-
-        bool isEmptyArray = true;
-        for (size_t i = intervalsPos + 13; i < intervalsEnd; ++i)
-        {
-          if (!isspace(content[i]) && content[i] != '[' && content[i] != ']')
-          {
-            isEmptyArray = false;
-            break;
-          }
-        }
-
-        if (!isEmptyArray)
-        {
-          content.insert(intervalsEnd, "," + newIntervalsStr);
-        }
-        else
-        {
-          content.insert(intervalsEnd, newIntervalsStr + "\n  ");
-        }
-      }
-    }
-  }
-
-  // ==================== ОБНОВЛЕНИЕ ВРЕМЕННОЙ МЕТКИ ====================
-
-  // Обновляем временную метку
-  size_t timestampPos = content.find("\"timestamp\": \"");
-  if (timestampPos != std::string::npos)
-  {
-    size_t timestampEnd = content.find("\"", timestampPos + 14);
-    if (timestampEnd != std::string::npos)
-    {
-      std::string newTimestamp = "\"timestamp\": \"" + GetCurrentTimeISO() + "\"";
-      content.replace(timestampPos, timestampEnd - timestampPos + 1, newTimestamp);
-    }
-  }
-
-  // Записываем обновленный файл
-  std::ofstream outfile(currentFileName.c_str());
+/// Запись содержимого в файл
+bool SearchDataSerializer::WriteFileContent(const std::string& filename, const std::string& content)
+{
+  std::ofstream outfile(filename.c_str());
   if (!outfile.is_open())
   {
     return false;
@@ -881,12 +683,661 @@ bool SearchDataSerializer::AppendNewPoints(const std::vector<Trial*>& newTrials,
   return true;
 }
 
+/// Поиск позиции массива trials и его закрывающей скобки
+bool SearchDataSerializer::FindTrialsPosition(const std::string& content,
+  size_t& trialsPos,
+  size_t& trialsEnd)
+{
+  trialsPos = content.find("\"trials\": [");
+  if (trialsPos == std::string::npos)
+  {
+    return false;
+  }
 
-SearchDataSerializer::SearchDataSerializer() : pSearchData(nullptr), isFirstSave(true) {}
+  trialsEnd = content.rfind("]");
+  if (trialsEnd == std::string::npos || trialsEnd < trialsPos)
+  {
+    return false;
+  }
+
+  return true;
+}
+
+/// Проверка, есть ли уже точки в массиве trials
+bool SearchDataSerializer::HasExistingPoints(const std::string& content,
+  size_t trialsPos,
+  size_t trialsEnd)
+{
+  for (size_t i = trialsPos + 10; i < trialsEnd; ++i)
+  {
+    if (!isspace(content[i]) && content[i] != '[' && content[i] != ']')
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+/// Формирование строки с новыми точками для вставки
+std::string SearchDataSerializer::BuildNewTrialsString(const std::vector<Trial*>& newTrials,
+  bool hasExistingPoints)
+{
+  std::string result;
+
+  for (size_t i = 0; i < newTrials.size(); ++i)
+  {
+    std::string trialJson = TrialToJson(newTrials[i]);
+
+    // Добавляем запятую и перевод строки перед каждой новой точкой
+    if (hasExistingPoints || i > 0)
+    {
+      result += ",\n    ";
+    }
+    else
+    {
+      result += "\n    ";
+    }
+
+    result += trialJson;
+  }
+
+  return result;
+}
+
+
+/// Поиск закрывающей скобки массива trials (упрощенный)
+bool SearchDataSerializer::FindTrialsEnd(const std::string& content,
+  size_t trialsPos,
+  size_t& trialsEnd)
+{
+  // Ищем от конца файла последнюю закрывающую скобку
+  // которая находится после trialsPos
+  size_t lastBracket = content.rfind(']');
+  if (lastBracket == std::string::npos || lastBracket < trialsPos)
+  {
+    return false;
+  }
+
+  trialsEnd = lastBracket;
+  return true;
+}
+
+
+
+
+/// Добавление новых точек в массив trials
+bool SearchDataSerializer::AppendNewTrials(std::string& content,
+  const std::vector<Trial*>& newTrials)
+{
+  if (newTrials.empty())
+  {
+    return true;
+  }
+
+  // Находим позицию массива trials
+  std::string searchStr = "\"trials\": [";
+  size_t trialsPos = content.find(searchStr);
+  if (trialsPos == std::string::npos)
+  {
+    return false;
+  }
+
+  // Ищем закрывающую скобку ИМЕННО ЭТОГО МАССИВА
+  // Начинаем с позиции после открывающей скобки
+  size_t currentPos = trialsPos + searchStr.length();
+  int bracketCount = 1;
+  size_t trialsEnd = std::string::npos;
+
+  while (currentPos < content.length() && bracketCount > 0)
+  {
+    char c = content[currentPos];
+    if (c == '[')
+    {
+      bracketCount++;
+    }
+    else if (c == ']')
+    {
+      bracketCount--;
+      if (bracketCount == 0)
+      {
+        trialsEnd = currentPos;
+        break;
+      }
+    }
+    currentPos++;
+  }
+
+  if (trialsEnd == std::string::npos)
+  {
+    return false;
+  }
+
+  // Проверяем, есть ли уже точки в массиве
+  bool hasExistingPoints = false;
+  for (size_t i = trialsPos + searchStr.length(); i < trialsEnd; ++i)
+  {
+    char c = content[i];
+    if (c != ' ' && c != '\t' && c != '\n' && c != '\r' && c != '[' && c != ']')
+    {
+      hasExistingPoints = true;
+      break;
+    }
+  }
+
+  // Формируем строку с новыми точками
+  std::string newTrialsStr;
+  for (size_t i = 0; i < newTrials.size(); ++i)
+  {
+    std::string trialJson = TrialToJson(newTrials[i]);
+
+    // Добавляем запятую и перевод строки перед каждой новой точкой
+    if (hasExistingPoints || i > 0)
+    {
+      newTrialsStr += ",\n    ";
+    }
+    else
+    {
+      newTrialsStr += "\n    ";
+    }
+
+    newTrialsStr += trialJson;
+  }
+
+  if (content[trialsEnd - 3] == '\n')
+    trialsEnd = trialsEnd - 3;
+  else
+  {
+    // Добавляем перевод строки после последней точки если нужно
+    if (!newTrialsStr.empty() && newTrialsStr[newTrialsStr.length() - 1] != '\n')
+    {
+      newTrialsStr += "\n  ";
+    }
+  }
+  // Вставляем новые точки ПЕРЕД закрывающей скобкой
+  content.insert(trialsEnd, newTrialsStr);
+
+  return true;
+}
+
+
+
+
+/// Поиск позиции поля Count
+bool SearchDataSerializer::FindCountPosition(const std::string& content,
+  size_t& countPos,
+  size_t& countEnd)
+{
+  countPos = content.find("\"Count\": ");
+  if (countPos == std::string::npos)
+  {
+    return false;
+  }
+
+  countEnd = content.find_first_of(",\n", countPos);
+  return (countEnd != std::string::npos);
+}
+
+/// Обновление поля Count
+bool SearchDataSerializer::UpdateCount(std::string& content, int newCount)
+{
+  size_t countPos, countEnd;
+  if (!FindCountPosition(content, countPos, countEnd))
+  {
+    return false;
+  }
+
+  std::string newCountStr = "\"Count\": " + IntToString(newCount);
+  content.replace(countPos, countEnd - countPos, newCountStr);
+
+  return true;
+}
+
+/// Поиск позиции поля best_trial (улучшенная версия)
+bool SearchDataSerializer::FindBestTrialPosition(const std::string& content,
+  size_t& bestTrialPos,
+  size_t& bestTrialEnd,
+  bool& hasComma)
+{
+  bestTrialPos = content.find("\"best_trial\": ");
+  if (bestTrialPos == std::string::npos)
+  {
+    return false;
+  }
+
+  // Ищем конец строки - следующий перевод строки
+  size_t lineEnd = content.find("\n", bestTrialPos);
+  if (lineEnd == std::string::npos)
+  {
+    lineEnd = content.length();
+  }
+
+  // Проверяем, есть ли запятая в конце строки
+  hasComma = false;
+  for (size_t i = bestTrialPos; i < lineEnd; ++i)
+  {
+    if (content[i] == ',')
+    {
+      hasComma = true;
+      break;
+    }
+  }
+
+  bestTrialEnd = lineEnd;
+
+  return true;
+}
+
+/// Обновление поля best_trial (двухэтапный подход)
+bool SearchDataSerializer::UpdateBestTrial(std::string& content, Trial* newBestTrial)
+{
+  if (newBestTrial == nullptr)
+  {
+    return true;
+  }
+
+  // ШАГ 1: Находим всю строку с best_trial
+  size_t bestTrialPos = content.find("\"best_trial\":");
+  if (bestTrialPos == std::string::npos)
+  {
+    return false;
+  }
+
+  // ШАГ 2: Находим конец этой строки (следующий перевод строки)
+  size_t lineEndPos = content.find("\n", bestTrialPos);
+  if (lineEndPos == std::string::npos)
+  {
+    lineEndPos = content.length();
+  }
+
+  // ШАГ 3: Сохраняем старую строку
+  std::string oldLine = content.substr(bestTrialPos, lineEndPos - bestTrialPos);
+
+  // ШАГ 4: Формируем новую строку
+  std::string newLine = "\"best_trial\": " + TrialToJson(newBestTrial);
+
+  // ШАГ 5: Проверяем, была ли запятая в старой строке
+  //if (oldLine.find(',') != std::string::npos)
+  //{
+  //  newLine += ",";
+  //}
+
+  // ШАГ 6: Добавляем перевод строки
+  //newLine += "\n";
+
+  // ШАГ 7: Заменяем
+  content.replace(bestTrialPos, lineEndPos - bestTrialPos, newLine);
+
+  return true;
+}
+
+/// Поиск позиции временной метки
+bool SearchDataSerializer::FindTimestampPosition(const std::string& content,
+  size_t& timestampStart,
+  size_t& timestampEnd)
+{
+  size_t timestampPos = content.find("\"timestamp\": \"");
+  if (timestampPos == std::string::npos)
+  {
+    return false;
+  }
+
+  timestampStart = timestampPos + 13;
+  timestampEnd = content.find("\"", timestampStart);
+
+  return (timestampEnd != std::string::npos);
+}
+
+/// Обновление временной метки (альтернативный вариант)
+bool SearchDataSerializer::UpdateTimestamp(std::string& content)
+{
+  // Ищем строку с timestamp
+  size_t timestampPos = content.find("\"timestamp\": \"");
+  if (timestampPos == std::string::npos)
+  {
+    return false;
+  }
+
+  // Находим конец строки (до следующей запятой или перевода строки)
+  size_t lineEnd = content.find_first_of(",\n", timestampPos);
+  if (lineEnd == std::string::npos)
+  {
+    lineEnd = content.length();
+  }
+
+  // Формируем новую строку целиком
+  std::string newTimestampLine = "\"timestamp\": \"" + GetCurrentTimeISO() + "\"";
+
+  // Проверяем, была ли запятая в конце
+  //if (lineEnd < content.length() && content[lineEnd] == ',')
+  //{
+  //  newTimestampLine += ",";
+  //}
+
+  // Заменяем всю строку
+  content.replace(timestampPos, lineEnd - timestampPos, newTimestampLine);
+
+  return true;
+}
+
+/// Поиск позиции массива M
+bool SearchDataSerializer::FindMPosition(const std::string& content,
+  size_t& mPos,
+  size_t& mEnd)
+{
+  mPos = content.find("\"M\": [");
+  if (mPos == std::string::npos)
+  {
+    return false;
+  }
+
+  mEnd = content.find("]", mPos);
+  return (mEnd != std::string::npos);
+}
+
+/// Обновление массива M
+bool SearchDataSerializer::UpdateMArray(std::string& content,
+  const double* M,
+  int numOfFuncs)
+{
+  size_t mPos, mEnd;
+
+  if (!FindMPosition(content, mPos, mEnd))
+  {
+    return false;
+  }
+
+  std::string newM = "\"M\": [";
+  for (int i = 0; i < numOfFuncs; ++i)
+  {
+    if (i > 0) newM += ",";
+    newM += FormatDouble(M[i]);
+  }
+  newM += "]";
+
+  content.replace(mPos, mEnd - mPos + 1, newM);
+
+  return true;
+}
+
+/// Поиск позиции массива Z
+bool SearchDataSerializer::FindZPosition(const std::string& content,
+  size_t& zPos,
+  size_t& zEnd)
+{
+  zPos = content.find("\"Z\": [");
+  if (zPos == std::string::npos)
+  {
+    return false;
+  }
+
+  zEnd = content.find("]", zPos);
+  return (zEnd != std::string::npos);
+}
+
+/// Обновление массива Z
+bool SearchDataSerializer::UpdateZArray(std::string& content,
+  const double* Z,
+  int numOfFuncs)
+{
+  size_t zPos, zEnd;
+
+  if (!FindZPosition(content, zPos, zEnd))
+  {
+    return false;
+  }
+
+  std::string newZ = "\"Z\": [";
+  for (int i = 0; i < numOfFuncs; ++i)
+  {
+    if (i > 0) newZ += ",";
+    newZ += FormatDouble(Z[i]);
+  }
+  newZ += "]";
+
+  content.replace(zPos, zEnd - zPos + 1, newZ);
+
+  return true;
+}
+
+/// Поиск позиции поля local_r
+bool SearchDataSerializer::FindLocalRPosition(const std::string& content,
+  size_t& localRPos,
+  size_t& localREnd)
+{
+  localRPos = content.find("\"local_r\": ");
+  if (localRPos == std::string::npos)
+  {
+    return false;
+  }
+
+  localREnd = content.find_first_of(",\n", localRPos);
+  return (localREnd != std::string::npos);
+}
+
+/// Обновление поля local_r
+bool SearchDataSerializer::UpdateLocalR(std::string& content, double local_r)
+{
+  size_t localRPos, localREnd;
+
+  if (!FindLocalRPosition(content, localRPos, localREnd))
+  {
+    return false;
+  }
+
+  std::string newLocalR = "\"local_r\": " + FormatDouble(local_r);
+  content.replace(localRPos, localREnd - localRPos, newLocalR);
+
+  return true;
+}
+
+
+bool SearchDataSerializer::AppendNewPoints(const std::vector<Trial*>& newTrials,
+  const std::vector<SearchInterval*>& /*newIntervals*/,
+  Trial* newBestTrial)
+{
+  if (currentFileName.empty() || !pSearchData)
+  {
+    return false;
+  }
+
+  // Проверяем изменения в массивах
+  UpdateMChanges();
+  UpdateZChanges();
+  UpdateLocalRChanges();
+
+  // Читаем содержимое файла
+  std::string content;
+  if (!ReadFileContent(currentFileName, content))
+  {
+    return false;
+  }
+
+  // Добавляем новые точки
+  if (!AppendNewTrials(content, newTrials))
+  {
+    return false;
+  }
+
+  // Обновляем Count
+  if (!UpdateCount(content, pSearchData->GetCount()))
+  {
+    return false;
+  }
+
+  // Обновляем best_trial
+  if (!UpdateBestTrial(content, newBestTrial))
+  {
+    return false;
+  }
+
+  // Обновляем временную метку
+  if (!UpdateTimestamp(content))
+  {
+    return false;
+  }
+
+  // Обновляем M если изменился
+  if (mArrayChanged)
+  {
+    UpdateMArray(content, pSearchData->M, pSearchData->NumOfFuncs);
+  }
+
+  // Обновляем Z если изменился
+  if (zArrayChanged)
+  {
+    UpdateZArray(content, pSearchData->Z, pSearchData->NumOfFuncs);
+  }
+
+  // Обновляем local_r если изменился
+  if (localRChanged)
+  {
+    UpdateLocalR(content, pSearchData->local_r);
+  }
+
+  // Записываем обновленное содержимое в файл
+  return WriteFileContent(currentFileName, content);
+}
+
+
+SearchDataSerializer::SearchDataSerializer()
+  : pSearchData(nullptr)
+  , pTask(nullptr)
+  , isFirstSave(true)
+  , previousLocalR(0.0)
+  , mArrayChanged(false)
+  , zArrayChanged(false)
+  , localRChanged(false)
+{
+}
+
+/// Обновление флага изменений массива M
+void SearchDataSerializer::UpdateMChanges()
+{
+  if (!pSearchData)
+  {
+    mArrayChanged = false;
+    return;
+  }
+
+  // Если предыдущий вектор пуст, инициализируем его
+  if (previousM.empty())
+  {
+    previousM.resize(pSearchData->NumOfFuncs);
+    for (int i = 0; i < pSearchData->NumOfFuncs; ++i)
+    {
+      previousM[i] = pSearchData->M[i];
+    }
+    mArrayChanged = true; // Первый раз - считаем что изменилось
+    return;
+  }
+
+  // Проверяем, изменились ли значения
+  mArrayChanged = false;
+  for (int i = 0; i < pSearchData->NumOfFuncs; ++i)
+  {
+    // Сравниваем с погрешностью
+    if (fabs(previousM[i] - pSearchData->M[i]) > 1e-12)
+    {
+      mArrayChanged = true;
+      break;
+    }
+  }
+
+  // Обновляем предыдущие значения
+  if (mArrayChanged)
+  {
+    previousM.resize(pSearchData->NumOfFuncs);
+    for (int i = 0; i < pSearchData->NumOfFuncs; ++i)
+    {
+      previousM[i] = pSearchData->M[i];
+    }
+  }
+}
+
+/// Обновление флага изменений массива Z
+void SearchDataSerializer::UpdateZChanges()
+{
+  if (!pSearchData)
+  {
+    zArrayChanged = false;
+    return;
+  }
+
+  // Если предыдущий вектор пуст, инициализируем его
+  if (previousZ.empty())
+  {
+    previousZ.resize(pSearchData->NumOfFuncs);
+    for (int i = 0; i < pSearchData->NumOfFuncs; ++i)
+    {
+      previousZ[i] = pSearchData->Z[i];
+    }
+    zArrayChanged = true; // Первый раз - считаем что изменилось
+    return;
+  }
+
+  // Проверяем, изменились ли значения
+  zArrayChanged = false;
+  for (int i = 0; i < pSearchData->NumOfFuncs; ++i)
+  {
+    // Сравниваем с погрешностью
+    if (fabs(previousZ[i] - pSearchData->Z[i]) > 1e-12)
+    {
+      zArrayChanged = true;
+      break;
+    }
+  }
+
+  // Обновляем предыдущие значения
+  if (zArrayChanged)
+  {
+    previousZ.resize(pSearchData->NumOfFuncs);
+    for (int i = 0; i < pSearchData->NumOfFuncs; ++i)
+    {
+      previousZ[i] = pSearchData->Z[i];
+    }
+  }
+}
+
+/// Обновление флага изменений local_r
+void SearchDataSerializer::UpdateLocalRChanges()
+{
+  if (!pSearchData)
+  {
+    localRChanged = false;
+    return;
+  }
+
+  // Сравниваем с погрешностью
+  if (fabs(previousLocalR - pSearchData->local_r) > 1e-12)
+  {
+    localRChanged = true;
+    previousLocalR = pSearchData->local_r;
+  }
+  else
+  {
+    localRChanged = false;
+  }
+}
+
+/// Сброс всех флагов изменений
+void SearchDataSerializer::ResetChangeFlags()
+{
+  mArrayChanged = false;
+  zArrayChanged = false;
+  localRChanged = false;
+}
+
+
 
 void SearchDataSerializer::SetSearchData(SearchData* data)
 {
   pSearchData = data;
+
+  // Сбрасываем предыдущие значения при новой поисковой информации
+  previousM.clear();
+  previousZ.clear();
+  previousLocalR = 0.0;
+  ResetChangeFlags();
 }
 
 void SearchDataSerializer::SetTask(Task* task)
@@ -954,25 +1405,9 @@ std::string SearchDataSerializer::SerializeFullState()
   std::vector<Trial*>& trials = pSearchData->GetTrials();
   for (size_t i = 0; i < trials.size(); ++i)
   {
-    if (i > 0) json << ",\n";
+    if (i > 0) 
+      json << ",\n";
     json << "    " << TrialToJson(trials[i]);
-  }
-  json << "\n  ],\n";
-
-  // Все интервалы
-  json << "  \"intervals\": [\n";
-  SearcDataIterator it = pSearchData->GetBeginIterator();
-  bool first = true;
-  while (it.operator void* () != NULL)
-  {
-    SearchInterval* interval = it.operator*();
-    if (interval != NULL)
-    {
-      if (!first) json << ",\n";
-      json << "    " << IntervalToJson(interval);
-      first = false;
-    }
-    ++it;
   }
   json << "\n  ],\n";
 
@@ -997,7 +1432,7 @@ std::string SearchDataSerializer::SerializeFullState()
 /// Сохранение состояния (первый раз - полное, потом - добавление)
 bool SearchDataSerializer::SaveProgress(const std::string& filename,
   const std::vector<Trial*>& newTrials,
-  const std::vector<SearchInterval*>& newIntervals,
+  const std::vector<SearchInterval*>& /*newIntervals*/,
   Trial* newBestTrial)
 {
   if (!pSearchData)
@@ -1012,8 +1447,9 @@ bool SearchDataSerializer::SaveProgress(const std::string& filename,
   }
   else
   {
-    // Последующие разы - добавляем новые данные
-    return AppendNewPoints(newTrials, newIntervals, newBestTrial);
+    // Последующие разы - добавляем только новые точки
+    // Интервалы не сохраняем, так как их можно восстановить из точек
+    return AppendNewPoints(newTrials, std::vector<SearchInterval*>(), newBestTrial);
   }
 }
 

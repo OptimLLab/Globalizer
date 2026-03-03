@@ -235,6 +235,8 @@ protected:
 */
   virtual void SetNumPoints(int newNP);
 
+  /// Загрузка информации из файла
+  void LoadPoint();
 
 public:
 
@@ -351,36 +353,9 @@ public:
   /// Печатает информацию о сечениях
   virtual void PrintSection();
 
-  void SaveCurrentProgress()
-  {
-    if (parameters.fileSerializer.ToString().empty()) return;
+  /// Сохранение в json файл
+  void SaveCurrentProgress();
 
-    // Получаем новые точки и интервалы с последнего сохранения
-    std::vector<Trial*> newTrials;
-    std::vector<SearchInterval*> newIntervals;
-
-    std::vector<Trial*>& allTrials = pData->GetTrials();
-    for (int i = lastSavedTrialsCount; i < (int)allTrials.size(); ++i)
-    {
-      newTrials.push_back(allTrials[i]);
-    }
-
-    // Собираем новые интервалы
-    int currentIntervalsCount = pData->GetCount();
-    int intervalCounter = 0;
-    for (SearcDataIterator it = pData->GetBeginIterator(); it; ++it)
-    {
-      if (intervalCounter >= lastSavedTrialsCount - 1)
-      {
-        newIntervals.push_back(*it);
-      }
-      intervalCounter++;
-    }
-
-    parameters.serializer->SaveProgress(parameters.fileSerializer.ToString(), newTrials, newIntervals, pData->GetBestTrial());
-
-    lastSavedTrialsCount = allTrials.size();
-  }
 };
 
 #endif

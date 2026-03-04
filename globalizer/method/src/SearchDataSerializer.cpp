@@ -1775,18 +1775,15 @@ bool SearchDataSerializer::LoadFromFile(const std::string& filename, LoadedFileD
     return false;
   }
 
-  if (!LoadTrials(root, outData.trials, std::map<double, Trial*>()))
+  // Создаем map для точек, который будем использовать при загрузке
+  std::map<double, Trial*> trialMap;
+
+  if (!LoadTrials(root, outData.trials, trialMap))
   {
     // Очистка произойдет в деструкторе LoadedFileData
     return false;
   }
 
-  // Создаем map для поиска лучшей точки
-  std::map<double, Trial*> trialMap;
-  for (Trial* trial : outData.trials)
-  {
-    trialMap[trial->X().toDouble()] = trial;
-  }
 
   LoadBestTrial(root, trialMap, outData.bestTrial);
 

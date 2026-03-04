@@ -189,6 +189,7 @@ int HDSolver::Solve()
         tasks[i] = dynamic_cast<HDTask*>(TaskFactory::CreateTask(problem, 0));
 
         tasks[i]->SetStartParameterNumber(startParameterNumber);
+        parameters.startParameterNumber = startParameterNumber;
 
         solver->Solve(tasks[i]);
 

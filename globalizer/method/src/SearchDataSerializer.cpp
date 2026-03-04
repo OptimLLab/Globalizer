@@ -1154,6 +1154,37 @@ bool SearchDataSerializer::UpdateLocalR(std::string& content, double local_r)
   return true;
 }
 
+// ------------------------------------------------------------------------------------------------
+bool SearchDataSerializer::FindStartParameterNumberPosition(const std::string& content,
+  size_t& paramPos,
+  size_t& paramEnd)
+{
+  paramPos = content.find("\"start_parameter_number\": ");
+  if (paramPos == std::string::npos)
+  {
+    return false;
+  }
+
+  paramEnd = content.find_first_of(",\n", paramPos);
+  return (paramEnd != std::string::npos);
+}
+
+// ------------------------------------------------------------------------------------------------
+bool SearchDataSerializer::UpdateStartParameterNumber(std::string& content, int value)
+{
+  size_t paramPos, paramEnd;
+
+  if (!FindStartParameterNumberPosition(content, paramPos, paramEnd))
+  {
+    return false;
+  }
+
+  std::string newParam = "\"start_parameter_number\": " + IntToString(value);
+  content.replace(paramPos, paramEnd - paramPos, newParam);
+
+  return true;
+}
+
 
 // ------------------------------------------------------------------------------------------------
 bool SearchDataSerializer::AppendNewPoints(const std::vector<Trial*>& newTrials,
@@ -1169,6 +1200,7 @@ bool SearchDataSerializer::AppendNewPoints(const std::vector<Trial*>& newTrials,
   UpdateMChanges();
   UpdateZChanges();
   UpdateLocalRChanges();
+  UpdateStartParameterNumberChanges();
 
   // Читаем содержимое файла
   std::string content;
@@ -1201,6 +1233,11 @@ bool SearchDataSerializer::AppendNewPoints(const std::vector<Trial*>& newTrials,
     return false;
   }
 
+  if (startParameterNumberChanged)
+  {
+    UpdateStartParameterNumber(content, parameters.startParameterNumber);
+  }
+
   // Обновляем M если изменился
   if (mArrayChanged)
   {
@@ -1223,6 +1260,28 @@ bool SearchDataSerializer::AppendNewPoints(const std::vector<Trial*>& newTrials,
   return WriteFileContent(currentFileName, content);
 }
 
+// ------------------------------------------------------------------------------------------------
+void SearchDataSerializer::UpdateStartParameterNumberChanges()
+{
+  if (!pSearchData)
+  {
+    startParameterNumberChanged = false;
+    return;
+  }
+
+  int currentValue = parameters.startParameterNumber;
+
+  // Сравниваем с предыдущим значением
+  if (previousStartParameterNumber != currentValue)
+  {
+    startParameterNumberChanged = true;
+    previousStartParameterNumber = currentValue;
+  }
+  else
+  {
+    startParameterNumberChanged = false;
+  }
+}
 
 // ------------------------------------------------------------------------------------------------
 SearchDataSerializer::SearchDataSerializer()
@@ -1230,9 +1289,11 @@ SearchDataSerializer::SearchDataSerializer()
   , pTask(nullptr)
   , isFirstSave(true)
   , previousLocalR(0.0)
+  , previousStartParameterNumber(0)
   , mArrayChanged(false)
   , zArrayChanged(false)
   , localRChanged(false)
+  , startParameterNumberChanged(false)
 {
 }
 
@@ -1355,6 +1416,7 @@ void SearchDataSerializer::ResetChangeFlags()
   mArrayChanged = false;
   zArrayChanged = false;
   localRChanged = false;
+  startParameterNumberChanged = false;
 }
 
 
@@ -1368,6 +1430,7 @@ void SearchDataSerializer::SetSearchData(SearchData* data)
   previousM.clear();
   previousZ.clear();
   previousLocalR = 0.0;
+  previousStartParameterNumber = 0;
   ResetChangeFlags();
 }
 
@@ -1399,6 +1462,7 @@ std::string SearchDataSerializer::SerializeFullState()
   json << "    \"r\": " << FormatDouble(parameters.r) << ",\n";
   json << "    \"iters_limit\": " << parameters.MaxNumOfPoints << ",\n";
   json << "    \"number_of_parallel_points\": " << parameters.NumPoints << ",\n";
+  json << "    \"start_parameter_number\": " << parameters.startParameterNumber << ",\n";
   json << "    \"start_point\": [";
   for (int i = 0; i < parameters.Dimension; ++i)
   {
@@ -1548,6 +1612,13 @@ bool SearchDataSerializer::LoadMethodParameters(const std::map<std::string, std:
   if (it != paramsObj.end())
   {
     params.number_of_parallel_points = StringToInt(it->second);
+  }
+
+  // Парсим start_parameter_number
+  it = paramsObj.find("start_parameter_number");
+  if (it != paramsObj.end())
+  {
+    params.start_parameter_number = StringToInt(it->second);
   }
 
   // Парсим start_point

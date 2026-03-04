@@ -164,11 +164,13 @@ protected:
   std::vector<double> previousM;
   std::vector<double> previousZ;
   double previousLocalR;
+  int previousStartParameterNumber;
 
   // Флаги изменений
   bool mArrayChanged;
   bool zArrayChanged;
   bool localRChanged;
+  bool startParameterNumberChanged;
 
   // Методы для проверки изменений
   /// Обновление флага изменений массива M
@@ -179,7 +181,8 @@ protected:
   void UpdateLocalRChanges();
   /// Сброс всех флагов изменений
   void ResetChangeFlags();
-
+  /// Обновление флага изменений start_parameter_number 
+  void UpdateStartParameterNumberChanges();
 
 
   // Внутренние структуры для хранения загруженных данных
@@ -189,6 +192,7 @@ protected:
     int iters_limit = 0;
     int number_of_parallel_points = 0;
     std::vector<double> start_point;
+    int start_parameter_number = 0;
   };
 
   struct LoadedSearchData {
@@ -212,6 +216,10 @@ protected:
   bool LoadTrials(const std::map<std::string, std::string>& root, std::vector<Trial*>& trials, std::map<double, Trial*>& trialMap);
   /// Считываем лучшую точку
   bool LoadBestTrial(const std::map<std::string, std::string>& root, const std::map<double, Trial*>& trialMap, Trial*& bestTrial);
+  /// Поиск позиции поля start_parameter_number
+  bool FindStartParameterNumberPosition(const std::string& content, size_t& paramPos, size_t& paramEnd);
+  /// Обновление поля start_parameter_number
+  bool UpdateStartParameterNumber(std::string& content, int value);
 
 public:
 

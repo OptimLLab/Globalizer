@@ -416,7 +416,7 @@ if (IS_MICROSOFT_COMPILER)
 	list (APPEND MultiplePrecision "bootstrap" "gen-bases" "gen-fac" "gen-fac-table" "gen-fib" "gen-fib-table"
 	"gen-jacobitab" "gen-mp-bases" "gen-mpn-jacobitab" "gen-mpn-perfsqr" "gen-psqr" "gen-trialdivtab" 
 	"gen-trialdivtab-h" "libgmp" "libmpf" "libmpn" "libmpq" "libmpz" "libprintf" "librandom" "libscanf"
-	"mpfr" "MPFR_GMP_MPIR_test" "mpir")
+	"mpfr" "mpir")
   endif()
   
   set_property(TARGET ${MultiplePrecision} PROPERTY FOLDER "multiple precision")

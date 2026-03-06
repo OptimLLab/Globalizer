@@ -1,86 +1,162 @@
-import sys, os
-
-sys.path.append(os.path.dirname(sys.argv[0]))
-
-import argparse
-
 from interface_cpp import DrawingProcess
 
-def parserArgument():
+import argparse
+from datetime import datetime
+
+def parse_args():
     ap = argparse.ArgumentParser()
 
-    ap.add_argument("SourceFilesPath", type=str, help="The path of the files to read problem info and trials points.")
-    ap.add_argument("ProblemFileName", type=str, help="The file with problem info.")
-    ap.add_argument("TrialsFileName", type=str, help="The file with trials points.")
-    
-    ap.add_argument("-PlotFileName", "--PlotFileName", type=str, default="GlobalizerPicture.png", help="The name of the file to save the image.")
-    
-    ap.add_argument("-ShowFigure", "--ShowFigure", action='store_true', help="A flag indicating the need to open the resulting drawing in an interactive window on the screen")
-    ap.add_argument("-PointsBelowGraph", "--PointsBelowGraph", action='store_true', help="A flag indicating the need to shift the trial points in the figure below the graph.")
-    #ap.add_argument("-DontShowPoints", "--DontShowPoints", action='store_true', help="A flag indicating the need to hide trial points.")
-    
-    ap.add_argument("-FigureType", "--FigureType", type=str, default="LevelLayers", help="The type of visualization of the target function (available modes : 0 - LevelLayers, 1 - Surface)")
-    ap.add_argument("-CalcsType", "--CalcsType", type=str, default="Interpolation", help="The type of value calculations for visualizing the objective function (available modes: ObjectiveFunction, Approximation, Interpolation, ByPoints, OnlyPoints)")
-    
-    ap.add_argument("-Eps", "--Epsilon", type=float, default=0.01, help="Accuracy of solve.")
-    ap.add_argument("-x1", "--x1", type=int, default=0, help="First parameter number for visualization.")
-    ap.add_argument("-x2", "--x2", type=int, default=1, help="Second parameter number for visualization.")
+    ap.add_argument(
+        "SourceFilesPath",
+        type=str,
+        help="The path of the files to read problem info and trials points."
+    )
+    ap.add_argument(
+        "ProblemFileName",
+        type=str,
+        help="The file with problem info."
+    )
+    ap.add_argument(
+        "TrialsFileName",
+        type=str,
+        help="The file with trials points."
+    )
+    ap.add_argument(
+        "-pfn",
+        "--PlotFileName",
+        type=str,
+        default=datetime.now().strftime("plotter_%Y_%d_%m_%H_%M_%S.png"),
+        help="The name of the file to save the image.")
+    ap.add_argument(
+        "-ft",
+        "--FigureType",
+        type=str,
+        default="LevelLayers",
+        choices=[
+            "LevelLayers",
+            "Surface"
+        ],
+        help="The type of visualization of the target function."
+    )
+    ap.add_argument(
+        "-ct",
+        "--CalcsType",
+        type=str,
+        default="Interpolation",
+        choices=[
+            "ObjectiveFunction",
+            "Approximation",
+            "Interpolation",
+            "ByPoints",
+            "OnlyPoints"
+        ],
+        help="The type of value calculations for visualizing the objective function."
+    )
+    ap.add_argument(
+        "-eps",
+        "--Epsilon",
+        type=float,
+        default=0.01,
+        help="Accuracy of solve."
+    )
+    ap.add_argument(
+        "-x1",
+        "--x1",
+        type=int,
+        default=0,
+        help="First parameter number for visualization."
+    )
+    ap.add_argument(
+        "-x2",
+        "--x2",
+        type=int,
+        default=1,
+        help="Second parameter number for visualization."
+    )
+    ap.add_argument(
+        "-ShowFigure",
+        "--ShowFigure",
+        action="store_true",
+        help="A flag indicating the need to open the resulting drawing in an interactive window on the screen."
+    )
+    ap.add_argument(
+        "-PointsBelowGraph",
+        "--PointsBelowGraph",
+        action="store_true",
+        help="A flag indicating the need to shift the trial points in the figure below the graph."
+    )
 
     return ap
 
 def read_args():
-    ap = parserArgument()
+    ap = parse_args()
     args = vars(ap.parse_args())
 
-    if (args['SourceFilesPath'] is None) or (args['TrialsFileName'] is None) or (args['ProblemFileName'] is None):
-        ap.print_help()
+    if (args["SourceFilesPath"] is None) or (args["TrialsFileName"] is None) or (args["ProblemFileName"] is None):
+        raise ValueError("The required arguments SourceFilesPath, TrialsFileName, and ProblemFileName are missing.")
+
     else:
-        ap.print_help()
-        path = str(args['SourceFilesPath'])
-        if path[-1] != '/':
-            path += '/'
-        trials_file_name = str(args['TrialsFileName'])
-        problem_file_name = str(args['ProblemFileName'])
-        output_file_name = str(args['PlotFileName'])
-        
-        eps = float(args['Epsilon'])
-        plot_type = str(args['FigureType'])
-        obj_func_type = str(args['CalcsType'])
+        path = str(args["SourceFilesPath"])
+        if not path.endswith("/"):
+            path += "/"
+        trials_file_name = str(args["TrialsFileName"])
+        problem_file_name = str(args["ProblemFileName"])
+        output_file_name = str(args["PlotFileName"])
 
-        if plot_type == 'LevelLayers':
-            plot_type = 'lines layers'
-        else: 
-            plot_type = 'surface'
+        eps = float(args["Epsilon"])
 
-        if obj_func_type == 'ObjectiveFunction':
-            obj_func_type = 'objective function'
-        elif obj_func_type == 'Approximation':
-            obj_func_type = 'approximation'
-        elif obj_func_type == 'Interpolation':
-            obj_func_type = 'interpolation'
-        elif obj_func_type == 'ByPoints':
-            obj_func_type = 'by points'
-        else:
-            obj_func_type = 'only points'
+        types_names_map = {
+            "LevelLayers": "lines layers",
+            "Surface": "surface",
+            "ObjectiveFunction": "objective function",
+            "Approximation": "approximation",
+            "Interpolation": "interpolation",
+            "ByPoints": "by points",
+            "OnlyPoints": "only points"
+        }
 
-        params = list({int(args['x1']), int(args['x2'])})
+        plot_type = str(args["FigureType"])
+        plot_type = types_names_map.get(plot_type)
 
-        if args['PointsBelowGraph'] is None:
-            displacement_of_points = False
-        else:
-            displacement_of_points = True
+        obj_func_type = str(args["CalcsType"])
+        obj_func_type = types_names_map.get(obj_func_type)
 
-        if args['ShowFigure'] is None:
-            figure_show = False
-        else:
-            figure_show = True
+        params = list({int(args["x1"]), int(args["x2"])})
 
-    return path, trials_file_name, problem_file_name, eps, plot_type, obj_func_type, params, displacement_of_points, output_file_name, figure_show
+        displacement_of_points = bool(args["PointsBelowGraph"])
+        figure_show = bool(args["ShowFigure"])
+
+    return (
+        path,
+        trials_file_name,
+        problem_file_name,
+        output_file_name,
+        eps,
+        plot_type,
+        obj_func_type,
+        params,
+        displacement_of_points,
+        figure_show
+    )
 
 if __name__ == "__main__":
-    print("Start ", str(sys.argv[0]), "...")
+    (path, trials_file_name, problem_file_name, output_file_name,
+     eps, plot_type, obj_func_type, params,
+     displacement_of_points, figure_show) = read_args()
 
-    path, trials_file_name, problem_file_name, eps, plot_type, obj_func_type, params, displacement_of_points, output_file_name, figure_show = read_args()
+    print(f"""
+    Plotter startup parameters:
+    SourceFilesPath: {path}
+    TrialsFileName: {trials_file_name}
+    ProblemFileName: {problem_file_name}
+    OutputFileName: {output_file_name}
+    Eps: {eps}
+    PlotType: {plot_type}
+    ObjFuncType: {obj_func_type}
+    Params: {params}
+    DisplacementOfPoints: {displacement_of_points}
+    FigureShow: {figure_show}
+    """)
 
     dp = DrawingProcess(path, trials_file_name, problem_file_name, eps)
 
@@ -92,4 +168,4 @@ if __name__ == "__main__":
                  is_need_show_figure=figure_show
                  )
     
-    print("Picture was saved in", path + output_file_name)
+    print(f"Picture was saved in {path + output_file_name}.")

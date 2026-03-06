@@ -37,7 +37,7 @@
 #include <string>
 #include <stdio.h>
 
-
+class SearchDataSerializer;
 
 
 /// Параметры системы оптимизации
@@ -75,6 +75,15 @@ public:
   int MyMap;
   /// последний сохраненный номер итерации
   int iterationNumber;
+  
+  /// Суммарное время решения
+  double timeSolve;
+
+  /// Текущая версия
+  std::string version = "0.1.7";
+
+  /// Номер параметра с которого начинается оптимизация
+  int startParameterNumber = 0;
 
   //Параметры командной строки
 
@@ -125,7 +134,7 @@ public:
   TBool<Parameters> IsPrintSectionPoint;
 
   /// максимальное число итераций для процессов на каждом уровне //  размер - NumOfProcLevels{100, 100, 100, 100};// // параметры метода
-  TInts<Parameters> MaxNumOfPoints;
+  TInt<Parameters> MaxNumOfPoints;
   /// Распечатать справку
   TFlag<Parameters> HELP;
   /// Имя файла для сохранения изображения
@@ -253,6 +262,18 @@ public:
 
   /// Использовать  расширенный консольный интерфейс 
   TBool<Parameters> IsUseExtendedConsole;
+
+  /// Включить автоматическую настройку параметров алгоритма оптимизации, если выключено - используются значения по умолчанию
+  TBool<Parameters> automaticParametersSetting;
+
+  /// Путь для сохранения и загрузки
+  TString<Parameters> fileSerializer;
+
+  /// Сохранение в файл
+  SearchDataSerializer* serializer;
+
+  /// Максимальное количество итераций без улучшения, работает только с критерием остановки MaxIterWithoutImprovement
+  TInt<Parameters> MaxIterationsWithoutImprovement;
 
   /// Проверка правильности при изменение параметров
   virtual int CheckValueParameters(int index = 0);

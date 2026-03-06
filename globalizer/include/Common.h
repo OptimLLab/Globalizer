@@ -17,6 +17,7 @@
 #define __COMMON_H__
 
 #include "Defines.h"
+#include <string>
 
 /* ============================================================================================= *\
 **  Constants                                                                                    **
@@ -40,6 +41,10 @@ const int DefaultSearchDataSize = 100000;
 const int TagChildStartSolve = 101;
 const int TagChildSolved = 102;
 const int ChildStopMsg = -101;
+
+
+std::string getFileExtension(const std::string& filename, bool include_dot = false);
+
 
 /* ============================================================================================= *\
 **  Types                                                                                        **
@@ -117,7 +122,7 @@ enum EStopCondition
   OptimumVicinity,
   OptimumVicinity2,
   OptimumValue,
-  AccuracyWithCheck,
+  MaxIterWithoutImprovement,
   InLocalArea
 };
 
@@ -221,6 +226,8 @@ enum ELocalTuningType
   ///3 - адаптивно-минимаксное
   AdaptiveMiniMax
 };
+
+
 
 #endif
 // - end of file ----------------------------------------------------------------------------------

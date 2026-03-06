@@ -36,7 +36,7 @@
 #include "SearchIteration.h"
 #include "SearchInterval.h"
 
-
+#include "SearchDataSerializer.h"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -137,6 +137,12 @@ protected:
   /// Массив для сохранения точек для последующей печати и рисования
   std::vector<Trial*> printPoints;
 
+  /// Количество сохраненных точек
+  int lastSavedTrialsCount = 0;
+
+  /// Последняя итерация  обновления лучшей точки
+  int LastIterationBestUpdate = 0;
+
   /// Метод сохраняющий точки в статический массив
   virtual void  SavePoints();
 
@@ -232,6 +238,8 @@ protected:
 */
   virtual void SetNumPoints(int newNP);
 
+  /// Загрузка информации из файла
+  void LoadPoint();
 
 public:
 
@@ -307,11 +315,11 @@ public:
   virtual void PrintLevelPoints(const std::string& fileName);
 
   /// Сохраняем все точки, со всех уровней, в файл
-  virtual void PrintPoints(const std::string & fileName);
+  virtual void PrintPoints(const std::string& fileName);
 
   /// Метод Хука-Дживса
   void HookeJeevesMethod(Trial& point, std::vector<Trial*>& localPoints);
-  
+
   ///Возвращает Число вычислений каждой функции
   virtual std::vector<int> GetFunctionCalculationCount();
 
@@ -347,6 +355,9 @@ public:
 
   /// Печатает информацию о сечениях
   virtual void PrintSection();
+
+  /// Сохранение в json файл
+  void SaveCurrentProgress();
 
 };
 

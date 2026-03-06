@@ -38,6 +38,8 @@
 #include <iomanip>
 #include <sstream>
 
+#include "SearchDataSerializer.h"
+
 
 #ifdef WIN32
 #include <windows.h>
@@ -56,6 +58,7 @@ Parameters parameters;
 // ------------------------------------------------------------------------------------------------
 void Parameters::SetDefaultParameters()
 {
+  parameters.timeSolve = 0;
   InitOption(HELP, 0, "-HELP", "Print Help", 1);
   InitOption(IsPlot, 0, "-PLOT", "Draw a graph of the function", 1);
   InitOption(ShowFigure, false, "-ShowFigure", "a flag indicating the need to open the resulting drawing in an interactive window on the screen", 1);
@@ -162,6 +165,11 @@ void Parameters::SetDefaultParameters()
 
   InitOption(IsUseExtendedConsole, false, "-IsUEC", "Use the extended console interface", 1);
 
+  InitOption(automaticParametersSetting, false, "-IsAPS", "Enable automatic adjustment of optimization algorithm parameters, if disabled, default values are used.", 1);
+
+  InitOption(fileSerializer, \0, "-fs", "The path to save and upload", 1);
+  
+  InitOption(MaxIterationsWithoutImprovement, 100, "-MIWI", "The maximum number of iterations without improvement, works only with the MaxIterWithoutImprovement stop criterion", 1);
 
   ProcRank.SetGetter(&Parameters::GetProcRank);
   ProcRank.SetIsHaveValue(false);
@@ -401,6 +409,8 @@ void Parameters::Init(int argc, char* argv[], bool isMPIInit)
 Parameters::Parameters() : BaseParameters<Parameters>::BaseParameters()
 {
   mOwner = this;
+
+  serializer = new SearchDataSerializer;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -431,6 +441,8 @@ Parameters::Parameters(Parameters& _parameters) : BaseParameters<Parameters>::Ba
   MyLevel = _parameters.MyLevel;
 
   MyMap = _parameters.MyMap;
+
+
 }
 
 // ------------------------------------------------------------------------------------------------

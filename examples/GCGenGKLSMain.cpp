@@ -27,6 +27,8 @@ int main(int argc, char* argv[])
     parameters.Dimension = 2;
 
   int problemIndex = parameters.GetIntVal("-problemIndex");
+  if (problemIndex <= 0 || problemIndex > 100)
+    problemIndex = 1;
 
   TGKLSProblem* gkls_problem = new TGKLSProblem(problemIndex, parameters.Dimension, gkls);
 

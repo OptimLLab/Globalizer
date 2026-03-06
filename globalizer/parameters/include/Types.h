@@ -1228,8 +1228,8 @@ void TEStopCondition<Owner>::operator = (std::string data)
     *this = OptimumVicinity2;
   if (data == "OptimumValue" || data == "3")
     *this = OptimumValue;
-  if (data == "AccuracyWithCheck" || data == "4")
-    *this = AccuracyWithCheck;
+  if (data == "MaxIterWithoutImprovement" || data == "4")
+    *this = MaxIterWithoutImprovement;
   if (data == "InLocalArea" || data == "5")
     *this = InLocalArea;
 }

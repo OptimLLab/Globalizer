@@ -122,7 +122,7 @@ enum EStopCondition
   OptimumVicinity,
   OptimumVicinity2,
   OptimumValue,
-  AccuracyWithCheck,
+  MaxIterWithoutImprovement,
   InLocalArea
 };
 

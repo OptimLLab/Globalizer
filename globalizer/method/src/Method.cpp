@@ -728,6 +728,14 @@ bool Method::CheckStopCondition()
       double fm = parameters.Epsilon;
       if ((isSetInLocalMinimumInterval == true) || (AchievedAccuracy < fm))
         res = true;
+      break;
+    }
+
+    case MaxIterWithoutImprovement:
+    {
+      if ((iteration.IterationCount - LastIterationBestUpdate) > parameters.MaxIterationsWithoutImprovement)
+        res = true;
+      break;
     }
     break;
     }
@@ -908,6 +916,7 @@ bool Method::UpdateOptimumEstimation(Trial& trial)
     // Оптимум обновился - нужен пересчет
     pData->SetRecalc(true);
     isLocalZUpdate = true;
+    LastIterationBestUpdate = iteration.IterationCount;
     return true;
   }
   return false;

@@ -272,6 +272,9 @@ public:
   /// Сохранение в файл
   SearchDataSerializer* serializer;
 
+  /// Максимальное количество итераций без улучшения, работает только с критерием остановки MaxIterWithoutImprovement
+  TInt<Parameters> MaxIterationsWithoutImprovement;
+
   /// Проверка правильности при изменение параметров
   virtual int CheckValueParameters(int index = 0);
   /// Возвращает номер текущего процесса

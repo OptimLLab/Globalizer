@@ -140,6 +140,9 @@ protected:
   /// Количество сохраненных точек
   int lastSavedTrialsCount = 0;
 
+  /// Последняя итерация  обновления лучшей точки
+  int LastIterationBestUpdate = 0;
+
   /// Метод сохраняющий точки в статический массив
   virtual void  SavePoints();
 

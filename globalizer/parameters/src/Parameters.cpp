@@ -169,7 +169,7 @@ void Parameters::SetDefaultParameters()
 
   InitOption(fileSerializer, \0, "-fs", "The path to save and upload", 1);
   
-
+  InitOption(MaxIterationsWithoutImprovement, 100, "-MIWI", "The maximum number of iterations without improvement, works only with the MaxIterWithoutImprovement stop criterion", 1);
 
   ProcRank.SetGetter(&Parameters::GetProcRank);
   ProcRank.SetIsHaveValue(false);

@@ -1,7 +1,7 @@
 #include "Task.h"
 #include "Problem.h"
 #include "test_config.h"
-#include "GlobalizerProblem.h"
+#include "ProblemFromFunctionPointers.h"
 
 #include <gtest/gtest.h>
 #include <string>

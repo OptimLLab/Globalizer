@@ -16,7 +16,7 @@
 
 #include "Globalizer.h"
 
-enum ProblemName { RASTRIGIN, STRONGINC3_LAMBDA_EXPRESSION, STRONGINC3_FUNCTION_POINTER};
+enum ProblemName { RASTRIGIN, STRONGINC3_LAMBDA_EXPRESSION, STRONGINC3_FUNCTION_POINTER, RASTRIGIN_INT};
 
 double StronginC3Functionals(const double* y, int fNumber)
 {
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   GlobalizerInitialization(argc, argv);
 
   parameters.Dimension = 2; // Размерность задачи
-  ProblemName problemName = STRONGINC3_FUNCTION_POINTER; // Задача Стронгина задается как указатель на функцию
+  ProblemName problemName = RASTRIGIN_INT; // Задача Стронгина задается как указатель на функцию
   IProblem* problem = nullptr;
   parameters.IsPlot = true; // Включаем рисование графика функции с точками испытаний (сохраняются в файл)
 
@@ -115,6 +115,39 @@ int main(int argc, char* argv[])
       4 // количество функций (3 ограничения + 1 критерий)
     );
     parameters.CalcsType = 2;
+  }
+  else if (problemName == RASTRIGIN_INT)
+  {
+    parameters.Dimension = 4;
+    int numberOfDiscreteVariables = 2;
+    std::vector<int> discreteValues = { 5, 5 };
+
+    problem = new ProblemFromFunctionPointers(
+      parameters.Dimension,          
+      numberOfDiscreteVariables,     
+      std::vector<double>(parameters.Dimension, -2.2), // нижняя граница
+      std::vector<double>(parameters.Dimension, 1.8),  // верхняя граница
+      discreteValues,                 // количество значений для целочисленных переменных
+      std::vector<std::function<double(const double*)>>(1, [](const double* y)
+        {
+          double pi_ = 3.14159265358979323846;
+    double sum = 0.;
+    
+    for (int j = 0; j < 2; j++) 
+      sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
+
+    
+    for (int j = 2; j < 4; j++) 
+    {
+      double rounded = round(y[j]);
+      sum += 100 * (y[j] - rounded) * (y[j] - rounded); 
+    }
+    return sum;
+        }),
+      true, 
+          0,
+          std::vector<double>(parameters.Dimension, 0)
+          );
   }
 
   problem->Initialize();

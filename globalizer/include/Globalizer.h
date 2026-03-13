@@ -28,7 +28,7 @@
 #include <iostream>
 
 #include "Solver.h"
-#include "GlobalizerProblem.h"
+#include "ProblemFromFunctionPointers.h"
 #include "HDSolver.h"
 
 #ifdef _GLOBALIZER_BENCHMARKS

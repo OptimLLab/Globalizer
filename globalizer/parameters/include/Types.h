@@ -1132,6 +1132,8 @@ void TETypeMethod<Owner>::operator = (std::string data)
     *this = StandartMethod;
   if ((data == "IntegerMethod") || (data == "1"))
     *this = IntegerMethod;
+  if ((data == "RSAMethod") || (data == "2"))
+      *this = RSAMethod;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1144,6 +1146,8 @@ TETypeMethod<Owner>::operator std::string()
     s = "StandartMethod";
   if (this->mValue == IntegerMethod)
     s = "IntegerMethod";
+  if (this->mValue == RSAMethod)
+      s = "RSAMethod";
   return s;
 }
 

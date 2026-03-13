@@ -96,7 +96,8 @@ enum EParameterType
 enum ETypeMethod
 {
   StandartMethod,
-  IntegerMethod
+  IntegerMethod,
+  RSAMethod
 };
 
 enum ESeparableMethodType

@@ -63,6 +63,13 @@ void GlobalizerInitialization(int argc=0, char* argv[]=nullptr,
   std::string* errorsName = nullptr, int* errorsCode = nullptr, 
   int errorsCount = 0);
 
+/**
+Решение задачи оптимизации
+\param[in] problem - задача оптимизации
+
+*/
+SolutionResult* GlobalizerSolveProblem(IGlobalOptimizationProblem*& problem);
+
 /** Создает параметры для тестовых задач //временное решение!!!
   \param[in] argc - Количество аргументов командной строки
   \param[in] argv - Аргументы командной строки

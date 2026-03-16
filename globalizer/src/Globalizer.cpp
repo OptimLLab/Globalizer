@@ -79,17 +79,19 @@ void GlobalizerInitialization(int argc, char* argv[], bool isMPIInit,
   }
 }
 
+SolutionResult* GlobalizerSolveProblem(IGlobalOptimizationProblem*& problem)
+{
+    // Решатель
+    HDSolver solver(problem);
+    // Решаем задачу
+    if (solver.Solve() != SYSTEM_OK)
+        throw EXCEPTION("Error: solver.Solve crash!!!");
+
+    return solver.GetSolutionResult();
+}
+
 // ------------------------------------------------------------------------------------------------
 void CreateCurentProblemsParameters(int argc, char* argv[])
 {
-  parameters.AddOption(Pstring, "Method", "svc", "-Method", "", 1);
-  parameters.AddOption(Pstring, "DataSet", "balance", "-DataSet", "", 1);
-  parameters.AddOption(Pstring, "mPyFilePath", "", "-mPyFilePath", "", 1);
-  parameters.AddOption(Pstring, "functionScriptName", "TestsProblem", "-functionScriptName", "", 1);
-  parameters.AddOption(Pstring, "functionClassName", "TestsProblem", "-functionClassName", "", 1);
- // parameters.AddOption(Pint, "problemIndex", "1", "-problemIndex", "", 1);
- // parameters.AddOption(Pstring, "GKLSClass", "simple", "-GKLSClass", "", 1);
- // parameters.AddOption(Pstring, "GKLSFuncionType", "TD", "-GKLSFuncionType", "", 1);
 
-  //parameters.ReadAddParameters(argc, argv);
 }

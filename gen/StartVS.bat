@@ -37,11 +37,8 @@ call cmake -DGLOBALIZER_BUILD_PROBLEMS=ON  -DGLOBALIZER_BUILD_GCGEN=ON -DBUILD_A
 if %errorlevel% neq 0 goto error
 
 echo [6/6] Opening Visual Studio...
-if exist "globalizer.sln" (
-    call "globalizer.sln"
-) else (
-    echo Error: globalizer.sln not found!
-)
+if exist "globalizer.sln" (call "globalizer.sln") else if exist "globalizer.slnx" (call "globalizer.slnx") else echo Error: globalizer not found!
+
 
 cd /d "%START_DIR%"
 echo.

@@ -171,6 +171,10 @@ void Parameters::SetDefaultParameters()
   
   InitOption(MaxIterationsWithoutImprovement, 100, "-MIWI", "The maximum number of iterations without improvement, works only with the MaxIterWithoutImprovement stop criterion", 1);
 
+  InitOption(iterationsCount, 1000000, "-IC", "The maximum number of iterations of the optimization algorithm, used in automatic mode.", 1);
+
+
+
   ProcRank.SetGetter(&Parameters::GetProcRank);
   ProcRank.SetIsHaveValue(false);
   //TInt<Parameters> ProcRank;

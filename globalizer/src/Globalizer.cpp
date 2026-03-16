@@ -81,13 +81,33 @@ void GlobalizerInitialization(int argc, char* argv[], bool isMPIInit,
 
 SolutionResult* GlobalizerSolveProblem(IGlobalOptimizationProblem*& problem)
 {
-    // Решатель
-    HDSolver solver(problem);
+    ISolver* solver;
+
+    parameters.automaticParametersSetting = true;
+
+    if (parameters.iterationsCount / parameters.Dimension > 10000)
+    {
+        solver = new Solver(problem);
+    }
+    else
+    {
+        int iterationByDimention = parameters.iterationsCount / parameters.Dimension;
+
+        parameters.HDSolverIterationCount = 3;
+
+        parameters.MaxNumOfPoints = 10;
+
+        //parameters.Dimension * parameters.MaxNumOfPoints * parameters.HDSolverIterationCount
+
+        // Решатель
+        solver = new HDSolver(problem);
+    }
+
     // Решаем задачу
-    if (solver.Solve() != SYSTEM_OK)
+    if (solver->Solve() != SYSTEM_OK)
         throw EXCEPTION("Error: solver.Solve crash!!!");
 
-    return solver.GetSolutionResult();
+    return solver->GetSolutionResult();
 }
 
 // ------------------------------------------------------------------------------------------------

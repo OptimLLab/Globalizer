@@ -148,15 +148,15 @@ void Solver_RSA::MpiCalculation()
     while (isFinish == 0)
     {
         MPI_Status status;
-        // Принимаем данные из mpi_calculation
-        // Проверяем, что ещё работаем
+        // РџСЂРёРЅРёРјР°РµРј РґР°РЅРЅС‹Рµ РёР· mpi_calculation
+        // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РµС‰С‘ СЂР°Р±РѕС‚Р°РµРј
         MPI_Recv(&isFinish, 1, MPI_INT, 0, TagChildSolved, MPI_COMM_WORLD, &status);
         if (isFinish == 1)
             break;
 
-        /// Входные данные для вычислителя, формируются в CalculateFunctionals()
+        /// Р’С…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ РґР»СЏ РІС‹С‡РёСЃР»РёС‚РµР»СЏ, С„РѕСЂРјРёСЂСѓСЋС‚СЃСЏ РІ CalculateFunctionals()
         InformationForCalculation inputSet;
-        /// Выходные данные вычислителя, обрабатываются в CalculateFunctionals()
+        /// Р’С‹С…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ РІС‹С‡РёСЃР»РёС‚РµР»СЏ, РѕР±СЂР°Р±Р°С‚С‹РІР°СЋС‚СЃСЏ РІ CalculateFunctionals()
         TResultForCalculation outputSet;
 
         Trial* trail = TrialFactory::CreateTrial();
@@ -167,7 +167,7 @@ void Solver_RSA::MpiCalculation()
         for (unsigned int j = 0; j < parameters.mpiBlockSize; j++)
         {
             inputSet.trials[j] = TrialFactory::CreateTrial();
-            // Получаем координаты точки
+            // РџРѕР»СѓС‡Р°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ С‚РѕС‡РєРё
             MPI_Recv(trail->y, parameters.Dimension, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD, &status);
             trail->index = -1;
 
@@ -189,7 +189,7 @@ void Solver_RSA::MpiCalculation()
         calculation->Calculate(inputSet, outputSet);
 
         for (unsigned int j = 0; j < parameters.mpiBlockSize; j++) {
-            // Отправляем обратно значение функции
+            // РћС‚РїСЂР°РІР»СЏРµРј РѕР±СЂР°С‚РЅРѕ Р·РЅР°С‡РµРЅРёРµ С„СѓРЅРєС†РёРё
             MPI_Send(inputSet.trials[j]->FuncValues, MaxNumOfFunc, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD);
         }
     }
@@ -202,15 +202,15 @@ void Solver_RSA::AsyncCalculation()
     while (isFinish == 0)
     {
         MPI_Status status;
-        // Принимаем данные из mpi_calculation
-        // Проверяем, что ещё работаем
+        // РџСЂРёРЅРёРјР°РµРј РґР°РЅРЅС‹Рµ РёР· mpi_calculation
+        // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РµС‰С‘ СЂР°Р±РѕС‚Р°РµРј
         MPI_Recv(&isFinish, 1, MPI_INT, 0, TagChildSolved, MPI_COMM_WORLD, &status);
         if (isFinish == 1)
             break;
 
         Trial* trail = TrialFactory::CreateTrial();
 
-        // Получаем координаты точки
+        // РџРѕР»СѓС‡Р°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ С‚РѕС‡РєРё
         MPI_Recv(trail->y, parameters.Dimension, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD, &status);
         trail->index = -1;
 
@@ -235,7 +235,7 @@ void Solver_RSA::AsyncCalculation()
             }
         }
 
-        // Вычисляем значение функции
+        // Р’С‹С‡РёСЃР»СЏРµРј Р·РЅР°С‡РµРЅРёРµ С„СѓРЅРєС†РёРё
         while ((trail->index == -1) && (fNumber < _pTask->GetNumOfFunc()))
         {
             trail->FuncValues[fNumber] = _pTask->CalculateFuncs(trail->y, fNumber);
@@ -258,11 +258,11 @@ void Solver_RSA::AsyncCalculation()
             fNumber++;
         }
 
-        // Отправляем индекс точки
+        // РћС‚РїСЂР°РІР»СЏРµРј РёРЅРґРµРєСЃ С‚РѕС‡РєРё
         MPI_Send(&(trail->index), 1, MPI_INT, 0, TagChildSolved, MPI_COMM_WORLD);
-        // Отправляем точку
+        // РћС‚РїСЂР°РІР»СЏРµРј С‚РѕС‡РєСѓ
         MPI_Send(trail->y, parameters.Dimension, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD);
-        // Отправляем обратно значение функции
+        // РћС‚РїСЂР°РІР»СЏРµРј РѕР±СЂР°С‚РЅРѕ Р·РЅР°С‡РµРЅРёРµ С„СѓРЅРєС†РёРё
         MPI_Send(trail->FuncValues, MaxNumOfFunc, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD);
     }
 }
@@ -418,15 +418,15 @@ void Solver_RSA::InitAutoPrecision()
 // ------------------------------------------------------------------------------------------------
 int Solver_RSA::CreateProcess()
 {
-    // В случае, если не совпадают (задача пришла снаружи — берём новые), иначе всё равно
+    // Р’ СЃР»СѓС‡Р°Рµ, РµСЃР»Рё РЅРµ СЃРѕРІРїР°РґР°СЋС‚ (Р·Р°РґР°С‡Р° РїСЂРёС€Р»Р° СЃРЅР°СЂСѓР¶Рё вЂ” Р±РµСЂС‘Рј РЅРѕРІС‹Рµ), РёРЅР°С‡Рµ РІСЃС‘ СЂР°РІРЅРѕ
     IProblem* _problem = mProblem;
 
-    /// Создание задачи (Task) // перенести в фабрику
+    /// РЎРѕР·РґР°РЅРёРµ Р·Р°РґР°С‡Рё (Task) // РїРµСЂРµРЅРµСЃС‚Рё РІ С„Р°Р±СЂРёРєСѓ
     if (pTask == 0)
     {
         pTask = TaskFactory::CreateTask(_problem, 0);
     }
-    /// Создаём данные для поисковой информации
+    /// РЎРѕР·РґР°С‘Рј РґР°РЅРЅС‹Рµ РґР»СЏ РїРѕРёСЃРєРѕРІРѕР№ РёРЅС„РѕСЂРјР°С†РёРё
 
 
     if (pData == 0)
@@ -444,7 +444,7 @@ int Solver_RSA::CreateProcess()
     parameters.serializer->SetSearchData(pData);
     parameters.serializer->SetTask(pTask);
 
-    // Инициализируем числа с расширенной точностью
+    // РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј С‡РёСЃР»Р° СЃ СЂР°СЃС€РёСЂРµРЅРЅРѕР№ С‚РѕС‡РЅРѕСЃС‚СЊСЋ
     InitAutoPrecision();
 
     if (mProcess != 0)
@@ -499,7 +499,7 @@ Task* Solver_RSA::GetTask()
 }
 
 
-/// Возвращает поисковую информацию
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РїРѕРёСЃРєРѕРІСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ
 SearchData* Solver_RSA::GetData()
 {
     return pData;

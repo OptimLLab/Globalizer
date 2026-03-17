@@ -34,6 +34,8 @@ protected:
 
   SearchDataSerializer::LoadedFileData fd;
 
+  int countIterationsWithoutImprovement = 0;
+
   /// альтернативная стартовая точка на случай если не удалось улучшить решение
   std::vector<double> alternativeStartingPoint;
 

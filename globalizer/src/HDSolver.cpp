@@ -143,6 +143,7 @@ void HDSolver::UpdateStartPoint(SolutionResult* solution, double& bestValue, int
         }
 
         print << "\t Iteration " << points.size() << "\t" << "bestValue =\t" << bestValue << "\n";
+        countIterationsWithoutImprovement = points.size();
 
       }
     }
@@ -188,7 +189,7 @@ void  HDSolver::CreateData()
 void HDSolver::LoadPoint()
 {
   std::string pointsPath = parameters.FirstPointFilePath;
-  std::string pointsPathExtension = getFileExtension(pointsPath);
+  std::string pointsPathExtension = GetFileExtension(pointsPath);
   //int numberLoadedPoints = 0;
   //std::vector<Trial*> newPoint;
   if (pointsPathExtension == "json")
@@ -296,45 +297,61 @@ int HDSolver::Solve()
             parameters.M_constant[j] = solver->GetData()->M[j];
           }
         }
+
+        if ((points.size() - countIterationsWithoutImprovement > parameters.MaxIterationsWithoutImprovement) && (parameters.stopCondition == MaxIterWithoutImprovement))
+        {
+          break;
+        }
       }
+
       if (iteration == iterationCount - 1)
       {
         parameters.localRefineSolution = doLV;
         parameters.isPrintResultToConsole = isPrint;
       }
 
-      if (finalSolver == nullptr)
-        finalSolver = new Solver(problem);
-      else
+      if ((parameters.localRefineSolution != None) || (iteration == iterationCount - 1)) //Если нужно локальное улучшение
       {
+        std::string fileSerializer = parameters.fileSerializer.ToString();
+        parameters.fileSerializer = "";
 
-        finalSolver = new Solver(problem);
+        if (finalSolver == nullptr)
+          finalSolver = new Solver(problem);
+        else
+        {
+
+          finalSolver = new Solver(problem);
+        }
+        //parameters.MaxNumOfPoints[0] = 2;
+
+        //parameters.MaxNumOfPoints = parameters.MaxNumOfPoints + points.size();
+
+        finalSolver->SetPoint(points);
+
+        finalSolver->Solve();
+
+        if (solutionResult != nullptr)
+          delete solutionResult;
+        solutionResult = finalSolver->GetSolutionResult();
+
+        AddPoint(finalSolver, originalDimension, points, 0);
+
+        UpdateStartPoint(solutionResult, bestValue, originalDimension, startParameterNumber, points, dynamic_cast<HDTask*>(finalSolver->GetTask()));
+
+        //parameters.MaxNumOfPoints = mnp ;
+        parameters.fileSerializer = fileSerializer;
       }
-      //parameters.MaxNumOfPoints[0] = 2;
 
-      parameters.MaxNumOfPoints = parameters.MaxNumOfPoints + points.size();
 
-      finalSolver->SetPoint(points);
-
-      finalSolver->Solve();      
-
-      if (solutionResult != nullptr)
-        delete solutionResult;
-      solutionResult = finalSolver->GetSolutionResult();
-
-      AddPoint(finalSolver, originalDimension, points, 0);
-
-      UpdateStartPoint(solutionResult, bestValue, originalDimension, startParameterNumber, points, dynamic_cast<HDTask*>(finalSolver->GetTask()));
-
-      parameters.MaxNumOfPoints = mnp ;
-
-      if (bestValue == MaxDouble)
+      if (bestValue == MaxDouble) //Если допустимая точка не найдена
       {
         for (int j = 0; j < originalDimension; j++)
         {
           parameters.startPoint[j] = alternativeStartingPoint[j];
         }
       }
+
+      parameters.startParameterNumber = 0;
     }
     parameters.MaxNumOfPoints = mnp;
 

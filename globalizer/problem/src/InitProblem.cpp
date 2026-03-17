@@ -116,7 +116,7 @@ int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemMan
   std::vector<double> values(baseProblem->GetNumberOfFunctions());
 
   int err = baseProblem->GetStartTrial(y, u, values);
-  if (err == IGlobalOptimizationProblem::PROBLEM_OK)
+  if ((err == IGlobalOptimizationProblem::PROBLEM_OK) && parameters.IsUseStartPoint)
   {
     parameters.startPoint.SetSize(baseProblem->GetDimension() - baseProblem->GetNumberOfDiscreteVariable());
     for (int i = 0; i < baseProblem->GetDimension() - baseProblem->GetNumberOfDiscreteVariable(); i++)

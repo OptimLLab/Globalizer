@@ -222,7 +222,7 @@ void Method::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestInter
 void Method::LoadPoint()
 {
   std::string pointsPath = parameters.FirstPointFilePath;
-  std::string pointsPathExtension = getFileExtension(pointsPath);
+  std::string pointsPathExtension = GetFileExtension(pointsPath);
   int numberLoadedPoints = 0;
   std::vector<Trial*> newPoint;
   SearchDataSerializer::LoadedFileData fd;

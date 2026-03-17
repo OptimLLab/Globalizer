@@ -275,6 +275,9 @@ public:
   /// Максимальное количество итераций без улучшения, работает только с критерием остановки MaxIterWithoutImprovement
   TInt<Parameters> MaxIterationsWithoutImprovement;
 
+  /// Максимальное количество итераций алгоритма оптимизации, используется в автоматическом режиме работы.
+  TInt<Parameters> iterationsCount; 
+
   /// Проверка правильности при изменение параметров
   virtual int CheckValueParameters(int index = 0);
   /// Возвращает номер текущего процесса

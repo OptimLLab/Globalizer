@@ -1,7 +1,7 @@
 ﻿#include "Globalizer.h"
 
 // ------------------------------------------------------------------------------------------------
-void GlobalizerInitialization(int argc, char* argv[], bool isMPIInit, 
+void GlobalizerInitialization(int argc, char* argv[], bool isMPIInit,
   bool isPrintParameters, std::string mLogFileName, int processCount,
   int processNumber, bool isPrintToFile,
   std::string* errorsName, int* errorsCode, int errorsCount)
@@ -79,17 +79,56 @@ void GlobalizerInitialization(int argc, char* argv[], bool isMPIInit,
   }
 }
 
+
+SolutionResult* GlobalizerSolveProblem(IProblem*& problem)
+{
+  ISolver* solver;
+
+  parameters.automaticParametersSetting = true;
+
+  if (parameters.MaxNumOfPoints > 100
+    && parameters.NumThread.GetIsChange() == false && parameters.NumPoints.GetIsChange() == false
+    && parameters.TypeCalculation == OMP)
+  {
+    parameters.NumThread = 1;
+    parameters.NumPoints = parameters.NumThread;
+  }
+
+  int iterationByDimention = parameters.iterationsCount / parameters.Dimension;
+  if (!IsBelowGraph(parameters.Dimension, parameters.iterationsCount))
+  {
+    if (parameters.iterationsCount.GetIsChange() || !(parameters.MaxNumOfPoints.GetIsChange()))
+      parameters.MaxNumOfPoints = parameters.iterationsCount;
+
+    solver = new Solver(problem);
+  }
+  else
+  {
+    int C = parameters.Dimension;
+    int z = parameters.iterationsCount;
+    int y = parameters.HDSolverIterationCount;
+    int x = parameters.MaxNumOfPoints;
+    FindXY(x, y, z, C);
+    parameters.HDSolverIterationCount = y;
+    parameters.MaxNumOfPoints = x;
+
+
+    parameters.stopCondition = MaxIterWithoutImprovement;
+    parameters.MaxIterationsWithoutImprovement = parameters.iterationsCount / 10;
+
+    // Решатель
+    solver = new HDSolver(problem);
+  }
+
+  // Решаем задачу
+  if (solver->Solve() != SYSTEM_OK)
+    throw EXCEPTION("Error: solver.Solve crash!!!");
+
+  return solver->GetSolutionResult();
+}
+
 // ------------------------------------------------------------------------------------------------
 void CreateCurentProblemsParameters(int argc, char* argv[])
 {
-  parameters.AddOption(Pstring, "Method", "svc", "-Method", "", 1);
-  parameters.AddOption(Pstring, "DataSet", "balance", "-DataSet", "", 1);
-  parameters.AddOption(Pstring, "mPyFilePath", "", "-mPyFilePath", "", 1);
-  parameters.AddOption(Pstring, "functionScriptName", "TestsProblem", "-functionScriptName", "", 1);
-  parameters.AddOption(Pstring, "functionClassName", "TestsProblem", "-functionClassName", "", 1);
- // parameters.AddOption(Pint, "problemIndex", "1", "-problemIndex", "", 1);
- // parameters.AddOption(Pstring, "GKLSClass", "simple", "-GKLSClass", "", 1);
- // parameters.AddOption(Pstring, "GKLSFuncionType", "TD", "-GKLSFuncionType", "", 1);
 
-  //parameters.ReadAddParameters(argc, argv);
 }

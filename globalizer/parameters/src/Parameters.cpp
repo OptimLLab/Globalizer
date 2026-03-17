@@ -80,7 +80,7 @@ void Parameters::SetDefaultParameters()
   InitOption(SizeInBlock, 32, "-sb", "Size In CUDA Block", 1);
   InitOption(IsPrintFile, false, "-IsPF", "Is Print report to File", 1);
 
-  InitOption(Dimension, -1, "-N", "Dimension", 1);
+  InitOption(Dimension, 1, "-N", "Dimension", 1);
 
   InitOption(r, 4.0, "-r", "r", 1);
 
@@ -170,6 +170,10 @@ void Parameters::SetDefaultParameters()
   InitOption(fileSerializer, \0, "-fs", "The path to save and upload", 1);
   
   InitOption(MaxIterationsWithoutImprovement, 100, "-MIWI", "The maximum number of iterations without improvement, works only with the MaxIterWithoutImprovement stop criterion", 1);
+
+  InitOption(iterationsCount, 1000000, "-IC", "The maximum number of iterations of the optimization algorithm, used in automatic mode.", 1);
+
+
 
   ProcRank.SetGetter(&Parameters::GetProcRank);
   ProcRank.SetIsHaveValue(false);

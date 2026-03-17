@@ -80,8 +80,7 @@ void GlobalizerInitialization(int argc, char* argv[], bool isMPIInit,
 }
 
 
-
-SolutionResult* GlobalizerSolveProblem(IGlobalOptimizationProblem*& problem)
+SolutionResult* GlobalizerSolveProblem(IProblem*& problem)
 {
   ISolver* solver;
 

@@ -80,7 +80,7 @@ void Parameters::SetDefaultParameters()
   InitOption(SizeInBlock, 32, "-sb", "Size In CUDA Block", 1);
   InitOption(IsPrintFile, false, "-IsPF", "Is Print report to File", 1);
 
-  InitOption(Dimension, -1, "-N", "Dimension", 1);
+  InitOption(Dimension, 1, "-N", "Dimension", 1);
 
   InitOption(r, 4.0, "-r", "r", 1);
 

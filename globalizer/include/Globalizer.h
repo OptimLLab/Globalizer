@@ -69,7 +69,7 @@ void GlobalizerInitialization(int argc=0, char* argv[]=nullptr,
 \param[in] problem - задача оптимизации
 
 */
-SolutionResult* GlobalizerSolveProblem(IGlobalOptimizationProblem*& problem);
+SolutionResult* GlobalizerSolveProblem(IProblem*& problem);
 
 /** Создает параметры для тестовых задач //временное решение!!!
   \param[in] argc - Количество аргументов командной строки

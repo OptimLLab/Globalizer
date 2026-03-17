@@ -199,7 +199,7 @@ void Method_RSA::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestI
 void Method_RSA::LoadPoint()
 {
     std::string pointsPath = parameters.FirstPointFilePath;
-    std::string pointsPathExtension = getFileExtension(pointsPath);
+    std::string pointsPathExtension = GetFileExtension(pointsPath);
     int numberLoadedPoints = 0;
     std::vector<Trial*> newPoint;
     SearchDataSerializer::LoadedFileData fd;

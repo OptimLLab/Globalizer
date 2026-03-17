@@ -29,6 +29,7 @@
 
 #include "Solver.h"
 #include "ProblemFromFunctionPointers.h"
+#include "SolverRSA.hpp"
 #include "HDSolver.h"
 
 #ifdef _GLOBALIZER_BENCHMARKS

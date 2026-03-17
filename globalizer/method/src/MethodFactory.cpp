@@ -29,6 +29,8 @@ IMethod* MethodFactory::CreateMethod(Task& _pTask, SearchData& _pData,
     pMethod = new Method(_pTask, _pData, _Calculation, _Evolvent);
   if (parameters.TypeMethod == IntegerMethod)
     pMethod = new MixedIntegerMethod(_pTask, _pData, _Calculation, _Evolvent);
+  if (parameters.TypeMethod == RSAMethod)
+      pMethod = new Method_RSA(_pTask, _pData, _Calculation, _Evolvent);
 
 
   return pMethod;

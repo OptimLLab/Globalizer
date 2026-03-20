@@ -179,7 +179,6 @@ The trials number is too large to plot a 3D graph using Rbf-interpolation.\n\n\
 Possible solutions:\n\
 - Reduce the number of points to plot.\n\
 - Use the mode \'ByPoints\' to plot surface.\n\
-- Use level lines instead of plotting the surface.\n\n\
 Original error text of scipy.interpolate.Rbf:\n\
 {err}\n\n\033[0m")
             return

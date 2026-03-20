@@ -18,7 +18,8 @@ class DrawingProcess:
                   parameters_numbers=[0],
                   is_points_at_bottom=True,
                   output_file="output.png",
-                  is_need_show_figure=False):
+                  is_need_show_figure=False,
+                  is_need_hide_trials_points = False):
         '''
         plotter_type: 'lines layers' 'surface'
         object_function_plotter_type: 'objective function' 'approximation' 'interpolation' 'by points' 'only points'
@@ -46,6 +47,7 @@ class DrawingProcess:
                                 is_points_at_bottom)
         painter.paint_objective_func()
         painter.paint_constraints()
-        painter.paint_points()
+        if not is_need_hide_trials_points:
+            painter.paint_points()
         painter.paint_optimum()
         painter.save_image(self.path, output_file, is_need_show_figure)

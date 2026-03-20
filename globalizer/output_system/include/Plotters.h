@@ -61,7 +61,7 @@ namespace Plotter
     */
   void draw_plot(IProblem* problem, SolutionResult* result, std::initializer_list<int> params,
     wchar_t* output_file_name = L"globalizer_output.png", FigureTypes figure_type = LevelLayers,
-    CalcsTypes calcs_type = ObjectiveFunction, bool show_figure = false,
+    CalcsTypes calcs_type = ObjectiveFunction, bool show_figure = false, bool hide_trials_points = false,
     bool move_points_under_graph = false);
 };
 #endif

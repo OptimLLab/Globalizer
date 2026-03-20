@@ -113,7 +113,7 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
 #ifdef USE_PYTHON
 void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initializer_list<int> params,
   wchar_t* output_file_name, FigureTypes figure_type, CalcsTypes calcs_type,
-  bool show_figure, bool move_points_under_graph) 
+  bool show_figure, bool hide_trials_points, bool move_points_under_graph)
 {
   if (problem == nullptr) 
   {
@@ -188,11 +188,13 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
   wchar_t* __eps = _eps.data();
   
   wchar_t __show_figure[6]; 
+  wchar_t __hide_trials_points[6];
   wchar_t __move_points_under_graph[6];
   wchar_t __figure_type[64];
   wchar_t __calcs_type[64];
 
   wcscpy(__show_figure, show_figure ? L"True" : L"False");
+  wcscpy(__hide_trials_points, hide_trials_points ? L"True" : L"False");
   wcscpy(__move_points_under_graph, move_points_under_graph ? L"True" : L"False");
 
   wcscpy(__figure_type, figure_type == Plotter::LevelLayers ? L"lines layers" : L"surface");
@@ -215,6 +217,7 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result, std::initiali
           __move_points_under_graph,
           output_file_name,
           __show_figure,
+          __hide_trials_points,
           NULL
   };
 

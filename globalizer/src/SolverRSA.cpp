@@ -305,7 +305,7 @@ int Solver_RSA::Solve()
                 Plotter::FigureTypes figure_type = static_cast<Plotter::FigureTypes>(parameters.FigureType.operator int());
                 Plotter::CalcsTypes calcs_type = static_cast<Plotter::CalcsTypes>(parameters.CalcsType.operator int());;
 
-                draw_plot(this->mProblem, GetSolutionResult(), { 0, 1 }, output_file_name, figure_type, calcs_type, show_figure, hide_trials_points, move_points_under_graph);
+                draw_plot(this->mProblem, GetSolutionResult(), { 0, 1 }, {}, output_file_name, figure_type, calcs_type, show_figure, hide_trials_points, move_points_under_graph);
 #else
                 print << "Plotter is not work!!!\nPython libraries doesn't find!!!\n";
 #endif

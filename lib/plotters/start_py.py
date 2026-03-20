@@ -26,7 +26,8 @@ def parse_args():
         "--PlotFileName",
         type=str,
         default=datetime.now().strftime("plotter_%Y_%d_%m_%H_%M_%S.png"),
-        help="The name of the file to save the image.")
+        help="The name of the file to save the image."
+    )
     ap.add_argument(
         "-ft",
         "--FigureType",
@@ -74,10 +75,25 @@ def parse_args():
         help="Second parameter number for visualization."
     )
     ap.add_argument(
+        "-b",
+        "--Bounds",
+        type=str,
+        default="",
+        help="Visualization area boundaries\
+        (in format \" {lower_x1}_{lower_x2} {upper_x1}_{upper_x2}\" or \" {lower_x1}_{upper_x1}\"). \
+        Warning: begining space nedded for lower_x1 < 0."
+    )
+    ap.add_argument(
         "-ShowFigure",
         "--ShowFigure",
         action="store_true",
         help="A flag indicating the need to open the resulting drawing in an interactive window on the screen."
+    )
+    ap.add_argument(
+        "-HideTrialsPoints",
+        "--HideTrialsPoints",
+        action="store_true",
+        help="A flag indicating the need to hide trial points."
     )
     ap.add_argument(
         "-PointsBelowGraph",
@@ -123,8 +139,11 @@ def read_args():
 
         params = list({int(args["x1"]), int(args["x2"])})
 
+        bounds = str(args["Bounds"])
+
         displacement_of_points = bool(args["PointsBelowGraph"])
         figure_show = bool(args["ShowFigure"])
+        hide_trials_points = bool(args["HideTrialsPoints"])
 
     return (
         path,
@@ -136,13 +155,15 @@ def read_args():
         obj_func_type,
         params,
         displacement_of_points,
-        figure_show
+        figure_show,
+        hide_trials_points,
+        bounds
     )
 
 if __name__ == "__main__":
     (path, trials_file_name, problem_file_name, output_file_name,
      eps, plot_type, obj_func_type, params,
-     displacement_of_points, figure_show) = read_args()
+     displacement_of_points, figure_show, hide_trials_points, bounds) = read_args()
 
     print(f"""
     Plotter startup parameters:
@@ -156,16 +177,32 @@ if __name__ == "__main__":
     Params: {params}
     DisplacementOfPoints: {displacement_of_points}
     FigureShow: {figure_show}
+    HideTrialsPoints: {hide_trials_points}
+    Bounds: {bounds}
     """)
 
+    filename = path + problem_file_name
+
+    old_problem_init_info = ""
+    with open(filename, "r") as file:
+        old_problem_init_info = file.readline()
+
+    new_problem_init_info = old_problem_init_info.split(' ')[0] + ' ' + bounds
+    with open(filename, "w") as file:
+        file.write(new_problem_init_info)
+
     dp = DrawingProcess(path, trials_file_name, problem_file_name, eps)
+
+    with open(filename, "w") as file:
+        file.write(old_problem_init_info)
 
     dp.draw_plot(plotter_type=plot_type,
                  object_function_plotter_type=obj_func_type,
                  parameters_numbers=params,
                  is_points_at_bottom=displacement_of_points,
                  output_file=output_file_name,
-                 is_need_show_figure=figure_show
+                 is_need_show_figure=figure_show,
+                 is_need_hide_trials_points=hide_trials_points
                  )
     
     print(f"Picture was saved in {path + output_file_name}.")

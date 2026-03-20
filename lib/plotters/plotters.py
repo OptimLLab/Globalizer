@@ -171,8 +171,19 @@ class Plotter3D(Plotter):
 
     def plot_interpolation(self, points, values, points_count=100,
                            colormap=plt.cm.viridis, transparency=0.6, linewidths=1, levels=25):
+        try:
+            interp = interpolate.Rbf(np.array(points)[:, self.indexes[0]], np.array(points)[:, self.indexes[1]], values)
+        except Exception as err:
+            print(f"\033[33m\nWARNING: the graph is plotted without displaying the objective function!\n\n\
+The trials number is too large to plot a 3D graph using Rbf-interpolation.\n\n\
+Possible solutions:\n\
+- Reduce the number of points to plot.\n\
+- Use the mode \'ByPoints\' to plot surface.\n\
+- Use level lines instead of plotting the surface.\n\n\
+Original error text of scipy.interpolate.Rbf:\n\
+{err}\n\n\033[0m")
+            return
 
-        interp = interpolate.Rbf(np.array(points)[:, self.indexes[0]], np.array(points)[:, self.indexes[1]], values)
         x1 = np.linspace(self.leftBounds[0], self.rightBounds[0], points_count)
         x2 = np.linspace(self.leftBounds[1], self.rightBounds[1], points_count)
         x1, x2 = np.meshgrid(x1, x2)

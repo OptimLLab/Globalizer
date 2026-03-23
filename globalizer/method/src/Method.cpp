@@ -481,7 +481,8 @@ void Method::FirstIteration()
       inputlocal.trials[sfipi + ifip] = newPoint[ind];
     }
 
-    calculation.Calculate(inputlocal, outputlocal);
+    if (inputlocal.trials.size() > 0)
+      calculation.Calculate(inputlocal, outputlocal);
 
     for (int j = 0; j < pTask.GetNumOfFunc(); j++)
     {

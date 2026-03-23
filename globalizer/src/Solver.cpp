@@ -301,10 +301,10 @@ int Solver::Solve()
         wcscpy(output_file_name, wstring.c_str());
         bool show_figure = parameters.ShowFigure;
         bool move_points_under_graph = false;
-        Plotter::FigureTypes figure_type = static_cast<Plotter::FigureTypes>(parameters.FigureType.operator int());
-        Plotter::CalcsTypes calcs_type = static_cast<Plotter::CalcsTypes>(parameters.CalcsType.operator int());;
+        FigureTypes figure_type =parameters.FigureType;
+        CalcsTypes calcs_type = parameters.CalcsType;
 
-        draw_plot(this->mProblem, GetSolutionResult(), { 0, 1 }, output_file_name, figure_type, calcs_type, show_figure, move_points_under_graph);
+        Plotter::draw_plot(this->mProblem, GetSolutionResult(), { 0, 1 }, output_file_name, figure_type, calcs_type, show_figure, move_points_under_graph);
 #else
         print << "Plotter is not work!!!\nPython libraries doesn't find!!!\n";
 #endif

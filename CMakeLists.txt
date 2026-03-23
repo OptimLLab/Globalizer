@@ -20,10 +20,7 @@ option(GLOBALIZER_MAX_Number_Of_Function "Set MAX Number Of Function Globalizer"
 option(GLOBALIZER_BUILD_PROBLEMS "Set ON to build problems" OFF)
 option(GLOBALIZER_USE_DOXYGEN "Set ON to build documentation" OFF)
 option(GLOBALIZER_BUILD_GCGEN "Set ON to build GCGen" OFF)
-
-
 option(GLOBALIZER_ONE_MPI_PROCESS_PER_NODE "ONE PROCESS PER NODE" OFF)
-
 option(GLOBALIZER_PYTHON "Set ON to use Python" OFF)
 
 set(GLOBALIZER_DEBUG_SUFFIX   d)

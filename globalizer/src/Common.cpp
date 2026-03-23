@@ -49,13 +49,12 @@ void FindXY(int& x, int& y, int z, int C)
 
   for (int curY = startY; curY <= endY; ++curY)
   {
-    int minX = 2 * curY + 1;
+    int minX = curY + 1;
     int targetX = static_cast<int>(static_cast<double>(z) / (curY * C));
 
-    for (int curX = std::max(minX, targetX - 5); curX <= targetX + 5; ++curX)
+    for (int curX = minX; curX <= targetX + 5; ++curX)
     {
       if (curX <= curY) continue;
-      if (curX <= 2 * curY) continue;
 
       long long product = static_cast<long long>(curX) * curY * C;
       long long diff = std::abs(product - z);
@@ -82,6 +81,12 @@ void FindXY(int& x, int& y, int z, int C)
   {
     bestY = 1;
     bestX = 3;
+  }
+
+  if (bestX < 5)
+  {
+    bestX = bestX * bestY;
+    bestY = 1;
   }
 
   x = bestX;

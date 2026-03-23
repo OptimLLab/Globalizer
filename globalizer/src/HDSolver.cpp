@@ -30,6 +30,7 @@ void HDSolver::CreateStartPoint()
       parameters.startPoint[i] = A[i] + (B[i] - A[i]) / 2.0;
     }
   }
+  parameters.IsUseStartPoint = true;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -136,11 +137,11 @@ void HDSolver::UpdateStartPoint(SolutionResult* solution, double& bestValue, int
           parameters.startPoint[j + startParameterNumber] = solution->BestTrial->y[j];
         }
 
-        parameters.startPointValues.SetSize(curTask->GetNumOfFunc());
-        for (int j = 0; j < curTask->GetNumOfFunc(); j++)
-        {
-          parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
-        }
+        //parameters.startPointValues.SetSize(curTask->GetNumOfFunc());
+        //for (int j = 0; j < curTask->GetNumOfFunc(); j++)
+        //{
+        //  parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
+        //}
 
         print << "\t Iteration " << points.size() << "\t" << "bestValue =\t" << bestValue << "\n";
         countIterationsWithoutImprovement = points.size();
@@ -209,7 +210,7 @@ void HDSolver::LoadPoint()
       parameters.M_constant[j] = fd.searchData.M[j];
     }
     parameters.startPoint.SetSize(parameters.Dimension);
-    parameters.startParameterNumber = fd.methodParams.start_parameter_number;
+    parameters.startParameterNumber = (fd.methodParams.start_parameter_number + 1) % parameters.Dimension;
 
     Trial* best = fd.trials[0];
 
@@ -252,6 +253,11 @@ int HDSolver::Solve()
     int iterationCount = parameters.HDSolverIterationCount;
     
     alternativeStartingPoint.resize(originalDimension);
+    for (int j = 0; j < originalDimension; j++)
+    {
+      alternativeStartingPoint[j] = parameters.startPoint[j];
+    }
+
 
     std::vector<Trial*> points;
     double bestValue = MaxDouble;
@@ -301,6 +307,14 @@ int HDSolver::Solve()
         if ((points.size() - countIterationsWithoutImprovement > parameters.MaxIterationsWithoutImprovement) && (parameters.stopCondition == MaxIterWithoutImprovement))
         {
           break;
+        }
+
+        if (bestValue == MaxDouble) //Если допустимая точка не найдена
+        {
+          for (int j = 0; j < originalDimension; j++)
+          {
+            parameters.startPoint[j] = alternativeStartingPoint[j];
+          }
         }
       }
 

@@ -31,8 +31,8 @@ int main(int argc, char* argv[])
     parameters.Dimension = 2;
     parameters.IsPlot = true; // Включаем рисование графика функции с точками испытаний (сохраняются в файл)
     parameters.ShowFigure = true;
-    parameters.FigureType = 1; // 0 - LevelLayers - линии уровней (по умолчанию); 1 - Surface - поверхность
-    parameters.CalcsType = 2;// 0 - ObjectiveFunction - строит линии уровня / поверхность по сетке 100 * 100,
+    parameters.FigureType = Surface; // 0 - LevelLayers - линии уровней (по умолчанию); 1 - Surface - поверхность
+    parameters.CalcsType = Interpolation;// 0 - ObjectiveFunction - строит линии уровня / поверхность по сетке 100 * 100,
     //1 - Approximation - строит аппроксимацию линий уровня / поверхности по имеющейся поисковой информации,
     //  2 - Interpolation - строит интерполяцию линий уровня / поверхности по имеющейся поисковой информации,
     //  3 - ByPoints - строит поверхность путем "натягивагия" ее на точки поисковой информации без сглаживания,

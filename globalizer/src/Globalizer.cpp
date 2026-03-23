@@ -112,8 +112,6 @@ SolutionResult* GlobalizerSolveProblem(IProblem*& problem)
     parameters.HDSolverIterationCount = y;
     parameters.MaxNumOfPoints = x;
 
-
-    parameters.stopCondition = MaxIterWithoutImprovement;
     parameters.MaxIterationsWithoutImprovement = parameters.iterationsCount / 10;
 
     // Решатель

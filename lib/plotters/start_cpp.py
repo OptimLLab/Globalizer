@@ -30,12 +30,17 @@ def read_args():
     if sys.argv[10].lower() == "true":
         figure_show = True
 
-    return build_path, trials_file_name, problem_file_name, eps, plot_type, obj_func_type, params, displacement_of_points, output_file_name, figure_show
+    hide_trials_points = False
+    if sys.argv[11].lower() == "true":
+        hide_trials_points = True
+
+    return build_path, trials_file_name, problem_file_name, eps, plot_type, obj_func_type, params, displacement_of_points, output_file_name, figure_show, hide_trials_points
 
 if __name__ == "__main__":
     print("Start ", str(sys.argv[0]), "...")
-
-    build_path, trials_file_name, problem_file_name, eps, plot_type, obj_func_type, params, displacement_of_points, output_file_name, figure_show = read_args()
+    print("New parameter: ", str(sys.argv[11]))
+    
+    build_path, trials_file_name, problem_file_name, eps, plot_type, obj_func_type, params, displacement_of_points, output_file_name, figure_show, hide_trials_points = read_args()
 
     dp = DrawingProcess(build_path, trials_file_name, problem_file_name, eps)
 
@@ -44,5 +49,6 @@ if __name__ == "__main__":
                  parameters_numbers=params,
                  is_points_at_bottom=displacement_of_points,
                  output_file=output_file_name,
-                 is_need_show_figure=figure_show
+                 is_need_show_figure=figure_show,
+                 is_need_hide_trials_points = hide_trials_points
                  )

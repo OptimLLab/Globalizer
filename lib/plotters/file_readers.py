@@ -71,7 +71,7 @@ def ReadProblemFile(dir, file_for_reading):
 
         for line in file:
             if isFirst:
-                splitedline = line.split(' ')
+                splitedline = line.split()
                 dim = int(splitedline[0])
                 lb_line = splitedline[1].split('_')
                 rb_line = splitedline[2].split('_')

@@ -46,6 +46,8 @@ namespace Plotter
     \param[in] result - указатель на полученное решение,
     \param[in] params - индексы вещественных параметров задачи, для которых следует произвести визуализацию
     (допускается 2 или 1 (TBD) параметра для визуализации)
+    \param[in] bounds - границы построения графика по заданными параметрам
+    (по умолчанию совпадают с границами области решения задачи)
     \param[in] output_file_name - имя файла для сохранения изображения с указанием формата,
     \param[in] figure_type - тип визуализации целевой функции
     (доступные режимы: LevelLayers, Surface)
@@ -56,9 +58,10 @@ namespace Plotter
     \param[in] displacement_of_points - флаг о необходимости сместить точки испытаний под график
     (в формате булевого значения - true, false)
     */
-  void draw_plot(IProblem* problem, SolutionResult* result, std::initializer_list<int> params,
+  void draw_plot(IProblem* problem, SolutionResult* result,
+      std::initializer_list<int> params = {}, std::initializer_list<double[2]> bounds = {},
     wchar_t* output_file_name = L"globalizer_output.png", FigureTypes figure_type = LevelLayers,
-    CalcsTypes calcs_type = ObjectiveFunction, bool show_figure = false,
+    CalcsTypes calcs_type = ObjectiveFunction, bool show_figure = false, bool hide_trials_points = false,
     bool move_points_under_graph = false);
 };
 #endif

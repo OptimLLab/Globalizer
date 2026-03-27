@@ -29,8 +29,8 @@
 
 #ifdef USE_PYTHON
 void make_problem_info_file(IProblem* problem, SolutionResult* result, const char* problem_file_name = "_problem_info.txt",
-    Plotter::CalcsTypes calcs_type = Plotter::ObjectiveFunction, std::initializer_list<int> params = { 0, 1 },
-    std::initializer_list<double[2]> bounds = {}, int points_count = 100) {
+  CalcsTypes calcs_type = ObjectiveFunction, std::initializer_list<int> params = { 0, 1 },
+  std::initializer_list<double[2]> bounds = {}, int points_count = 100) {
 
     FILE* pf = fopen(problem_file_name, "w+");
 
@@ -70,7 +70,7 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
   }
   fprintf(pf, "%lf\n", right_bound[problem->GetDimension() - 1]);
 
-  if (calcs_type == Plotter::ObjectiveFunction) {
+  if (calcs_type == ObjectiveFunction) {
     double* section = (result->BestTrial)->y;
     double* x = new double[problem->GetDimension()];
     double z;
@@ -191,7 +191,6 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
     }
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-
     std::filesystem::path build_path = std::filesystem::absolute("./");
     std::filesystem::path script_path = std::filesystem::absolute("../lib/plotters/start_cpp.py");
 
@@ -231,12 +230,12 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
     wcscpy(__hide_trials_points, hide_trials_points ? L"True" : L"False");
     wcscpy(__move_points_under_graph, move_points_under_graph ? L"True" : L"False");
 
-    wcscpy(__figure_type, figure_type == Plotter::LevelLayers ? L"lines layers" : L"surface");
-    wcscpy(__calcs_type, calcs_type == Plotter::ObjectiveFunction ? L"objective function" :
-        calcs_type == Plotter::Approximation ? L"approximation" :
-        calcs_type == Plotter::Interpolation ? L"interpolation" :
-        calcs_type == Plotter::ByPoints ? L"by points" :
-        L"only points");
+    wcscpy(__figure_type, figure_type == LevelLayers ? L"lines layers" : L"surface");
+    wcscpy(__calcs_type, calcs_type == ObjectiveFunction ? L"objective function" :
+      calcs_type == Approximation ? L"approximation" :
+      calcs_type == Interpolation ? L"interpolation" :
+      calcs_type == ByPoints ? L"by points" :
+      L"only points");
 
     wchar_t* args[] =
     {

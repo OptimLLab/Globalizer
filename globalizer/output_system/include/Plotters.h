@@ -25,7 +25,7 @@
 #include <unistd.h>
 #endif
 
-
+#include "Common.h"
 /**
 \file Plotters.h
 
@@ -40,9 +40,6 @@
 #ifdef USE_PYTHON
 namespace Plotter
 {
-  enum FigureTypes { LevelLayers, Surface, None };
-  enum CalcsTypes { ObjectiveFunction, Approximation, Interpolation, ByPoints, OnlyPoints };
-
   /**
     Запуск отрисовки (требует обязательного совместного использования с ключом -sip)
     \param[in] problem - указатель на задачу,

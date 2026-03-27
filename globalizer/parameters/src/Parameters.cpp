@@ -63,8 +63,8 @@ void Parameters::SetDefaultParameters()
   InitOption(IsPlot, 0, "-PLOT", "Draw a graph of the function", 1);
   InitOption(ShowFigure, false, "-ShowFigure", "a flag indicating the need to open the resulting drawing in an interactive window on the screen", 1);
   InitOption(HideTrialsPoints, false, "-HideTrialsPoints", "a flag indicating the need to hide trial points", 1);
-  InitOption(FigureType, 0, "-FigureType", "type of visualization of the target function (available modes : 0 - LevelLayers, 1 - Surface)", 1);
-  InitOption(CalcsType, 0, "-CalcsType", "the type of value calculations for visualizing the objective function (available modes: ObjectiveFunction, Approximation, Interpolation, ByPoints, OnlyPoints)", 1);
+  InitOption(FigureType, LevelLayers, "-FigureType", "type of visualization of the target function (available modes : 0 - LevelLayers, 1 - Surface)", 1);
+  InitOption(CalcsType, ObjectiveFunction, "-CalcsType", "the type of value calculations for visualizing the objective function (available modes: ObjectiveFunction, Approximation, Interpolation, ByPoints, OnlyPoints)", 1);
   InitOption(PlotGridSize, 300, "-PGS", "Drawing mesh precision", 1);
   InitOption(PlotFileName, \0, "-PlotFileName", "The name of the file to save the image", 1);
   InitOption(IsCalculateNumPoint, 0, "-ICNP", "Number of trials will be calculated at each iteration", 1);

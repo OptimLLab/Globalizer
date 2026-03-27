@@ -370,7 +370,7 @@ void BaseParameters<Owner>::ReadParameters(int argc, char* argv[])
     {
       if (i + 1 < argc)
       {
-        std::string paramName = arg;
+        std::string paramName = arg.substr(1);
         std::string value = argv[i + 1];
         EParameterType type = DetermineParameterType(value);
 

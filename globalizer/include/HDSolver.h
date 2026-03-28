@@ -60,24 +60,25 @@ protected:
 
 public:
   HDSolver(IProblem* problem, std::vector<int> _dimentions = {});
-
 #ifdef _GLOBALIZER_BENCHMARKS
 
   HDSolver(IGlobalOptimizationProblem* problem, std::vector<int> _dimentions = {});
 
 #endif
-
   virtual ~HDSolver();
 
   /// Решение задачи по умолчанию
   virtual int Solve();
 
-
-
+  /// Возвращает полученное решение
   SolutionResult* GetSolutionResult();
 
   /// Добавляет точки испытаний
   virtual void SetPoint(std::vector<Trial*>& points);
+
   /// Возврящает все имеющиеся точки испытаний
   virtual std::vector<Trial*>& GetAllPoint();
+
+  /// Выполняет автоматическую настройку параметров решателя
+  virtual void AutoConfig();
 };

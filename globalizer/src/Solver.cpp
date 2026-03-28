@@ -55,6 +55,9 @@ Solver::Solver(IProblem* problem)
   isExternalTask = false;
 
   addPoints = nullptr;
+
+  // Настраиваем параметры
+  AutoConfig();
 }
 
 #ifdef _GLOBALIZER_BENCHMARKS
@@ -110,24 +113,7 @@ int Solver::CheckParameters()
     }
   }
 
-  if (parameters.automaticParametersSetting)
-  {
-    if (parameters.MaxNumOfPoints > 100
-      && parameters.NumThread.GetIsChange() == false && parameters.NumPoints.GetIsChange() == false
-      && parameters.TypeCalculation == OMP)
-    {
-      if (parameters.Dimension > 2 && parameters.Dimension < 10 && parameters.startPoint.GetIsChange() == false)
-      {
-        parameters.NumThread = std::max(int(parameters.GetMaxNumOMP() / 2), 1);
-        parameters.NumPoints = parameters.NumThread;
-      }
-      if (parameters.Dimension > 5
-        && parameters.r.GetIsChange() == false)
-      {
-        parameters.r = parameters.r * 2;
-      }
-    }
-  }
+
 
   if (parameters.IsPlot)
   {
@@ -500,8 +486,47 @@ Task* Solver::GetTask()
 }
 
 
-/// Возвращает поисковую информацию
+
+// ------------------------------------------------------------------------------------------------
 SearchData* Solver::GetData()
 {
   return pData;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Solver::AutoConfig()
+{
+  if (parameters.iterationsCount.GetIsChange() == true)
+  {
+    if (parameters.MaxNumOfPoints.GetIsChange() == false)
+    {
+      parameters.MaxNumOfPoints = parameters.iterationsCount;
+    }
+  }
+  else
+  {
+    if (parameters.iterationsCount.GetIsChange() == false)
+    {
+      parameters.iterationsCount = parameters.MaxNumOfPoints;
+    }
+  }
+
+  if (parameters.automaticParametersSetting)
+  {
+    if (parameters.MaxNumOfPoints > 100
+      && parameters.NumThread.GetIsChange() == false && parameters.NumPoints.GetIsChange() == false
+      && parameters.TypeCalculation == OMP)
+    {
+      if (parameters.Dimension > 2 && parameters.Dimension < 10 && parameters.startPoint.GetIsChange() == false)
+      {
+        parameters.NumThread = std::max(int(parameters.GetMaxNumOMP() / 2), 1);
+        parameters.NumPoints = parameters.NumThread;
+      }
+      if (parameters.Dimension > 5
+        && parameters.r.GetIsChange() == false)
+      {
+        parameters.r = parameters.r * 2;
+      }
+    }
+  }
 }

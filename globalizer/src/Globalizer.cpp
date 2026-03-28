@@ -110,9 +110,10 @@ SolutionResult* GlobalizerSolveProblem(IProblem*& problem)
     int x = parameters.MaxNumOfPoints;
     FindXY(x, y, z, C);
     parameters.HDSolverIterationCount = y;
-    parameters.MaxNumOfPoints = x;
+    parameters.MaxNumOfPoints = x + 3;
 
-    parameters.MaxIterationsWithoutImprovement = parameters.iterationsCount / 10;
+    if (!parameters.MaxIterationsWithoutImprovement.GetIsChange())
+      parameters.MaxIterationsWithoutImprovement = parameters.iterationsCount / 10;
 
     // Решатель
     solver = new HDSolver(problem);
@@ -129,4 +130,22 @@ SolutionResult* GlobalizerSolveProblem(IProblem*& problem)
 void CreateCurentProblemsParameters(int argc, char* argv[])
 {
 
+}
+
+// ------------------------------------------------------------------------------------------------
+bool SelectSolver(IProblem* problem)
+{
+  int dim = problem->GetDimension();
+  if (dim == 1 ||
+    dim == 2 && parameters.iterationsCount > 100 ||
+    dim == 3 && parameters.iterationsCount > 300 ||
+    dim == 4 && parameters.iterationsCount > 1000 ||
+    dim == 5 && parameters.iterationsCount > 4000)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }

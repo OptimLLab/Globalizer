@@ -38,7 +38,6 @@ def read_args():
 
 if __name__ == "__main__":
     print("Start ", str(sys.argv[0]), "...")
-    print("New parameter: ", str(sys.argv[11]))
     
     build_path, trials_file_name, problem_file_name, eps, plot_type, obj_func_type, params, displacement_of_points, output_file_name, figure_show, hide_trials_points = read_args()
 

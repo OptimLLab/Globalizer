@@ -46,6 +46,74 @@ class Plotter:
 
     def plot_contour(self, x1, x2, z, colormap, linewidths, levels):
         self.ax.contour(x1, x2, z, cmap=colormap, linewidths=linewidths, levels=levels)
+    def plot_hatch_by_grid(self, x1, x2, zc):
+        total_points = len(x1)
+        # assert total_points == rows * cols, f"Ошибка: Ожидалось {rows * cols} точек, а найдено {total_points}."
+        rows = int(np.sqrt(total_points))
+        cols = int(np.sqrt(total_points))
+
+        z = []
+        for i in range(len(zc[0])):
+            z.append(np.array([zcj[i] for zcj in zc]))
+
+        xgrid = np.zeros((rows, cols))
+        ygrid = np.zeros((rows, cols))
+
+        for i in range(rows):
+            for j in range(cols):
+                idx = i * cols + j
+                xgrid[i, j] = x1[idx]
+                ygrid[i, j] = x2[idx]
+
+        zgrid = []
+        for k in range(len(z)):
+            zgrid.append(np.zeros((rows, cols)))
+            for i in range(rows):
+                for j in range(cols):
+                    idx = i * cols + j
+                    zgrid[k][i, j] = z[k][idx]
+
+        for k in range(len(z)):
+            self.ax.contour(xgrid, ygrid, zgrid[k], colors=["#393a398f"], linewidths=1, levels=[0])
+
+        mask = (zgrid[0] <= 0)
+        for k in range(len(zgrid) - 1):
+            mask &= (zgrid[k + 1] <= 0)
+        self.ax.contourf(xgrid, ygrid, mask.astype(float), levels=[0.5, 1.0], alpha=0.6, colors=["#00ff483e"])
+
+    def plot_hatch_by_interpolate(self, x1, x2, zc):
+        interp = []
+        #try:
+        for i in range(len(zc)):
+            interp.append(interpolate.Rbf(x1[i],
+                                          x2[i],
+                                          zc[i]))
+        #except Exception as err:
+        #    print(f"\033[33m\nWARNING: the graph is plotted without displaying the constraints!\n\n\
+        #           The trials number is too large to plot using Rbf-interpolation.\n\n\
+        #           Possible solutions:\n\
+         #          - Reduce the number of points to plot.\n\
+         #          Original error text of scipy.interpolate.Rbf:\n\
+         #          {err}\n\n\033[0m")
+         #   return
+
+        points_count = 200
+        xgrid = np.linspace(self.leftBounds[0], self.rightBounds[0], points_count)
+        ygrid = np.linspace(self.leftBounds[1], self.rightBounds[1], points_count)
+        xgrid, ygrid = np.meshgrid(xgrid, ygrid)
+
+        zgrid = []
+        for i in range(len(zc)):
+            zgrid.append(interp[i](xgrid, ygrid))
+
+        for k in range(len(zgrid)):
+            self.ax.contour(xgrid, ygrid, zgrid[k], colors=["#393a398f"], linewidths=1, levels=[0])
+
+        mask = (zgrid[0] <= 0)
+        for k in range(len(zgrid) - 1):
+            mask &= (zgrid[k + 1] <= 0)
+
+        self.ax.contourf(xgrid, ygrid, mask.astype(float), levels=[0.5, 1.0], alpha=0.6, colors=["#00ff483e"])
 
     def plot_contourf(self, x1, x2, z, colormap, levels):
         self.ax.contourf(x1, x2, z, cmap=colormap, levels=levels)
@@ -140,7 +208,25 @@ class Plotter3D(Plotter):
         x1 = [xi[0] for xi in x]
         x2 = [xi[1] for xi in x]
 
-        self.plot_contour_pulling_on_points(x1, x2, z, colormap=colormap, linewidths=linewidths, levels=levels, transparency=transparency)
+        total_points = len(x1)
+        #assert total_points == rows * cols, f"Ошибка: Ожидалось {rows * cols} точек, а найдено {total_points}."
+        rows = int(np.sqrt(total_points))
+        cols = int(np.sqrt(total_points))
+        xgrid = np.zeros((rows, cols))
+        ygrid = np.zeros((rows, cols))
+        zgrid = np.zeros((rows, cols))
+
+        for i in range(rows):
+            for j in range(cols):
+                idx = i * cols + j
+                xgrid[i, j] = x1[idx]
+                ygrid[i, j] = x2[idx]
+                zgrid[i, j] = z[idx]
+
+        if self.plotterType == 'lines layers':
+            self.plot_contour(xgrid, ygrid, zgrid, colormap=colormap, linewidths=linewidths, levels=levels)
+        elif self.plotterType == 'surface':
+            self.plot_surface(xgrid, ygrid, zgrid, colormap=colormap, transparency=transparency)
 
     def plot_approximation(self, points, values, points_count=100, colormap=plt.cm.viridis, transparency=0.6, linewidths=1, levels=25):
         nn = MLPRegressor(activation='logistic',  # can be tanh, identity, logistic, relu

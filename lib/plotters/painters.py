@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-
 from file_readers import ReadTrialsFile, ReadProblemFile
 from plotters import Plotter2D, Plotter3D
+from scipy import interpolate
 
 class Painter:
     """
@@ -65,6 +65,7 @@ class StaticPainter(Painter):
         self.plotter_type = plotter_type
         self.object_function_plotter_type = object_function_plotter_type
         self.is_points_at_bottom = is_points_at_bottom
+        self.hatch = '/'  # !!!!!!!!!!!!!!!!!!
 
         self.section_points = []
         self.section_values = []
@@ -127,15 +128,32 @@ class StaticPainter(Painter):
                     pass
 
     def paint_constraints(self):
-        if self.plotter_type != 'surface':
+        if self.hatch == '':
+            if self.plotter_type != 'surface':
+                if self.object_function_plotter_type == "objective function":
+                    if len(self.parameters_numbers) > 1 and len(self.c) > 0:
+                        for i in range(len(self.c[0])):
+                            self.plotter.plot_by_grid(self.x, [cj[i] for cj in self.c], colormap='twilight', linewidths=1, levels=0, transparency=0.6)
+                elif self.object_function_plotter_type == 'interpolation':
+                    if len(self.parameters_numbers) > 1 and len(self.cc[0]) > 0:
+                        for i in range(len(self.cc) // 2):
+                            self.plotter.plot_interpolation(self.cc[2 * i], self.cc[2 * i + 1], colormap='twilight', linewidths=1, transparency=0.6, levels=0)
+        else:
             if self.object_function_plotter_type == "objective function":
                 if len(self.parameters_numbers) > 1 and len(self.c) > 0:
-                    for i in range(len(self.c[0])):
-                        self.plotter.plot_by_grid(self.x, [cj[i] for cj in self.c], colormap='twilight', linewidths=1, levels=0, transparency=0.6)
+                    x1 = [xi[0] for xi in self.x]
+                    x2 = [xi[1] for xi in self.x]
+                    self.plotter.plot_hatch_by_grid(x1, x2, self.c)
             elif self.object_function_plotter_type == 'interpolation':
                 if len(self.parameters_numbers) > 1 and len(self.cc[0]) > 0:
+                    x1 = []
+                    x2 = []
+                    z = []
                     for i in range(len(self.cc) // 2):
-                        self.plotter.plot_interpolation(self.cc[2 * i], self.cc[2 * i + 1], colormap='twilight', linewidths=1, transparency=0.6, levels=0)
+                        x1.append(np.array(self.cc[2 * i])[:, self.parameters_numbers[0]])
+                        x2.append(np.array(self.cc[2 * i])[:, self.parameters_numbers[1]])
+                        z.append(np.array(self.cc[2 * i + 1]))
+                    self.plotter.plot_hatch_by_interpolate(x1, x2, z)
 
     def paint_points(self):
         flag = True

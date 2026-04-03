@@ -28,6 +28,63 @@
 #endif
 
 #ifdef USE_PYTHON
+
+// аналог np.arange
+std::vector<double> arange(double start, double stop, double step) {
+    std::vector<double> values;
+    for (double value = start; value < stop; value += step) {
+        values.push_back(value);
+    }
+    return values;
+}
+
+// аналог np.meshgrid
+void meshgrid(
+    const std::vector<double>& x,
+    const std::vector<double>& y,
+    std::vector<std::vector<double>>& xgrid,
+    std::vector<std::vector<double>>& ygrid) {
+
+    size_t num_rows = y.size();
+    size_t num_cols = x.size();
+
+    xgrid.resize(num_rows, std::vector<double>(num_cols));
+    ygrid.resize(num_rows, std::vector<double>(num_cols));
+
+    for (size_t i = 0; i < num_rows; ++i) {
+        for (size_t j = 0; j < num_cols; ++j) {
+            xgrid[i][j] = x[j];
+            ygrid[i][j] = y[i];
+        }
+    }
+}
+
+// аналог вычисления матрицы значений по np.meshgrid
+void calculate_z_matrix(
+    IProblem* problem,
+    const std::vector<std::vector<double>>& xgrid,
+    const std::vector<std::vector<double>>& ygrid,
+    std::vector<std::vector<double>>& z_matrix, int func_i) {
+
+    size_t rows = xgrid.size();
+    size_t cols = xgrid[0].size();
+
+    z_matrix.resize(rows, std::vector<double>(cols));
+
+    double* x = new double[2];
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
+            x[0] = xgrid[i][j];
+            x[1] = ygrid[i][j];
+            z_matrix[i][j] = problem->CalculateFunctionals(x, func_i);
+        }
+    }
+    delete[] x;
+}
+
+#endif
+
+#ifdef USE_PYTHON
 void make_problem_info_file(IProblem* problem, SolutionResult* result, const char* problem_file_name = "_problem_info.txt",
   CalcsTypes calcs_type = ObjectiveFunction, std::initializer_list<int> params = { 0, 1 },
   std::initializer_list<double[2]> bounds = {}, int points_count = 100) {
@@ -71,53 +128,52 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
   fprintf(pf, "%lf\n", right_bound[problem->GetDimension() - 1]);
 
   if (calcs_type == ObjectiveFunction) {
-    double* section = (result->BestTrial)->y;
-    double* x = new double[problem->GetDimension()];
-    double z;
-
-    for (int i = 0; i < problem->GetDimension(); i++) {
-      x[i] = section[i];
-    }
-
     double* dx = new double[params.size()];
     for (int i = 0; i < params.size(); i++) {
       dx[i] = fabs(right_bound[*(params.begin() + i)] - left_bound[*(params.begin() + i)]) / points_count;
     }
 
+    std::vector<std::vector<double>> x(params.size());
+    for (int i = 0; i < params.size(); i++) {
+        x[i] = arange(left_bound[*(params.begin() + i)], right_bound[*(params.begin() + i)], dx[i]);
+    }
+
     if (params.size() == 2) {
-      for (int k = 0; k < points_count; k++) {
-        x[*(params.begin() + 0)] = left_bound[*(params.begin() + 0)] + k * dx[0];
-        for (int j = 0; j < points_count; j++) {
-          x[*(params.begin() + 1)] = left_bound[*(params.begin() + 1)] + j * dx[1];
+        std::vector<std::vector<double>> xgrid;
+        std::vector<std::vector<double>> ygrid;
+        meshgrid(x[0], x[1], xgrid, ygrid);
 
-          for (int i = 0; i < problem->GetDimension(); i++) {
-            fprintf(pf, "%lf ", x[i]);
-          }
+        std::vector <std::vector<std::vector<double>>> z(problem->GetNumberOfFunctions());
+        for (int i = 0; i < problem->GetNumberOfFunctions(); i++)
+            calculate_z_matrix(problem, xgrid, ygrid, z[i], i);
 
+        size_t rows = xgrid.size();
+        size_t cols = xgrid[0].size();
+
+        for (size_t i = 0; i < rows; ++i) {
+            for (size_t j = 0; j < cols; ++j) {
+                fprintf(pf, "%lf %lf ", xgrid[i][j], ygrid[i][j]);
+                for (int k = 0; k < problem->GetNumberOfFunctions(); k++) {
+                    fprintf(pf, "| %lf ", z[k][i][j]);
+                }
+                fprintf(pf, "\n");
+            }
+        }
+    } else if (params.size() == 1) {
+          std::vector <std::vector<double>> z(problem->GetNumberOfFunctions());
           for (int i = 0; i < problem->GetNumberOfFunctions(); i++) {
-            z = problem->CalculateFunctionals(x, i);
-            fprintf(pf, "| %lf ", z);
-          }
-          fprintf(pf, "\n");
-        }
+              z[i].resize(x.size());
+              double* x1 = new double[1];
+              for (int k = 0; k < x.size(); k++) {
+                  x1[0] = x[0][k];
+                  z[i][k] = problem->CalculateFunctionals(x1, i);
+              }
+              delete[] x1;
+              fprintf(pf, "| %lf ", z);
+           }
+           fprintf(pf, "\n");
       }
-    }
-    else if (params.size() == 1)
-    {
-      for (int k = 0; k < points_count; k++) {
-        x[*(params.begin() + 0)] = left_bound[*(params.begin() + 0)] + k * dx[0];
-        for (int i = 0; i < problem->GetDimension(); i++) {
-          fprintf(pf, "%lf ", x[i]);
-        }
 
-        for (int i = 0; i < problem->GetNumberOfFunctions(); i++) {
-          z = problem->CalculateFunctionals(x, i);
-          fprintf(pf, "| %lf ", z);
-        }
-        fprintf(pf, "\n");
-      }
-    }
-    delete[] x;
     delete[] dx;
   }
 
@@ -210,7 +266,7 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
     std::wstring _problem_info_file = std::wstring(problem_info_file.begin(), problem_info_file.end());
     std::wstring _eps = std::to_wstring(parameters.Epsilon);
 
-    make_problem_info_file(problem, result, problem_info_file.c_str(), calcs_type, params, bounds, 100);
+    make_problem_info_file(problem, result, problem_info_file.c_str(), calcs_type, params, bounds, 200);
 
     wchar_t* __build_path = wcsdup(build_path.wstring().c_str());
     wchar_t* __script_path = wcsdup(script_path.wstring().c_str());

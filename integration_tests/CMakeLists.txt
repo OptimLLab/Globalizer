@@ -19,7 +19,6 @@ target_include_directories(Globalizer_IntegrationTests PRIVATE
 
 target_link_libraries(Globalizer_IntegrationTests PRIVATE Globalizer_l)
 
-# Копируем tests.json
 add_custom_command(TARGET Globalizer_IntegrationTests POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
   "${CMAKE_CURRENT_SOURCE_DIR}/references/tests.json"

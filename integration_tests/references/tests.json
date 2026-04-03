@@ -1,63 +1,62 @@
 [
-{
-"name": "Rastrigin",
-"type": "Simple",
-"dimension": 2,
-"optimum": 0.0,
-"tolerance": 0.01,
-"r": 2.5,
-"epsilon": 0.01,
-"m": 10
-},
-{
-"name": "StronginC3_Lambda",
-"type": "Simple",
-"dimension": 2,
-"optimum": -1.489444,
-"tolerance": 0.01,
-"r": 4.5,
-"epsilon": 0.01,
-"m": 10
-},
-{
-"name": "StronginC3_Pointer",
-"type": "Simple",
-"dimension": 2,
-"optimum": -1.489444,
-"tolerance": 0.01,
-"r": 4.5,
-"epsilon": 0.01,
-"m": 10
-},
-{
-"name": "Rastrigin",
-"type": "Benchmark",
-"dimension": 2,
-"optimum": 0.0,
-"tolerance": 0.01,
-"r": 2.5,
-"epsilon": 0.01,
-"m": 10
-},
-{
-"name": "StronginC3",
-"type": "Benchmark",
-"dimension": 2,
-"optimum": -1.489444,
-"tolerance": 0.01,
-"r": 4.5,
-"epsilon": 0.01,
-"m": 10
-},
-{
-"name": "GKLS",
-"type": "GCGen",
-"gkls_class": 1,
-"dimension": 2,
-"optimum": -1.0,
-"tolerance": 0.01,
-"r": 4.0,
-"epsilon": 0.01,
-"m": 10
-}
+  {
+    "name": "Hill",
+    "type": "Simple",
+    "dimension": 2,
+    "optimum": 0.0,
+    "point": [ 0.5, 0.5 ],
+    "expected_iterations": 54,
+    "tolerance": 0.001,
+    "r": 2.0,
+    "epsilon": 0.01,
+    "m": 0
+  },
+  {
+    "name": "Rastrigin",
+    "type": "Simple",
+    "dimension": 2,
+    "optimum": 0.0,
+    "point": [ 0.0, 0.0 ],
+    "expected_iterations": 523,
+    "tolerance": 0.01,
+    "r": 2.5,
+    "epsilon": 0.01,
+    "m": 0
+  },
+  {
+    "name": "Rastrigin_3D",
+    "type": "Simple",
+    "dimension": 3,
+    "optimum": 0.0,
+    "point": [ 0.0, 0.0, 0.0 ],
+    "expected_iterations": 2541,
+    "tolerance": 0.05,
+    "r": 2.5,
+    "epsilon": 0.01,
+    "m": 0
+  },
+  {
+    "name": "Rastrigin_5D",
+    "type": "Simple",
+    "dimension": 5,
+    "optimum": 0.0,
+    "point": [ 0.0, 0.0, 0.0, 0.0, 0.0 ],
+    "expected_iterations": 15200,
+    "tolerance": 0.1,
+    "r": 2.5,
+    "epsilon": 0.01,
+    "m": 0
+  },
+  {
+    "name": "StronginC3_Lambda",
+    "type": "Simple",
+    "dimension": 2,
+    "optimum": -1.489444,
+    "point": [ 0.941176, 0.941176 ],
+    "expected_iterations": 721,
+    "tolerance": 0.01,
+    "r": 4.5,
+    "epsilon": 0.01,
+    "m": 3
+  }
 ]

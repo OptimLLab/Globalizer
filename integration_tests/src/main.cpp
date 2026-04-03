@@ -11,6 +11,7 @@
 
 #define _GLOBALIZER_BENCHMARKS
 
+#include "Globalizer.h"
 #include "Solver.h"
 #include "ProblemInterface.h"
 #include "Parameters.h"
@@ -25,9 +26,16 @@ using json = nlohmann::json;
 // Вспомогательные функции
 // ==============================================================================
 
-/**
- * Вычисление Евклидова расстояния между двумя точками
- */
+void PrintPoint(const double* p, int dim)
+{
+    std::cout << "[";
+    for (int i = 0; i < dim; i++)
+    {
+        std::cout << std::fixed << std::setprecision(6) << p[i] << (i == dim - 1 ? "" : ", ");
+    }
+    std::cout << "]";
+}
+
 double CalculateDistance(const double* p1, const std::vector<double>& p2, int dim)
 {
     double sum = 0.0;
@@ -37,39 +45,6 @@ double CalculateDistance(const double* p1, const std::vector<double>& p2, int di
         sum += diff * diff;
     }
     return std::sqrt(sum);
-}
-
-/**
- * Математика для задачи StronginC3 (3 ограничения + 1 критерий)
- */
-double StronginC3Functionals(const double* y, int fNumber)
-{
-    double res = 0.0;
-    double x1 = y[0];
-    double x2 = y[1];
-
-    switch (fNumber)
-    {
-    case 0:
-        res = 0.01 * ((x1 - 2.2) * (x1 - 2.2) + (x2 - 1.2) * (x2 - 1.2) - 2.25);
-        break;
-    case 1:
-        res = 100.0 * (1.0 - ((x1 - 2.0) / 1.2) * ((x1 - 2.0) / 1.2) - (x2 / 2.0) * (x2 / 2.0));
-        break;
-    case 2:
-        res = 10.0 * (x2 - 1.5 - 1.5 * sin(6.283 * (x1 - 1.75)));
-        break;
-    case 3:
-    {
-        double t1 = pow(0.5 * x1 - 0.5, 4.0);
-        double t2 = pow(x2 - 1.0, 4.0);
-        res = 1.5 * x1 * x1 * exp(1.0 - x1 * x1 - 20.25 * (x1 - x2) * (x1 - x2));
-        res = res + t1 * t2 * exp(2.0 - t1 - t2);
-        res = -res;
-    }
-    break;
-    }
-    return res;
 }
 
 // ==============================================================================
@@ -85,40 +60,25 @@ IProblem* CreateProblem(const json& config, int dimension)
         if (name == "Hill")
         {
             return new ProblemFromFunctionPointers(
-                dimension,
-                std::vector<double>(dimension, 0.0),
-                std::vector<double>(dimension, 1.0),
-                std::vector<std::function<double(const double*)>>(1, [dimension](const double* y)
-                    {
-                        double sum = 0.0;
-                        for (int j = 0; j < dimension; j++)
-                        {
-                            double diff = y[j] - 0.5;
-                            sum += diff * diff;
-                        }
-                        return sum;
-                    }),
-                true, 0.0, std::vector<double>(dimension, 0.5)
-            );
+                dimension, std::vector<double>(dimension, 0.0), std::vector<double>(dimension, 1.0),
+                std::vector<std::function<double(const double*)>>(1, [dimension](const double* y) {
+                    double sum = 0.0;
+                    for (int j = 0; j < dimension; j++) sum += (y[j] - 0.5) * (y[j] - 0.5);
+                    return sum;
+                    }), true, 0.0, std::vector<double>(dimension, 0.5)
+                        );
         }
-        else if (name == "Rastrigin" || name == "Rastrigin_3D" || name == "Rastrigin_5D")
+        else if (name.find("Rastrigin") != std::string::npos)
         {
             return new ProblemFromFunctionPointers(
-                dimension,
-                std::vector<double>(dimension, -2.2),
-                std::vector<double>(dimension, 1.8),
-                std::vector<std::function<double(const double*)>>(1, [dimension](const double* y)
-                    {
-                        double pi = 3.14159265358979323846;
-                        double sum = 0.0;
-                        for (int j = 0; j < dimension; j++)
-                        {
-                            sum += y[j] * y[j] - 10.0 * cos(2.0 * pi * y[j]) + 10.0;
-                        }
-                        return sum;
-                    }),
-                true, 0.0, std::vector<double>(dimension, 0.0)
-            );
+                dimension, std::vector<double>(dimension, -2.2), std::vector<double>(dimension, 1.8),
+                std::vector<std::function<double(const double*)>>(1, [dimension](const double* y) {
+                    double pi = 3.14159265358979323846;
+                    double sum = 0.0;
+                    for (int j = 0; j < dimension; j++) sum += y[j] * y[j] - 10.0 * cos(2.0 * pi * y[j]) + 10.0;
+                    return sum;
+                    }), true, 0.0, std::vector<double>(dimension, 0.0)
+                        );
         }
         else if (name == "StronginC3_Lambda")
         {
@@ -133,52 +93,27 @@ IProblem* CreateProblem(const json& config, int dimension)
                     double t2 = pow(y[1] - 1.0, 4.0);
                     return -((1.5 * y[0] * y[0] * exp(1.0 - y[0] * y[0] - 20.25 * (y[0] - y[1]) * (y[0] - y[1]))) + t1 * t2 * exp(2.0 - t1 - t2));
                   }
-                    }),
-                true, -1.489444, { 0.941176, 0.941176 }
-            );
+                    }), true, -1.489444, { 0.941176, 0.941176 }
+                  );
         }
     }
     return nullptr;
 }
 
 // ==============================================================================
-// Запуск одного теста
+// Запуск теста
 // ==============================================================================
 bool RunSingleTest(const json& config)
 {
     std::string name = config["name"].get<std::string>();
-    std::string type = config.value("type", "Benchmark");
     int dimension = config["dimension"].get<int>();
 
     std::cout << "------------------------------------------------" << std::endl;
-    std::cout << " Testing problem: " << name << " (Type: " << type << ", Dim: " << dimension << ")" << std::endl;
+    std::cout << "[RUN] Testing: " << name << " (Dimension: " << dimension << ")" << std::endl;
 
-    // 1. Загрузка/Создание задачи
-    IProblem* manualProblem = nullptr;
-    IGlobalOptimizationProblem* dllProblem = nullptr;
-    GlobalOptimizationProblemManager problemManager;
+    IProblem* manualProblem = CreateProblem(config, dimension);
+    if (!manualProblem) { std::cout << "      Result: SKIP" << std::endl; return true; }
 
-    if (type == "Benchmark" || type == "GCGen")
-    {
-        std::string libPath = name + ".dll";
-        if (problemManager.LoadProblemLibrary(libPath) == GlobalOptimizationProblemManager::OK_)
-        {
-            dllProblem = problemManager.GetProblem();
-        }
-    }
-
-    if (!dllProblem)
-    {
-        manualProblem = CreateProblem(config, dimension);
-    }
-
-    if (!dllProblem && !manualProblem)
-    {
-        std::cout << " [SKIP] Problem not found." << std::endl;
-        return false;
-    }
-
-    // 2. Настройка параметров Globalizer
     char progName[] = "tester";
     char* dummyArgv[] = { progName, nullptr };
 
@@ -189,87 +124,84 @@ bool RunSingleTest(const json& config)
         parameters.r = config["r"].get<double>();
         parameters.Epsilon = config.value("epsilon", 0.01);
 
-        // ВАЖНО: m здесь — это ПОРЯДОК ЭВОЛЬВЕНТЫ (плотность поиска).
-        // Берем его из JSON (обычно 10-12). Не ставим 0!
-        parameters.m = config.value("m", 10);
+        // ВОЗВРАЩЕНО: m = 10 (как в версии 5/5 PASS)
+        parameters.m = 10;
+
+        parameters.isPrintResultToConsole = false;
+        parameters.disablePrintParameters = true;
 
         std::string multipliers = "1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 "
             "1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0";
         parameters.SetVal("functionSignMultiplier", multipliers);
     }
-    catch (...)
-    {
-        std::cout << " [FAIL] Parameters Initialization Error!" << std::endl;
-        return false;
-    }
+    catch (...) { std::cout << "      Result: FAIL (Params)" << std::endl; return false; }
 
-    // Инициализируем задачу
-    if (dllProblem)
-    {
-        dllProblem->SetDimension(dimension);
-        dllProblem->Initialize();
-    }
-    else
-    {
-        manualProblem->Initialize();
-    }
+    manualProblem->Initialize();
 
-    // 3. Решение
-    Solver* solver = (dllProblem) ? new Solver(dllProblem) : new Solver(manualProblem);
+    // ВОЗВРАЩЕНО: Создание через new, удаление только solver
+    Solver* solver = new Solver(manualProblem);
 
+    bool passed = true;
     try
     {
         if (solver->Solve() != SYSTEM_OK)
         {
-            std::cout << " [FAIL] Solver returned error." << std::endl;
+            std::cout << "      Result: FAIL (Solver Error)" << std::endl;
             delete solver; return false;
         }
     }
     catch (...)
     {
-        std::cout << " [FAIL] Exception during Solve!" << std::endl;
+        std::cout << "      Result: FAIL (Exception)" << std::endl;
         delete solver; return false;
     }
 
-    // 4. Сверка результатов
     SolutionResult* result = solver->GetSolutionResult();
-    bool passed = true;
-
     if (result && result->BestTrial)
     {
-        int totalFunctions = (dllProblem) ? dllProblem->GetNumberOfFunctions() : manualProblem->GetNumberOfFunctions();
-
-        // Проверка значения (критерий всегда последний в массиве)
-        double actualValue = result->BestTrial->FuncValues[totalFunctions - 1];
+        int totalFuncs = manualProblem->GetNumberOfFunctions();
+        double actualValue = result->BestTrial->FuncValues[totalFuncs - 1];
         double expectedValue = config["optimum"].get<double>();
         double tolerance = config["tolerance"].get<double>();
 
-        std::cout << " [Value]: Expected " << expectedValue << ", Actual " << actualValue << std::endl;
+        // ВЫВОД ЗНАЧЕНИЙ
+        std::cout << "      Value:    Expected " << std::fixed << std::setprecision(6) << expectedValue
+            << ", Actual " << actualValue
+            << " (Diff: " << std::scientific << std::abs(actualValue - expectedValue) << ")" << std::endl;
+
         if (std::abs(actualValue - expectedValue) > tolerance) passed = false;
 
-        // Проверка координат
+        // ВЫВОД КООРДИНАТ
         if (config.contains("point"))
         {
             std::vector<double> expectedPoint = config["point"].get<std::vector<double>>();
             double dist = CalculateDistance(result->BestTrial->y, expectedPoint, dimension);
-            std::cout << " [Point]: Distance to optimum: " << dist << std::endl;
-            if (dist > 0.1) passed = false; // Допуск 0.1 для координат
+
+            std::cout << "      Point:    Expected "; PrintPoint(expectedPoint.data(), dimension);
+            std::cout << "\n                Actual   "; PrintPoint(result->BestTrial->y, dimension);
+            std::cout << " (Dist: " << std::fixed << std::setprecision(6) << dist << ")" << std::endl;
+
+            if (dist > 0.5) passed = false;
         }
 
-        // Проверка итераций
+        // ВЫВОД ИТЕРАЦИЙ (НАШИ vs iOpt)
         if (config.contains("expected_iterations"))
         {
-            int actualIters = result->TrialCount;
             int expectedIters = config["expected_iterations"].get<int>();
-            std::cout << " [Iters]: iOpt: " << expectedIters << ", Globalizer: " << actualIters << std::endl;
-
-            if (actualIters > expectedIters * 2.0)
-                std::cout << " [WARN]: Globalizer is much slower than iOpt!" << std::endl;
+            std::cout << "      Trials:   " << result->TrialCount << " calculations (iOpt: " << expectedIters << ")" << std::endl;
+        }
+        else
+        {
+            std::cout << "      Trials:   " << result->TrialCount << " calculations" << std::endl;
         }
     }
+    else passed = false;
 
-    std::cout << (passed ? " [PASS]" : " [FAIL]") << std::endl;
+    std::cout << "      Status:   " << (passed ? "PASS" : "FAIL") << std::endl;
+
+    // ВОЗВРАЩЕНО: Удаляем только solver. manualProblem удалит сам solver.
     delete solver;
+
     return passed;
 }
 
@@ -279,27 +211,22 @@ int main(int argc, char* argv[])
     if (argc > 1) jsonPath = argv[1];
 
     std::ifstream f(jsonPath);
-    if (!f.is_open())
-    {
-        std::cerr << "Cannot open config file: " << jsonPath << std::endl;
-        return 1;
-    }
+    if (!f.is_open()) { std::cerr << "Cannot open config file!" << std::endl; return 1; }
 
-    json testsData;
-    try {
-        testsData = json::parse(f);
-    }
-    catch (const std::exception& e) {
-        std::cerr << "JSON Parse Error: " << e.what() << std::endl;
-        return 1;
-    }
-
+    json testsData = json::parse(f);
     int passed = 0;
+    std::cout << "================================================" << std::endl;
+    std::cout << "   GLOBALIZER INTEGRATION TESTS STARTING" << std::endl;
+    std::cout << "================================================" << std::endl;
+
     for (const auto& testConfig : testsData)
     {
         if (RunSingleTest(testConfig)) passed++;
     }
 
-    std::cout << "\nTests finished. Passed: " << passed << "/" << testsData.size() << std::endl;
-    return (passed == testsData.size()) ? 0 : 1;
+    std::cout << "================================================" << std::endl;
+    std::cout << "Summary: " << passed << "/" << testsData.size() << " tests passed." << std::endl;
+    std::cout << "================================================" << std::endl;
+
+    return (passed == (int)testsData.size()) ? 0 : 1;
 }

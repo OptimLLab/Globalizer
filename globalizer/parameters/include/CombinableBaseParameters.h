@@ -1,12 +1,11 @@
-
-/////////////////////////////////////////////////////////////////////////////
+п»ї/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
 //                       Copyright (c) 2016 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      CombinableBaseParameter.h                                                  //
+//  File:      CombinableBaseParameter.h                                   //
 //                                                                         //
 //  Purpose:   Header file for random generator class                      //
 //                                                                         //
@@ -18,36 +17,41 @@
 #define __COMBINABLE_BASE_PARAMETERS_H__
 
 /**
-\file CombinableBaseParameter.h
-
-\authors Лебедев И.
-\date 2015-2016
-\copyright ННГУ им. Н.И. Лобачевского
-
-\brief Объявление базоых классов для свойств
-
-*/
+ * \file CombinableBaseParameter.h
+ *
+ * \authors Р›РµР±РµРґРµРІ Р.
+ * \date 2015-2016
+ * \copyright РќРќР“РЈ РёРј. Рќ.Р. Р›РѕР±Р°С‡РµРІСЃРєРѕРіРѕ
+ *
+ * \brief РћР±СЉСЏРІР»РµРЅРёРµ Р±Р°Р·РѕС‹С… РєР»Р°СЃСЃРѕРІ РґР»СЏ СЃРІРѕР№СЃС‚РІ
+ *
+ */
 
 #include "Types.h"
 
-/**
-Базовый класс параметров
-При создание наследника необходимо переопределить констану OWNER_NAME
-и в конструкторе задать mOwner
-(mOwner = this;)
-*/
+ /**
+  * Р‘Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РїР°СЂР°РјРµС‚СЂРѕРІ
+  * РџСЂРё СЃРѕР·РґР°РЅРёРµ РЅР°СЃР»РµРґРЅРёРєР° РЅРµРѕР±С…РѕРґРёРјРѕ РїРµСЂРµРѕРїСЂРµРґРµР»РёС‚СЊ РєРѕРЅСЃС‚Р°РЅСѓ OWNER_NAME
+  * Рё РІ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂРµ Р·Р°РґР°С‚СЊ mOwner
+  * (mOwner = this;)
+  */
 class CombinableBaseParameters
 {
 protected:
-  /// Количество арументов командной строки
+  /// РљРѕР»РёС‡РµСЃС‚РІРѕ Р°СЂСѓРјРµРЅС‚РѕРІ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
   int mArgumentCount;
-  /// Сами аргументы командной строки
+  /// РЎР°РјРё Р°СЂРіСѓРјРµРЅС‚С‹ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
   char** mAargumentValue;
-  /// Был ли инициализирован MPI
+  /// Р‘С‹Р» Р»Рё РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ MPI
   bool mIsMPIInit;
 public:
 
-  /// Задает начальные параметры
+  /**
+   * Р—Р°РґР°РµС‚ РЅР°С‡Р°Р»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
+   * \param[in] argc РљРѕР»РёС‡РµСЃС‚РІРѕ Р°СЂРіСѓРјРµРЅС‚РѕРІ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
+   * \param[in] argv РњР°СЃСЃРёРІ Р°СЂРіСѓРјРµРЅС‚РѕРІ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
+   * \param[in] isMPIInit Р¤Р»Р°Рі РёРЅРёС†РёР°Р»РёР·Р°С†РёРё MPI
+   */
   virtual void SetInitParam(int argc = 0, char* argv[] = 0, bool isMPIInit = false)
   {
     mArgumentCount = argc;
@@ -55,19 +59,19 @@ public:
     mIsMPIInit = isMPIInit;
   }
 
-  /// Объединяет все параметры двух классов в обоих
+  /// РћР±СЉРµРґРёРЅСЏРµС‚ РІСЃРµ РїР°СЂР°РјРµС‚СЂС‹ РґРІСѓС… РєР»Р°СЃСЃРѕРІ РІ РѕР±РѕРёС…
   virtual void CombineOptions(IBaseValueClass** otherOptions, int count) = 0;
-  /// Возвращает имеющиеся свойства
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ РёРјРµСЋС‰РёРµСЃСЏ СЃРІРѕР№СЃС‚РІР°
   virtual IBaseValueClass** GetOptions() = 0;
-  /// Возвращает количество опций
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ РѕРїС†РёР№
   virtual int GetOptionsCount() = 0;
 
   virtual void SetVal(std::string name, std::string val) = 0;
-  /// Задание параметру с именем name значения val
+  /// Р—Р°РґР°РЅРёРµ РїР°СЂР°РјРµС‚СЂСѓ СЃ РёРјРµРЅРµРј name Р·РЅР°С‡РµРЅРёСЏ val
   virtual void SetVal(std::string name, void* val) = 0;
-  /// Возвращает строку с значением параметра с именем name
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃС‚СЂРѕРєСѓ СЃ Р·РЅР°С‡РµРЅРёРµРј РїР°СЂР°РјРµС‚СЂР° СЃ РёРјРµРЅРµРј name
   virtual std::string GetStringVal(std::string name) = 0;
-  /// Возвращает значение параметра с именем name
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ Р·РЅР°С‡РµРЅРёРµ РїР°СЂР°РјРµС‚СЂР° СЃ РёРјРµРЅРµРј name
   virtual void* GetVal(std::string name) = 0;
 
   CombinableBaseParameters()
@@ -77,7 +81,7 @@ public:
     mIsMPIInit = false;
   }
 
-  /// Инициализировать данные задачи по параметрам системы
+  /// РРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ РґР°РЅРЅС‹Рµ Р·Р°РґР°С‡Рё РїРѕ РїР°СЂР°РјРµС‚СЂР°Рј СЃРёСЃС‚РµРјС‹
   virtual void InitDataByParameters()
   {};
 };

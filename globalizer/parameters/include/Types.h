@@ -565,6 +565,56 @@ public:
   virtual operator std::string();
 };
 
+/** тип визуализации целевой функции
+доступные режимы :
+0 - LevelLayers - линии уровней
+1 - Surface - поверхность
+*/
+template <class Owner>
+class TEFigureTypes :
+  public ParameterProperty<FigureTypes, Owner>
+{
+public:
+  /// Базовые переопределения
+  BasicMethods(TEFigureTypes, FigureTypes);
+
+  TEFigureTypes(FigureTypes value = LevelLayers) :
+    ParameterProperty<FigureTypes, Owner>(value) {}
+
+  /// Парсер строки
+  virtual void operator = (std::string data);
+
+  /// Приведение к строке
+  virtual operator std::string();
+};
+
+/** тип вычислений значений для визуализации целевой функции
+доступные режимы:
+0 - ObjectiveFunction - строит линии уровня / поверхность по сетке 100 * 100,
+1 - Approximation - строит аппроксимацию линий уровня / поверхности по имеющейся поисковой информации,
+2 - Interpolation - строит интерполяцию линий уровня / поверхности по имеющейся поисковой информации,
+3 - ByPoints - строит поверхность путем "натягивагия" ее на точки поисковой информации без сглаживания,
+4 - OnlyPoints - отображает только распределение точек поисковой информации в области поиска.
+*/
+template <class Owner>
+class TECalcsTypes :
+  public ParameterProperty<CalcsTypes, Owner>
+{
+public:
+  /// Базовые переопределения
+  BasicMethods(TECalcsTypes, CalcsTypes);
+
+  TECalcsTypes(CalcsTypes value = ObjectiveFunction) :
+    ParameterProperty<CalcsTypes, Owner>(value) {}
+
+  /// Парсер строки
+  virtual void operator = (std::string data);
+
+  /// Приведение к строке
+  virtual operator std::string();
+};
+
+
 /* ======================================================================== *\
 **  Служебные функции                                                       **
 \* ======================================================================== */
@@ -786,11 +836,11 @@ void TStrings<Owner>::operator = (std::string data)
   //sscanf(data.data(), "%d", &mValue);
 
   int l = 0;
-  char *s = new char[data.size() + 1];
+  char* s = new char[data.size() + 1];
 
   strcpy(s, data.c_str());
 
-  char *pp = strtok(s, this->mSeparator.c_str());
+  char* pp = strtok(s, this->mSeparator.c_str());
   std::string tt[100];
   std::string t = "";
   while (pp != 0)
@@ -926,11 +976,11 @@ void TInts<Owner>::operator = (std::string data)
   //sscanf(data.data(), "%d", &mValue);
 
   int l = 0;
-  char *s = new char[data.size() + 1];
+  char* s = new char[data.size() + 1];
 
   strcpy(s, data.c_str());
 
-  char *pp = strtok(s, this->mSeparator.c_str());
+  char* pp = strtok(s, this->mSeparator.c_str());
   int tt[100];
   int t = 0;
   while (pp != 0)
@@ -1066,11 +1116,11 @@ void TDoubles<Owner>::operator = (std::string data)
   //sscanf(data.data(), "%d", &mValue);
 
   int l = 0;
-  char *s = new char[data.size() + 1];
+  char* s = new char[data.size() + 1];
 
   strcpy(s, data.c_str());
 
-  char *pp = strtok(s, this->mSeparator.c_str());
+  char* pp = strtok(s, this->mSeparator.c_str());
   double tt[100];
   double t = 0;
   while (pp != 0)
@@ -1132,6 +1182,8 @@ void TETypeMethod<Owner>::operator = (std::string data)
     *this = StandartMethod;
   if ((data == "IntegerMethod") || (data == "1"))
     *this = IntegerMethod;
+  if ((data == "RSAMethod") || (data == "2"))
+      *this = RSAMethod;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1144,6 +1196,8 @@ TETypeMethod<Owner>::operator std::string()
     s = "StandartMethod";
   if (this->mValue == IntegerMethod)
     s = "IntegerMethod";
+  if (this->mValue == RSAMethod)
+      s = "RSAMethod";
   return s;
 }
 
@@ -1228,8 +1282,8 @@ void TEStopCondition<Owner>::operator = (std::string data)
     *this = OptimumVicinity2;
   if (data == "OptimumValue" || data == "3")
     *this = OptimumValue;
-  if (data == "AccuracyWithCheck" || data == "4")
-    *this = AccuracyWithCheck;
+  if (data == "MaxIterWithoutImprovement" || data == "4")
+    *this = MaxIterWithoutImprovement;
   if (data == "InLocalArea" || data == "5")
     *this = InLocalArea;
 }
@@ -1563,6 +1617,76 @@ TELocalTuningType<Owner>::operator std::string()
     s = "Adaptive";
   if (this->mValue == AdaptiveMiniMax)
     s = "AdaptiveMiniMax";
+  return s;
+}
+
+
+/* ======================================================================== *\
+**  Реализация методов класса     TEFigureTypes                                   **
+\* ======================================================================== */
+
+// ------------------------------------------------------------------------------------------------
+/// Парсер строки
+template <class Owner>
+void TEFigureTypes<Owner>::operator = (std::string data)
+{
+  if ((data == "LevelLayers") || (data == "0"))
+    *this = LevelLayers;
+  if ((data == "Surface") || (data == "1"))
+    *this = Surface;
+}
+
+// ------------------------------------------------------------------------------------------------
+/// Приведение к строке
+template <class Owner>
+TEFigureTypes<Owner>::operator std::string()
+{
+  std::string s;
+  if (this->mValue == LevelLayers)
+    s = "LevelLayers";
+  if (this->mValue == Surface)
+    s = "Surface";
+  return s;
+}
+
+
+/* ======================================================================== *\
+**  Реализация методов класса     TECalcsTypes                                 **
+\* ======================================================================== */
+
+// ------------------------------------------------------------------------------------------------
+/// Парсер строки
+template <class Owner>
+void TECalcsTypes<Owner>::operator = (std::string data)
+{
+  if ((data == "ObjectiveFunction") || (data == "0"))
+    *this = ObjectiveFunction;
+  if ((data == "Approximation") || (data == "1"))
+    *this = Approximation;
+  if ((data == "Interpolation") || (data == "2"))
+    *this = Interpolation;
+  if ((data == "ByPoints") || (data == "3"))
+    *this = ByPoints;
+  if ((data == "OnlyPoints") || (data == "4"))
+    *this = OnlyPoints;
+}
+
+// ------------------------------------------------------------------------------------------------
+/// Приведение к строке
+template <class Owner>
+TECalcsTypes<Owner>::operator std::string()
+{
+  std::string s;
+  if (this->mValue == ObjectiveFunction)
+    s = "ObjectiveFunction";
+  if (this->mValue == Approximation)
+    s = "Approximation";
+  if (this->mValue == Interpolation)
+    s = "Interpolation";
+  if (this->mValue == ByPoints)
+    s = "ByPoints";
+  if (this->mValue == OnlyPoints)
+    s = "OnlyPoints";
   return s;
 }
 

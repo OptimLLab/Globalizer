@@ -30,6 +30,7 @@ void HDSolver::CreateStartPoint()
       parameters.startPoint[i] = A[i] + (B[i] - A[i]) / 2.0;
     }
   }
+  parameters.IsUseStartPoint = true;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -57,6 +58,9 @@ HDSolver::HDSolver(IProblem* _problem, std::vector<int> _dimentions)
   SetDimentions(_dimentions);
   Construct();
   finalSolver = nullptr;
+  pData = nullptr;
+  pTask = nullptr;
+  parameters.startParameterNumber = 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -133,13 +137,14 @@ void HDSolver::UpdateStartPoint(SolutionResult* solution, double& bestValue, int
           parameters.startPoint[j + startParameterNumber] = solution->BestTrial->y[j];
         }
 
-        parameters.startPointValues.SetSize(curTask->GetNumOfFunc());
-        for (int j = 0; j < curTask->GetNumOfFunc(); j++)
-        {
-          parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
-        }
+        //parameters.startPointValues.SetSize(curTask->GetNumOfFunc());
+        //for (int j = 0; j < curTask->GetNumOfFunc(); j++)
+        //{
+        //  parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
+        //}
 
         print << "\t Iteration " << points.size() << "\t" << "bestValue =\t" << bestValue << "\n";
+        countIterationsWithoutImprovement = points.size();
 
       }
     }
@@ -150,6 +155,84 @@ void HDSolver::UpdateStartPoint(SolutionResult* solution, double& bestValue, int
     if (j + startParameterNumber < alternativeStartingPoint.size())
       alternativeStartingPoint[j + startParameterNumber] = solution->BestTrial->y[j];
   }
+}
+
+// ------------------------------------------------------------------------------------------------
+void  HDSolver::CreateData()
+{
+  // В случае, если не совпадают (задача пришла снаружи — берём новые), иначе всё равно
+  IProblem* _problem = problem;
+
+  /// Создание задачи (Task) // перенести в фабрику
+  if (pTask == 0)
+  {
+    pTask = TaskFactory::CreateTask(_problem, 0);
+  }
+  /// Создаём данные для поисковой информации
+
+
+  if (pData == 0)
+  {
+    pData = new SearchData(_problem->GetNumberOfFunctions());
+    int qSize = GLOBALIZER_MAX((int)pow(2.0, (int)(log((double)parameters.MaxNumOfPoints)
+      / log(2.0) - 2)) - 1, 1023);
+    pData->ResizeQueue(qSize);
+  }
+  else
+  {
+    pData->Clear();
+  }
+
+  parameters.serializer->SetSearchData(pData);
+  parameters.serializer->SetTask(pTask);
+}
+
+void HDSolver::LoadPoint()
+{
+  std::string pointsPath = parameters.FirstPointFilePath;
+  std::string pointsPathExtension = GetFileExtension(pointsPath);
+  //int numberLoadedPoints = 0;
+  //std::vector<Trial*> newPoint;
+  if (pointsPathExtension == "json")
+  {
+    CreateData();
+    parameters.serializer->LoadFromFile(pointsPath, fd);
+    //newPoint = fd.trials;
+    //numberLoadedPoints = newPoint.size();
+    //for (auto trial : newPoint)
+    //  pData->GetTrials().push_back(trial);
+
+    if (parameters.M_constant.GetSize() < fd.searchData.M.size())
+      parameters.M_constant.SetSize(fd.searchData.M.size());
+
+    for (int j = 0; j < fd.searchData.M.size(); j++)
+    {
+      parameters.M_constant[j] = fd.searchData.M[j];
+    }
+    parameters.startPoint.SetSize(parameters.Dimension);
+    parameters.startParameterNumber = (fd.methodParams.start_parameter_number + 1) % parameters.Dimension;
+
+    Trial* best = fd.trials[0];
+
+    for (auto trial : fd.trials)
+    {
+      if (trial->index > best->index || trial->index == best->index &&
+        trial->FuncValues[best->index] < best->FuncValues[best->index])
+      {
+        best = trial;
+      }
+    }
+
+
+    parameters.startPoint.SetSize(parameters.Dimension);
+    for (int i = 0; i < parameters.Dimension; i++)
+    {
+      parameters.startPoint[i] = best->y[i];
+    }
+
+  }
+
+
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -166,20 +249,28 @@ int HDSolver::Solve()
       parameters.M_constant[j] = 1;
     }
 
-    auto mnp = parameters.MaxNumOfPoints[0];
+    auto mnp = parameters.MaxNumOfPoints;
     int iterationCount = parameters.HDSolverIterationCount;
     
     alternativeStartingPoint.resize(originalDimension);
+    for (int j = 0; j < originalDimension; j++)
+    {
+      alternativeStartingPoint[j] = parameters.startPoint[j];
+    }
+
 
     std::vector<Trial*> points;
     double bestValue = MaxDouble;
+
+    LoadPoint();
+
     for (int iteration = 0; iteration < iterationCount; iteration++)
     {
       parameters.localRefineSolution = None;
       parameters.isPrintResultToConsole = false;
-      int startParameterNumber = 0;
+      int startParameterNumber = parameters.startParameterNumber;
 
-      for (int i = 0; i < solvers.size(); i++)
+      for (int i = startParameterNumber; i < solvers.size(); i++)
       {
         parameters.Dimension = dimensions[i];
 
@@ -189,6 +280,7 @@ int HDSolver::Solve()
         tasks[i] = dynamic_cast<HDTask*>(TaskFactory::CreateTask(problem, 0));
 
         tasks[i]->SetStartParameterNumber(startParameterNumber);
+        parameters.startParameterNumber = startParameterNumber;
 
         solver->Solve(tasks[i]);
 
@@ -211,47 +303,71 @@ int HDSolver::Solve()
             parameters.M_constant[j] = solver->GetData()->M[j];
           }
         }
+
+        if ((points.size() - countIterationsWithoutImprovement > parameters.MaxIterationsWithoutImprovement) && (parameters.stopCondition == MaxIterWithoutImprovement))
+        {
+          break;
+        }
+
+        if (bestValue == MaxDouble) //Если допустимая точка не найдена
+        {
+          for (int j = 0; j < originalDimension; j++)
+          {
+            parameters.startPoint[j] = alternativeStartingPoint[j];
+          }
+        }
       }
+
       if (iteration == iterationCount - 1)
       {
         parameters.localRefineSolution = doLV;
         parameters.isPrintResultToConsole = isPrint;
       }
 
-      if (finalSolver == nullptr)
-        finalSolver = new Solver(problem);
-      else
+      if ((parameters.localRefineSolution != None) || (iteration == iterationCount - 1)) //Если нужно локальное улучшение
       {
+        std::string fileSerializer = parameters.fileSerializer.ToString();
+        parameters.fileSerializer = "";
 
-        finalSolver = new Solver(problem);
+        if (finalSolver == nullptr)
+          finalSolver = new Solver(problem);
+        else
+        {
+
+          finalSolver = new Solver(problem);
+        }
+        //parameters.MaxNumOfPoints[0] = 2;
+
+        //parameters.MaxNumOfPoints = parameters.MaxNumOfPoints + points.size();
+
+        finalSolver->SetPoint(points);
+
+        finalSolver->Solve();
+
+        if (solutionResult != nullptr)
+          delete solutionResult;
+        solutionResult = finalSolver->GetSolutionResult();
+
+        AddPoint(finalSolver, originalDimension, points, 0);
+
+        UpdateStartPoint(solutionResult, bestValue, originalDimension, startParameterNumber, points, dynamic_cast<HDTask*>(finalSolver->GetTask()));
+
+        //parameters.MaxNumOfPoints = mnp ;
+        parameters.fileSerializer = fileSerializer;
       }
-      //parameters.MaxNumOfPoints[0] = 2;
 
-      parameters.MaxNumOfPoints[0] = parameters.MaxNumOfPoints[0] + points.size();
 
-      finalSolver->SetPoint(points);
-
-      finalSolver->Solve();      
-
-      if (solutionResult != nullptr)
-        delete solutionResult;
-      solutionResult = finalSolver->GetSolutionResult();
-
-      AddPoint(finalSolver, originalDimension, points, 0);
-
-      UpdateStartPoint(solutionResult, bestValue, originalDimension, startParameterNumber, points, dynamic_cast<HDTask*>(finalSolver->GetTask()));
-
-      parameters.MaxNumOfPoints[0] = mnp ;
-
-      if (bestValue == MaxDouble)
+      if (bestValue == MaxDouble) //Если допустимая точка не найдена
       {
         for (int j = 0; j < originalDimension; j++)
         {
           parameters.startPoint[j] = alternativeStartingPoint[j];
         }
       }
+
+      parameters.startParameterNumber = 0;
     }
-    parameters.MaxNumOfPoints[0] = mnp;
+    parameters.MaxNumOfPoints = mnp;
 
   }
   catch (const Exception& e)

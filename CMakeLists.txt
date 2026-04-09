@@ -23,7 +23,6 @@ option(GLOBALIZER_BUILD_GCGEN "Set ON to build GCGen" OFF)
 option(GLOBALIZER_BUILD_INTEGRATION_TESTS "Set ON to build integration tests" OFF)
 
 option(GLOBALIZER_ONE_MPI_PROCESS_PER_NODE "ONE PROCESS PER NODE" OFF)
-
 option(GLOBALIZER_PYTHON "Set ON to use Python" OFF)
 
 set(GLOBALIZER_DEBUG_SUFFIX   d)
@@ -58,6 +57,7 @@ endif()
 
 include(cmake/globalizer_utils.cmake)
 include(cmake/globalizer_mpi.cmake)
+include(cmake/globalizer_lib.cmake)
 if (GLOBALIZER_USE_DOXYGEN)
   include(cmake/globalizer_doxygen.cmake)
 endif()
@@ -130,11 +130,13 @@ if (${GLOBALIZER_ONE_MPI_PROCESS_PER_NODE})
 endif()
 
 
-
+#add MPFR_GMP_MPIR
 if (${GLOBALIZER_USE_MP})
-  setup_mpir(GLOBALIZER_MPIR_LIB_DIR GLOBALIZER_MPIR_INCLUDES GLOBALIZER_MPIR_LIB)
-  setup_mpfr(GLOBALIZER_MPFR_LIB_DIR GLOBALIZER_MPFR_INCLUDES GLOBALIZER_MPFR_LIB)
-  setup_mpreal(GLOBALIZER_MPREAL_INCLUDES)
+	add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/mpfr_gmp_mpir)
+
+	setup_mpir(GLOBALIZER_MPIR_LIB_DIR GLOBALIZER_MPIR_LIB)
+	setup_gmp(GLOBALIZER_GMP_LIB_DIR GLOBALIZER_GMP_LIB)
+	setup_mpfr(GLOBALIZER_MPFR_LIB_DIR GLOBALIZER_MPFR_LIB)
 else()
   add_definitions(-DNO_MPREAL)
 endif()
@@ -154,9 +156,6 @@ set(GLOBALIZER_local_method_DIR ${GLOBALIZER_COMMON_SRC_DIR}/method/local_method
 
 include_directories(
   ${GLOBALIZER_MPI_INCLUDES}
-  ${GLOBALIZER_MPIR_INCLUDES}
-  ${GLOBALIZER_MPFR_INCLUDES}
-  ${GLOBALIZER_MPREAL_INCLUDES}
   
   ${GLOBALIZER_COMMON_SRC_DIR}/include
   ${GLOBALIZER_PARAMETERS_DIR}/include
@@ -171,6 +170,7 @@ include_directories(
 
 link_directories(
   ${GLOBALIZER_MPIR_LIB_DIR}
+  ${GLOBALIZER_GMP_LIB_DIR}
   ${GLOBALIZER_MPFR_LIB_DIR}
 )
 
@@ -260,6 +260,7 @@ ${GLOBALIZER_BENCHMARKS_Interface_SOURCES}
 list(REMOVE_ITEM ALL_SRC_FILES ${GLOBALIZER_COMMON_SRC_DIR}/Main.cpp)
 
 if (${GLOBALIZER_PYTHON})
+  set(Python_FIND_DEBUG OFF)
   find_package (Python COMPONENTS Interpreter Development NumPy)
 
 #set(EXTRA_DEFINES "")
@@ -313,8 +314,10 @@ foreach(main_filename ${main_list})
     	
     if (${IS_CLANG_COMPILER})	
       target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES} OpenMP::OpenMP_CXX  )
-    else()
-      target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES})  
+    elseif (${IS_MICROSOFT_COMPILER})
+	  target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES}) 
+	else()
+      target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES} stdc++fs)  
     endif()
     
     set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${GLOBALIZER_EXECUTABLE_NAME_DEBUG})
@@ -341,6 +344,7 @@ if (${IS_CLANG_COMPILER})
   target_link_libraries(${GLOBALIZER_LIB_NAME}
     ${GLOBALIZER_MPI_LIB}
     ${GLOBALIZER_MPFR_LIB}
+	${GLOBALIZER_GMP_LIB}
     ${GLOBALIZER_MPIR_LIB}
     ${DISLIN_LIB}
 	OpenMP::OpenMP_CXX  )
@@ -348,6 +352,7 @@ else()
   target_link_libraries(${GLOBALIZER_LIB_NAME}
     ${GLOBALIZER_MPI_LIB}
     ${GLOBALIZER_MPFR_LIB}
+	${GLOBALIZER_GMP_LIB}
     ${GLOBALIZER_MPIR_LIB}
     ${DISLIN_LIB})
 
@@ -416,7 +421,17 @@ if (IS_MICROSOFT_COMPILER)
   endif()
   
   set_property(TARGET ${3RD_PARTY_PROJECT} PROPERTY FOLDER "3rd-party")
- 
+  
+  set(MultiplePrecision "")
+  
+  if(${GLOBALIZER_USE_MP})
+	list (APPEND MultiplePrecision "bootstrap" "gen-bases" "gen-fac" "gen-fac-table" "gen-fib" "gen-fib-table"
+	"gen-jacobitab" "gen-mp-bases" "gen-mpn-jacobitab" "gen-mpn-perfsqr" "gen-psqr" "gen-trialdivtab" 
+	"gen-trialdivtab-h" "libgmp" "libmpf" "libmpn" "libmpq" "libmpz" "libprintf" "librandom" "libscanf"
+	"mpfr" "mpir")
+  endif()
+  
+  set_property(TARGET ${MultiplePrecision} PROPERTY FOLDER "multiple precision")
 
   source_group("Header Files" FILES ${ROOT_HEADERS})
   source_group("Header Files\\Parameters" FILES ${PARAMETERS_HEADERS})

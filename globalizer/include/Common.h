@@ -17,6 +17,7 @@
 #define __COMMON_H__
 
 #include "Defines.h"
+#include <string>
 
 /* ============================================================================================= *\
 **  Constants                                                                                    **
@@ -40,6 +41,12 @@ const int DefaultSearchDataSize = 100000;
 const int TagChildStartSolve = 101;
 const int TagChildSolved = 102;
 const int ChildStopMsg = -101;
+
+
+std::string GetFileExtension(const std::string& filename, bool include_dot = false);
+void FindXY(int& x, int& y, int z, int C);
+bool IsBelowGraph(int x, int y);
+
 
 /* ============================================================================================= *\
 **  Types                                                                                        **
@@ -91,7 +98,8 @@ enum EParameterType
 enum ETypeMethod
 {
   StandartMethod,
-  IntegerMethod
+  IntegerMethod,
+  RSAMethod
 };
 
 enum ESeparableMethodType
@@ -117,7 +125,7 @@ enum EStopCondition
   OptimumVicinity,
   OptimumVicinity2,
   OptimumValue,
-  AccuracyWithCheck,
+  MaxIterWithoutImprovement,
   InLocalArea
 };
 
@@ -221,6 +229,31 @@ enum ELocalTuningType
   ///3 - адаптивно-минимаксное
   AdaptiveMiniMax
 };
+
+/// тип визуализации целевой функции
+enum FigureTypes 
+{ 
+  /// линии уровней
+  LevelLayers, 
+  /// поверхность
+  Surface 
+};
+
+/// тип вычислений значений для визуализации целевой функции
+enum CalcsTypes 
+{ 
+  /// строит линии уровня / поверхность по сетке 100 * 100,
+  ObjectiveFunction, 
+  /// строит аппроксимацию линий уровня / поверхности по имеющейся поисковой информации,
+  Approximation, 
+  /// строит интерполяцию линий уровня / поверхности по имеющейся поисковой информации,
+  Interpolation, 
+  /// строит поверхность путем "натягивагия" ее на точки поисковой информации без сглаживания,
+  ByPoints, 
+  /// отображает только распределение точек поисковой информации в области поиска.
+  OnlyPoints 
+};
+
 
 #endif
 // - end of file ----------------------------------------------------------------------------------

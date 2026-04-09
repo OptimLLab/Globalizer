@@ -37,7 +37,7 @@
 #include <string>
 #include <stdio.h>
 
-
+class SearchDataSerializer;
 
 
 /// Параметры системы оптимизации
@@ -75,70 +75,108 @@ public:
   int MyMap;
   /// последний сохраненный номер итерации
   int iterationNumber;
+  
+  /// Суммарное время решения
+  double timeSolve;
+
+  /// Текущая версия
+  std::string version = "0.1.7";
+
+  /// Номер параметра с которого начинается оптимизация
+  int startParameterNumber = 0;
 
   //Параметры командной строки
 
   /// число точек, порождаемых методом на 1 итерации
-  TInt<Parameters> NumPoints; 
-  TInt<Parameters> StepPrintMessages; 
+  TInt<Parameters> NumPoints;
+  /// Шаг печать информации в консоль
+  TInt<Parameters> StepPrintMessages;
   /// Через какое количество итераций сохранять точки
-  TInt<Parameters> StepSavePoint; 
+  TInt<Parameters> StepSavePoint;
+  /// Тип метода АГП
   TETypeMethod<Parameters> TypeMethod;
+  /// Организация проведения испытаний
   TETypeCalculation<Parameters> TypeCalculation;
-  TETypeProcess<Parameters> TypeProcess; 
+  /// Тип процесса
+  TETypeProcess<Parameters> TypeProcess;
+  /// Число параллельных потоков\процессов задействованых в проведении испытаний
   TInt<Parameters> NumThread;
   ///размер CUDA блока
-  TInt<Parameters> SizeInBlock; 
+  TInt<Parameters> SizeInBlock;
   /// Печатать ли отчетет в файл
   TBool<Parameters> IsPrintFile;
   /// Файл для печати результата, если "000" то не печатаем
-  TString<Parameters> ResulLog; 
+  TString<Parameters> ResulLog;
   ///размерность исходной задачи
-  TInt<Parameters> Dimension; 
+  TInt<Parameters> Dimension;
   /// надежность метода (> 1)
-  TDouble<Parameters> r; 
+  TDouble<Parameters> r;
   ///Добавка при динамичеки изменяемом r, r = r + rDynamic / (Iteration ^ (1/N))
   TDouble<Parameters> rDynamic;
   ///параметр eps-резервирования
-  TDouble<Parameters> rEps; 
+  TDouble<Parameters> rEps;
   ///единая точность
-  TDouble<Parameters> Epsilon; 
+  TDouble<Parameters> Epsilon;
   ///Коментарий к эксперименту
-  TString<Parameters> Comment; 
+  TString<Parameters> Comment;
 
   TDoubles<Parameters> M_constant;
   /// плотность построения развертки (точность 1/2^m по к-те)
-  TInt<Parameters> m; 
+  TInt<Parameters> m;
   ///кол-во используемых ускорителей
-  TInt<Parameters> deviceCount; 
+  TInt<Parameters> deviceCount;
   /// тип развертки (сдвиговая, вращаемая)
-  TEMapType<Parameters> MapType; 
+  TEMapType<Parameters> MapType;
   /// Флаг для проверки работы асинхронной схемы, если не 0, то вычисления проводятся в строго заданном порядке
-  TInt<Parameters> DebugAsyncCalculation; 
+  TInt<Parameters> DebugAsyncCalculation;
 
   /// Печатать ли информацию о сечении в многошаговой схеме
   TBool<Parameters> IsPrintSectionPoint;
 
   /// максимальное число итераций для процессов на каждом уровне //  размер - NumOfProcLevels{100, 100, 100, 100};// // параметры метода
-  TInts<Parameters> MaxNumOfPoints; 
+  TInt<Parameters> MaxNumOfPoints;
+  /// Распечатать справку
   TFlag<Parameters> HELP;
+  /// Имя файла для сохранения изображения
+  TString<Parameters> PlotFileName;
+  /// Нарисовать график функции
   TFlag<Parameters> IsPlot;
+  /// Плотность линий уровней
   TInt<Parameters> PlotGridSize;
+  /** тип визуализации целевой функции
+  доступные режимы : 
+  0 - LevelLayers - линии уровней
+  1 - Surface - поверхность
+  */
+  TEFigureTypes<Parameters> FigureType;
+  /** тип вычислений значений для визуализации целевой функции   
+  доступные режимы: 
+  0 - ObjectiveFunction - строит линии уровня / поверхность по сетке 100 * 100,
+  1 - Approximation - строит аппроксимацию линий уровня / поверхности по имеющейся поисковой информации,
+  2 - Interpolation - строит интерполяцию линий уровня / поверхности по имеющейся поисковой информации,
+  3 - ByPoints - строит поверхность путем "натягивагия" ее на точки поисковой информации без сглаживания,
+  4 - OnlyPoints - отображает только распределение точек поисковой информации в области поиска.
+  */
+  TECalcsTypes<Parameters> CalcsType;
+  /// флаг о необходимости скрыть точки испытаний при построении графика
+  TBool<Parameters> HideTrialsPoints;
+  /// флаг о необходимости открыть полученный рисунок в интерактивном окне на экране
+  TBool<Parameters> ShowFigure;
   /// Число испытаний за итерацию будет вычисляться на каждой итерации в методе CalculateNumPoint()
   TFlag<Parameters> IsCalculateNumPoint;
   ///Назначать каждому процессу свое устройство (ускоритель)
-  TBool<Parameters> IsSetDevice; 
+  TBool<Parameters> IsSetDevice;
   ///Индекс используемого устройства (ускорителей), если -1 используется первые deviceCount устройств
   TInt<Parameters> deviceIndex;
 
   TInt<Parameters> ProcRank;
   ///cпособ использования локального метода(только для синхронного типа процесса)
-  TELocalMethodScheme<Parameters> localRefineSolution; 
+  TELocalMethodScheme<Parameters> localRefineSolution;
 
   /// Количество итераций локального метода
   TInt<Parameters> localIteration;
   /// Точность локального метода
-  TDouble<Parameters> localVerificationEpsilon; 
+  TDouble<Parameters> localVerificationEpsilon;
   /// Количество точек точек параллельно вычисляемых локальным методом
   TInt<Parameters> localVerificationNumPoint;
 
@@ -146,33 +184,33 @@ public:
   TInt<Parameters> HDSolverIterationCount;
 
   ///параметр смешивания в локально-глобальном алгоритме
-  TInt<Parameters> localMix; 
+  TInt<Parameters> localMix;
   ///степень локальной адаптации в локально-глобальном алгоритме
   TDouble<Parameters> localAlpha;
   ///Распределение типов вычислений по
-  TInts<Parameters> calculationsArray; 
+  TInts<Parameters> calculationsArray;
   ///флаг сепарабельного поиска на первой итерации
-  TESeparableMethodType<Parameters> sepS;  
+  TESeparableMethodType<Parameters> sepS;
   ///флаг случайного поиска на первой итерации
-  TBool<Parameters> rndS;  
+  TBool<Parameters> rndS;
   ///путь к библиотеке с задачей
-  TString<Parameters> libPath;  
+  TString<Parameters> libPath;
   ///путь конфигарационному файлу задачи
-  TString<Parameters> libConfigPath; 
+  TString<Parameters> libConfigPath;
   /// тип критерия остановки
-  TEStopCondition<Parameters> stopCondition; 
+  TEStopCondition<Parameters> stopCondition;
   /// Критерий применим только к верхнему уровню или к любому (для адаптивной схемы)
   TBool<Parameters> isStopByAnyLevel;
   /// Печатать ли результаты работы алгоритма в консоль
   TBool<Parameters> isPrintResultToConsole;
   ///путь, по которому будут сохранены многомерные точки, поставленные методом корневого процесса
-  TString<Parameters> iterPointsSavePath; 
+  TString<Parameters> iterPointsSavePath;
   ///флаг, включающий печать дополнительной статистики: оценки констант Гёльдера и значения функций в точке оптимума
-  TFlag<Parameters> printAdvancedInfo; 
+  TFlag<Parameters> printAdvancedInfo;
   ///флаг, выключающий печать параметров при запуске системы
-  TFlag<Parameters> disablePrintParameters; 
+  TFlag<Parameters> disablePrintParameters;
   ///префикс в имени лог-файла
-  TString<Parameters> logFileNamePrefix; 
+  TString<Parameters> logFileNamePrefix;
 
   TETypeSolver<Parameters> TypeSolver;
   /// размерности каждой из подзадач в режиме сепарабильного или сикуенсального поиска
@@ -203,7 +241,7 @@ public:
   /// Тип локального уточнения: 0 - без него; 1 - минимаксное; 2 - адаптивное; 3 - адаптивно-минимаксное
   TELocalTuningType<Parameters> LocalTuningType;
   /// Параметр кси, используемый в локальном уточении
-  TDouble<Parameters> ltXi;  
+  TDouble<Parameters> ltXi;
 
   /// Загружать начальныеточки из файла или распределять их равномерно
   TBool<Parameters> isLoadFirstPointFromFile;
@@ -220,6 +258,27 @@ public:
 
   /// Значения функций в начальная точка для решения задачи оптимизации
   TDoubles<Parameters> startPointValues;
+
+  /// Использовать  стартовую точку из задачи 
+  TBool<Parameters> IsUseStartPoint;
+
+  /// Использовать  расширенный консольный интерфейс 
+  TBool<Parameters> IsUseExtendedConsole;
+
+  /// Включить автоматическую настройку параметров алгоритма оптимизации, если выключено - используются значения по умолчанию
+  TBool<Parameters> automaticParametersSetting;
+
+  /// Путь для сохранения и загрузки
+  TString<Parameters> fileSerializer;
+
+  /// Сохранение в файл
+  SearchDataSerializer* serializer;
+
+  /// Максимальное количество итераций без улучшения, работает только с критерием остановки MaxIterWithoutImprovement
+  TInt<Parameters> MaxIterationsWithoutImprovement;
+
+  /// Максимальное количество итераций алгоритма оптимизации, используется в автоматическом режиме работы.
+  TInt<Parameters> iterationsCount; 
 
   /// Проверка правильности при изменение параметров
   virtual int CheckValueParameters(int index = 0);
@@ -243,6 +302,9 @@ public:
 
   /// Является ли класс задачей
   virtual bool IsProblem();
+
+  /// Возвращает число потоков рекомендуемое OMP
+  virtual int GetMaxNumOMP();
 
 };
 

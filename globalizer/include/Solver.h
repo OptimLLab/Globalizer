@@ -16,13 +16,12 @@
 #include "Messages.h"
 #include "SolutionResult.h"
 #include "SolverInterface.h"
-#include "GlobalizerProblem.h"
+#include "GlobalizerBenchmarksProblem.h"
 
 #ifdef _GLOBALIZER_BENCHMARKS
 #include "IGlobalOptimizationProblem.h"
 #include "GlobalOptimizationProblemManager.h"
 #endif // _GLOBALIZER_BENCHMARKS
-
 
 
 /**

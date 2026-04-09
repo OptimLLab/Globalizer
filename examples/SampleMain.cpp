@@ -18,7 +18,7 @@
 // ------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-  GlobalizerInitialization(argc, argv, true, true);
+  GlobalizerInitialization(argc, argv, true);
 
 #ifdef _GLOBALIZER_BENCHMARKS
   GlobalOptimizationProblemManager manager;
@@ -35,10 +35,7 @@ int main(int argc, char* argv[])
   if (solver.Solve() != SYSTEM_OK)
     throw EXCEPTION("Error: solver.Solve crash!!!");
 
-
 #endif
-
-
   MPI_Finalize();
   return 0;
 }

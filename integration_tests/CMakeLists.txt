@@ -9,12 +9,12 @@ file(GLOB BENCHMARK_INTERFACE_SOURCES
 
 add_executable(Globalizer_IntegrationTests 
   src/main.cpp
-  src/json.hpp
   ${BENCHMARK_INTERFACE_SOURCES}
 )
 
 target_include_directories(Globalizer_IntegrationTests PRIVATE 
   ${CMAKE_SOURCE_DIR}/third_party/Problems/Interface/include
+  ${CMAKE_SOURCE_DIR}/lib
 )
 
 target_link_libraries(Globalizer_IntegrationTests PRIVATE Globalizer_l)

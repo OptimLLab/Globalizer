@@ -28,7 +28,8 @@
 #include <iostream>
 
 #include "Solver.h"
-#include "GlobalizerProblem.h"
+#include "ProblemFromFunctionPointers.h"
+#include "SolverRSA.hpp"
 #include "HDSolver.h"
 
 #ifdef _GLOBALIZER_BENCHMARKS
@@ -62,3 +63,16 @@ void GlobalizerInitialization(int argc=0, char* argv[]=nullptr,
   int processNumber = -1, bool isPrintToFile = false, 
   std::string* errorsName = nullptr, int* errorsCode = nullptr, 
   int errorsCount = 0);
+
+/**
+Решение задачи оптимизации
+\param[in] problem - задача оптимизации
+
+*/
+SolutionResult* GlobalizerSolveProblem(IProblem*& problem);
+
+/** Создает параметры для тестовых задач //временное решение!!!
+  \param[in] argc - Количество аргументов командной строки
+  \param[in] argv - Аргументы командной строки
+*/
+void CreateCurentProblemsParameters(int argc, char* argv[]);

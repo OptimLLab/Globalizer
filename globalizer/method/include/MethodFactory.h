@@ -17,6 +17,7 @@
 #define __METHOD_FACTORY_H__
 
 #include "Method.h"
+#include "RSAMethod.hpp"
 
 class MethodFactory
 {

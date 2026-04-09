@@ -16,9 +16,6 @@
 #include "SearchData.h"
 #include "SearcDataIterator.h"
 
-// Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
-std::vector<SearchData*> SearchData::pRecalcDatas;
-
 // ------------------------------------------------------------------------------------------------
 // SearchData Methods
 // ------------------------------------------------------------------------------------------------
@@ -51,7 +48,6 @@ SearchData::SearchData(int _NumOfFuncs, int _MaxSize)
   }
 
   BestTrial = nullptr;
-  pRecalcDatas.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -84,7 +80,6 @@ SearchData::SearchData(int _NumOfFuncs, int _MaxSize, int _queueSize)
   }
 
   BestTrial = nullptr;
-  pRecalcDatas.clear();
 }
 
 // ------------------------------------------------------------------------------------------------

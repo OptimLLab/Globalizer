@@ -46,7 +46,7 @@ Method::Method(Task& _pTask, SearchData& _pData,
 {
   isFoundOptimalPoint = false;
 
-  MaxNumOfTrials = parameters.MaxNumOfPoints[_pTask.GetProcLevel()];
+  MaxNumOfTrials = parameters.MaxNumOfPoints;
   if (MaxNumOfTrials < 1)
   {
     throw EXCEPTION("MaxNumOfTrials is out of range");
@@ -131,6 +131,7 @@ Method::~Method()
 
 
 
+// ------------------------------------------------------------------------------------------------
 SearchData* Method::GetSearchData(Trial* trial)
 {
   return pData;
@@ -139,7 +140,16 @@ SearchData* Method::GetSearchData(Trial* trial)
 // ------------------------------------------------------------------------------------------------
 bool Method::IsIntervalInSegment(SearchInterval* basicInterval, SearchInterval* newInterval)
 {
+  if (basicInterval == NULL || newInterval == NULL)
+  {
+    return false;
+  }
+  if (basicInterval->LeftPoint == NULL || newInterval->LeftPoint == NULL)
+  {
+    return false;
+  }
   double start = basicInterval->LeftPoint->GetFloor();
+
   if (basicInterval->LeftPoint->GetFloor() != newInterval->LeftPoint->GetFloor())
     return false;
   double end = start + 1;
@@ -205,6 +215,127 @@ void Method::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestInter
   // Вычисляем образ точки итерации - образ записывается в начальные позиции массива y
   CalculateImage(pCurTrialsj);
 
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void Method::LoadPoint()
+{
+  std::string pointsPath = parameters.FirstPointFilePath;
+  std::string pointsPathExtension = GetFileExtension(pointsPath);
+  int numberLoadedPoints = 0;
+  std::vector<Trial*> newPoint;
+  SearchDataSerializer::LoadedFileData fd;
+  if (pointsPathExtension == "json")
+  {
+    parameters.serializer->LoadFromFile(pointsPath, fd);
+    newPoint = fd.trials;
+    numberLoadedPoints = newPoint.size();
+    for (auto trial : newPoint)
+      pData->GetTrials().push_back(trial);
+  }
+  else
+  {
+
+    std::vector<std::vector<double>> points;
+    std::vector<double> pointVal;
+    std::vector<int> typeColor;
+
+    std::ifstream input;
+    std::string currentLine(512, ' ');
+    size_t numberOfPoints = 0;
+
+    input.open(pointsPath, std::ios_base::in);
+
+    if (input.is_open())
+    {
+      input.getline(&currentLine[0], currentLine.size());
+      numberOfPoints = std::stoi(currentLine, NULL);
+      points.reserve(numberOfPoints + 2);
+      typeColor.reserve(numberOfPoints + 2);
+
+
+      while (!input.eof()) {
+        size_t nextPosition = 0;
+        std::vector<double> currentPoint(parameters.Dimension);
+        double curVal;
+        int s = currentLine.size();
+        input.getline(&currentLine[0], currentLine.size());
+        int t = currentLine.find('|');
+        int l = currentLine.length();
+
+        const char* cstr = currentLine.c_str();
+
+        if (cstr[0] == '\0')
+          continue;
+        if (currentLine == "\n")
+          continue;
+        if (t == -1 || currentLine == "" || l == 0)
+          continue;
+
+        std::string curStr = currentLine;
+
+        currentPoint[0] = std::stod(curStr, &nextPosition);
+
+        for (int iDim = 1; iDim < parameters.Dimension; iDim++)
+        {
+          curStr = curStr.substr(nextPosition);
+          currentPoint[iDim] = std::stod(curStr, &nextPosition);
+        }
+
+        std::string a = currentLine.substr(t + 1);
+        curVal = std::stod(a);
+
+        t = a.find('|');
+        if (t == -1)
+        {
+          typeColor.push_back(0);
+          continue;
+        }
+        else
+        {
+          std::string b = a.substr(t + 1);
+          typeColor.push_back(std::stod(b));
+        }
+
+        points.push_back(currentPoint);
+        pointVal.push_back(curVal);
+
+      }
+      input.close();
+
+      numberLoadedPoints = points.size();
+      newPoint.resize(numberLoadedPoints);
+
+      for (int i = 0; i < numberLoadedPoints; i++)
+      {
+        newPoint[i] = TrialFactory::CreateTrial();
+        for (int iDim = 0; iDim < parameters.Dimension; iDim++)
+        {
+          newPoint[i]->y[iDim] = points[i][iDim];
+        }
+
+        newPoint[i]->FuncValues[0] = pointVal[i];
+
+        newPoint[i]->K = 1;
+        newPoint[i]->index = 0;
+
+        Extended genX(0.0);
+        evolvent.GetInverseImage(newPoint[i]->y, genX);
+
+        newPoint[i]->SetX(genX);
+
+        pData->GetTrials().push_back(newPoint[i]);
+      }
+    }
+  }
+  if (numberLoadedPoints > 0)
+  {
+    this->InsertPoints(newPoint);
+
+    //this->iteration.IterationCount += numberLoadedPoints;
+    parameters.iterationNumber = iteration.IterationCount;
+  }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -295,15 +426,20 @@ void Method::FirstIteration()
   // Равномерно ставим NumPoints точек c шагом h
   // А надо бы случайно...
   double h = 1.0 / (parameters.NumPoints + 1);
-  if (parameters.startPoint.GetIsChange()) //берем начальную точку из параметров
+  if (parameters.startPoint.GetIsChange() && parameters.IsUseStartPoint) //берем начальную точку из параметров
   {
 
-    std::vector<Trial*> newPoint(1);
+    int firstPointCount = parameters.NumPoints - 1;
 
 
+    std::vector<Trial*> newPoint(parameters.NumPoints);
     newPoint[0] = TrialFactory::CreateTrial();
-    
+
     pTask.CopyPoint(parameters.startPoint.GetData(), newPoint[0]);
+
+    InformationForCalculation inputlocal;
+    TResultForCalculation outputlocal;
+    int sfipi = 0;
 
     if (parameters.startPointValues.GetIsChange())
     {
@@ -315,35 +451,57 @@ void Method::FirstIteration()
           newPoint[0]->index = ifv;
         }
       }
+      inputlocal.Resize(firstPointCount);
+      outputlocal.Resize(firstPointCount);
+      sfipi = 0;
     }
     else
     {
-      InformationForCalculation inputlocal;
-      TResultForCalculation outputlocal;
-      inputlocal.Resize(1);
-      outputlocal.Resize(1);
-
+      inputlocal.Resize(parameters.NumPoints);
+      outputlocal.Resize(parameters.NumPoints);
       inputlocal.trials[0] = newPoint[0];
-
-      calculation.Calculate(inputlocal, outputlocal);
-
-      for (int j = 0; j < pTask.GetNumOfFunc(); j++)
-      {
-        functionCalculationCount[j] = outputlocal.countCalcTrials[j];
-      }
-      UpdateOptimumEstimation(*(newPoint[0]));
-
+      sfipi = 1;
     }
 
-    newPoint[0]->K = 1;
+    h = 1.0 / (firstPointCount + 1);
+    for (int ifip = 0; ifip < firstPointCount; ifip++)
+    {
+      int ind = ifip + 1;
 
-    Extended genX(0.0);
-    evolvent.GetInverseImage(newPoint[0]->y, genX);
+      newPoint[ind] = TrialFactory::CreateTrial();
 
-    newPoint[0]->SetX(genX);
+      pData->GetTrials().push_back(newPoint[ind]);
+      newPoint[ind]->SetX((ifip + 1) * h);
 
-    pData->GetTrials().push_back(newPoint[0]);
+      // Вычисляем образ точки итерации - образ записывается в начальные позиции массива y
+      CalculateImage(*newPoint[ind]);
 
+      newPoint[ind]->leftInterval = NewInterval[0];
+      newPoint[ind]->rightInterval = NewInterval[0];
+      inputlocal.trials[sfipi + ifip] = newPoint[ind];
+    }
+
+    if (inputlocal.trials.size() > 0)
+      calculation.Calculate(inputlocal, outputlocal);
+
+    for (int j = 0; j < pTask.GetNumOfFunc(); j++)
+    {
+      functionCalculationCount[j] = outputlocal.countCalcTrials[j];
+    }
+
+
+    for (int ifip = 0; ifip < newPoint.size(); ifip++)
+    {
+      UpdateOptimumEstimation(*(newPoint[ifip]));
+      newPoint[ifip]->K = 1;
+
+      Extended genX(0.0);
+      evolvent.GetInverseImage(newPoint[ifip]->y, genX);
+
+      newPoint[ifip]->SetX(genX);
+
+      //pData->GetTrials().push_back(newPoint[ifip]);
+    }
 
     this->InsertPoints(newPoint);
 
@@ -392,105 +550,8 @@ void Method::FirstIteration()
   }
   else // читаем из файла FirstPointFilePath
   {
-    std::string pointsPath = parameters.FirstPointFilePath;
 
-    std::vector<std::vector<double>> points;
-    std::vector<double> pointVal;
-    std::vector<int> typeColor;
-
-    std::ifstream input;
-    std::string currentLine(512, ' ');
-    size_t numberOfPoints = 0;
-
-    input.open(pointsPath, std::ios_base::in);
-
-    if (input.is_open())
-    {
-      input.getline(&currentLine[0], currentLine.size());
-      numberOfPoints = std::stoi(currentLine, NULL);
-      points.reserve(numberOfPoints + 2);
-      typeColor.reserve(numberOfPoints + 2);
-
-
-      while (!input.eof()) {
-        size_t nextPosition = 0;
-        std::vector<double> currentPoint(parameters.Dimension);
-        double curVal;
-        int s = currentLine.size();
-        input.getline(&currentLine[0], currentLine.size());
-        int t = currentLine.find('|');
-        int l = currentLine.length();
-
-        const char* cstr = currentLine.c_str();
-
-        if (cstr[0] == '\0')
-          continue;
-        if (currentLine == "\n")
-          continue;
-        if (t == -1 || currentLine == "" || l == 0)
-          continue;
-
-        std::string curStr = currentLine;
-
-        currentPoint[0] = std::stod(curStr, &nextPosition);
-
-        for (int iDim = 1; iDim < parameters.Dimension; iDim++)
-        {
-          curStr = curStr.substr(nextPosition);
-          currentPoint[iDim] = std::stod(curStr, &nextPosition);
-        }
-
-        std::string a = currentLine.substr(t + 1);
-        curVal = std::stod(a);
-
-        t = a.find('|');
-        if (t == -1)
-        {
-          typeColor.push_back(0);
-          continue;
-        }
-        else
-        {
-          std::string b = a.substr(t + 1);
-          typeColor.push_back(std::stod(b));
-        }
-
-        points.push_back(currentPoint);
-        pointVal.push_back(curVal);
-
-      }
-      input.close();
-
-      int numberLoadedPoints = points.size();
-      std::vector<Trial*> newPoint(numberLoadedPoints);
-
-      for (int i = 0; i < numberLoadedPoints; i++)
-      {
-        newPoint[i] = TrialFactory::CreateTrial();
-        for (int iDim = 0; iDim < parameters.Dimension; iDim++)
-        {
-          newPoint[i]->y[iDim] = points[i][iDim];
-        }
-
-        newPoint[i]->FuncValues[0] = pointVal[i];
-
-        newPoint[i]->K = 1;
-        newPoint[i]->index = 0;
-
-        Extended genX(0.0);
-        evolvent.GetInverseImage(newPoint[i]->y, genX);
-
-        newPoint[i]->SetX(genX);
-
-        pData->GetTrials().push_back(newPoint[i]);
-      }
-
-      this->InsertPoints(newPoint);
-
-      this->iteration.IterationCount += numberLoadedPoints;
-      parameters.iterationNumber = iteration.IterationCount;
-    }
-
+    LoadPoint();
 
   }
 
@@ -521,15 +582,13 @@ void Method::Recalc()
     for (SearcDataIterator it = pData->GetBeginIterator(); it; ++it)
     {
       it->R = CalculateGlobalR(*it);
-      it->locR = CalculateLocalR(*it);
+      //it->locR = CalculateLocalR(*it);
 
       pData->PushToQueue(*it);
     }
     // После пересчета флаг опускаем
     pData->SetRecalc(false);
   }
-
-  pData->pRecalcDatas.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -670,6 +729,14 @@ bool Method::CheckStopCondition()
       double fm = parameters.Epsilon;
       if ((isSetInLocalMinimumInterval == true) || (AchievedAccuracy < fm))
         res = true;
+      break;
+    }
+
+    case MaxIterWithoutImprovement:
+    {
+      if ((iteration.IterationCount - LastIterationBestUpdate) > parameters.MaxIterationsWithoutImprovement)
+        res = true;
+      break;
     }
     break;
     }
@@ -717,6 +784,7 @@ void Method::CalculateFunctionals()
   {
     functionCalculationCount[j] += outputSet.countCalcTrials[j];
   }
+
 
 }
 
@@ -784,11 +852,11 @@ void Method::InsertLocalPoints(const std::vector<Trial*>& points, Task* task)
       // Удалять интервалы из очереди не надо - они уже удалены в GetBestIntervals
       // Вставляем два новых интервала
       p->R = CalculateGlobalR(p);
-      p->locR = CalculateLocalR(p);
+      //p->locR = CalculateLocalR(p);
       pData->PushToQueue(p);
 
       CoveringInterval->R = CalculateGlobalR(CoveringInterval);
-      CoveringInterval->locR = CalculateLocalR(CoveringInterval);
+      //CoveringInterval->locR = CalculateLocalR(CoveringInterval);
 
       pData->PushToQueue(CoveringInterval);
     }
@@ -832,8 +900,9 @@ void Method::InsertPoints(const std::vector<Trial*>& points)
     {
       CalculateM(p);
       CalculateM(CoveringInterval);
+      this->iteration.IterationCount++;
     }
-    this->iteration.IterationCount++;
+    
   }
 }
 
@@ -848,11 +917,13 @@ bool Method::UpdateOptimumEstimation(Trial& trial)
     // Оптимум обновился - нужен пересчет
     pData->SetRecalc(true);
     isLocalZUpdate = true;
+    LastIterationBestUpdate = iteration.IterationCount;
     return true;
   }
   return false;
 }
 
+// ------------------------------------------------------------------------------------------------
 void Method::SavePoints()
 {
   if (static_cast<std::string>(parameters.iterPointsSavePath).size() > 0)
@@ -885,12 +956,12 @@ double Method::CalculateGlobalR(SearchInterval* p)
 
       value = 0;
       print << "iteration.IterationCount = " << iteration.IterationCount << "\n";
-      
-      print << "NewInterval! xl() = " << p->xl().toDouble() << " xr() = " 
-        << p->xr().toDouble() << " izl() = " << p->izl() << " izr() = " 
-        << p->izr() << " zl() = " << p->zl() << " zr() = " << p->zr() 
+
+      print << "NewInterval! xl() = " << p->xl().toDouble() << " xr() = "
+        << p->xr().toDouble() << " izl() = " << p->izl() << " izr() = "
+        << p->izr() << " zl() = " << p->zl() << " zr() = " << p->zr()
         << " R = " << p->R << "\n";
-      
+
       printf("Z[%d] = %lf M = %lf alfa = %lf\n", v, pData->Z[v], pData->Z[v], alfa);
       printf("val = %lf\n", value);
 
@@ -985,23 +1056,6 @@ void Method::CalculateM(SearchInterval* p)
   // Самый простой случай - индексы совпадают, рассматриваем только текущий интервал
   if (p->izl() == p->izr())
   {
-    //double zl = pTask.CalculateFuncs(p->LeftPoint->y, 0);
-    //double zr = pTask.CalculateFuncs(p->RightPoint->y, 0);
-
-    //double ozl = p->zl();
-    //double ozr = p->zr();
-
-    //if (zl != ozl || zr != ozr)
-    //  std::cout << "Error!!!\n";
-
-    //double newValue = fabs(p->zr() - p->zl()) / p->delta;
-    //int index = 0;
-    //if (newValue > pData->M[index] || pData->M[index] == 1.0 && newValue > _M_ZERO_LEVEL)
-    //{
-    //  pData->M[index] = newValue;
-    //  pData->SetRecalc(true);
-    //}
-
     UpdateM(fabs(p->zr() - p->zl()) / p->delta, p->izl(), boundaryStatus, p);
   }
   else //if(p->izl() != p->izr)
@@ -1017,7 +1071,6 @@ void Method::CalculateM(SearchInterval* p)
       //Если обнаружили точку с большим или равным индексом, то вычисляем оценку константы
       if (i != NULL && p->izl() <= i->izl() && IsIntervalInSegment(p, (*i)))
         UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(i->xl() - p->xl(), parameters.Dimension), p->izl(), boundaryStatus, p);
-      //UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(i->xl() - p->xl(), parameters.Dimension), p->izl(), boundaryStatus, p);
     // Просмотр влево до обнаружения точки с большим или равным индексом,
     // или до левой границы интервала поиска
       i = pData->GetIterator(p);
@@ -1027,7 +1080,6 @@ void Method::CalculateM(SearchInterval* p)
       //Если обнаружили точку с большим или равным индексом, то вычисляем оценку константы
       if (i != NULL && p->izl() <= i->izl() && IsIntervalInSegment(p, (*i)))
         UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(p->xl() - i->xl(), parameters.Dimension), p->izl(), boundaryStatus, p);
-      //UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(p->xl() - i->xl(), parameters.Dimension), p->izl(), boundaryStatus, p);
     }
     else
     {
@@ -1166,12 +1218,6 @@ void Method::RenewSearchData()
     //Обработка началной итерации
     if (iteration.IterationCount == 1)
     {
-      //bool f = j < parameters.NumPoints - 1;
-      //// Добавить следующий интервал для обработки
-      //if (f && (interval != 0))
-      //{
-      //  iteration.BestIntervals[j + 1] = p;
-      //}
       pData->SetRecalc(true);
     }
 
@@ -1179,7 +1225,6 @@ void Method::RenewSearchData()
     CalculateM(p);
     CalculateM((interval));
 
-    //SetIntervalVal(*BestIntervalsj, p, &(pCurTrialsj));
 
     // Если полный пересчет не нужен - обновляем только очереди характеристик
     if (!pData->IsRecalc())
@@ -1187,16 +1232,17 @@ void Method::RenewSearchData()
       // Удалять интервалы из очереди не надо - они уже удалены в GetBestIntervals
       // Вставляем два новых интервала
       p->R = CalculateGlobalR(p);
-      p->locR = CalculateLocalR(p);
       pData->PushToQueue(p);
 
       (interval)->R = CalculateGlobalR((interval));
-      (interval)->locR = CalculateLocalR((interval));
 
       pData->PushToQueue((interval));
     }
   }
   isFindInterval = false;
+
+  // Сохраняем состояние после первой итерации
+  SaveCurrentProgress();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1254,6 +1300,7 @@ void Method::FinalizeIteration()
   isLocalZUpdate = false;
 }
 
+// ------------------------------------------------------------------------------------------------
 int Method::GetIterationCount()
 {
   return iteration.IterationCount;
@@ -1261,6 +1308,7 @@ int Method::GetIterationCount()
 
 
 
+// ------------------------------------------------------------------------------------------------
 IterationType Method::GetIterationType(int iterationNumber, int localMixParameter)
 {
   if (iterationNumber < StartLocalIteration)
@@ -1290,7 +1338,9 @@ IterationType Method::GetIterationType(int iterationNumber, int localMixParamete
   return type;
 }
 
-int Method::IsBoundary(SearchInterval* p) {
+// ------------------------------------------------------------------------------------------------
+int Method::IsBoundary(SearchInterval* p) 
+{
   int ans = 0;
   if (p->izl() == -2)
     ans = 1;
@@ -1325,7 +1375,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     {
       pData->M[index] = newValue;
       pData->SetRecalc(true);
-      pData->pRecalcDatas.push_back(pData);
     }
     break;
   case 1:
@@ -1663,6 +1712,7 @@ int Method::GetNumberOfTrials()
 
 }
 
+// ------------------------------------------------------------------------------------------------
 void Method::PrintSection()
 {
   if (parameters.IsPrintSectionPoint == true)
@@ -1683,6 +1733,39 @@ void Method::PrintSection()
   }
 }
 
+// ------------------------------------------------------------------------------------------------
+void Method::SaveCurrentProgress()
+{
+  if (parameters.fileSerializer.ToString().empty()) return;
+
+  // Получаем новые точки и интервалы с последнего сохранения
+  std::vector<Trial*> newTrials;
+  std::vector<SearchInterval*> newIntervals;
+
+  std::vector<Trial*>& allTrials = pData->GetTrials();
+  for (int i = lastSavedTrialsCount; i < (int)allTrials.size(); ++i)
+  {
+    newTrials.push_back(allTrials[i]);
+  }
+
+  // Собираем новые интервалы
+  int currentIntervalsCount = pData->GetCount();
+  int intervalCounter = 0;
+  for (SearcDataIterator it = pData->GetBeginIterator(); it; ++it)
+  {
+    if (intervalCounter >= lastSavedTrialsCount - 1)
+    {
+      newIntervals.push_back(*it);
+    }
+    intervalCounter++;
+  }
+
+  parameters.serializer->SaveProgress(parameters.fileSerializer.ToString(), newTrials, newIntervals, pData->GetBestTrial());
+
+  lastSavedTrialsCount = allTrials.size();
+}
+
+// ------------------------------------------------------------------------------------------------
 void Method::PrintLevelPoints(const std::string& fileName)
 {
   std::ofstream fout;
@@ -1724,6 +1807,7 @@ void Method::PrintLevelPoints(const std::string& fileName)
 
 }
 
+// ------------------------------------------------------------------------------------------------
 void Method::PrintPoints(const std::string& fileName)
 {
   std::ofstream fout;
@@ -1775,6 +1859,7 @@ void Method::PrintPoints(const std::string& fileName)
   fout.close();
 }
 
+// ------------------------------------------------------------------------------------------------
 void Method::HookeJeevesMethod(Trial& point, std::vector<Trial*>& localPoints)
 {
   int addAllLocalPoints = 2;
@@ -1939,11 +2024,13 @@ void Method::LocalSearch()
   }
 }
 
+// ------------------------------------------------------------------------------------------------
 int Method::GetLocalPointCount()
 {
   return localPointCount;
 }
 
+// ------------------------------------------------------------------------------------------------
 int Method::GetNumberLocalMethodtStart()
 {
   return numberLocalMethodtStart;

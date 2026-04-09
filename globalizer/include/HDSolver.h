@@ -2,7 +2,7 @@
 
 #include "Solver.h"
 #include "HDTask.h"
-
+#include "SearchDataSerializer.h"
 
 /**
  Базовый класс для решателя задач большой размерности
@@ -24,8 +24,17 @@ protected:
   /// Задачи для оптимизации по группам параметров
   std::vector <HDTask*> tasks;
 
+  /// Общее описание задачи
+  Task* pTask;
+  /// База данных(поисковая информация)
+  SearchData* pData;
+
   /// задача оптимизации
   IProblem* problem;
+
+  SearchDataSerializer::LoadedFileData fd;
+
+  int countIterationsWithoutImprovement = 0;
 
   /// альтернативная стартовая точка на случай если не удалось улучшить решение
   std::vector<double> alternativeStartingPoint;
@@ -45,6 +54,9 @@ protected:
   /// Обновляет стартовую точку
   void UpdateStartPoint(SolutionResult* solution, double& bestValue, int curDimensions,
     int startParameterNumber, std::vector<Trial*>& points, HDTask* curTask);
+
+  void LoadPoint();
+  void CreateData();
 
 public:
   HDSolver(IProblem* problem, std::vector<int> _dimentions = {});

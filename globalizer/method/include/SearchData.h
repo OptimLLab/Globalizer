@@ -38,8 +38,7 @@ class SearchData
 {
   friend class SearcDataIterator;
 protected:
-  /// Число функций задачи
-  int NumOfFuncs;
+
   /// Максимальный размер МСП = максимальному числу итераций метода
   int MaxSize;
   /// Текущее число интервалов в дереве
@@ -97,8 +96,8 @@ protected:
    xl() < x < xr */
   TreeNode* FindIn(TreeNode *p, Trial* x) const;
 public:
-  /// Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
-  static std::vector<SearchData*> pRecalcDatas;
+  /// Число функций задачи
+  int NumOfFuncs;
 
   SearchData(int _NumOfFuncs, int _MaxSize = DefaultSearchDataSize);
   SearchData(int _NumOfFuncs, int _MaxSize, int _queueSize);
@@ -186,8 +185,6 @@ public:
   /// Задает нужно ли пересчитывать характеристики
   void SetRecalc(bool f)
   {    
-    if (recalc == false)
-      pRecalcDatas.push_back(this);
     recalc = f;    
   }
   /// Лучшая точка, полученная для данной поисковой информации
@@ -206,6 +203,12 @@ public:
 
   /// Вычисляемое r
   double local_r;
+
+  /// Число функций задачи
+  int GetNumOfFuncs()
+  {
+    return NumOfFuncs;
+  }
 }; // SearchData
 
 

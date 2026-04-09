@@ -91,8 +91,6 @@ void OutputMessage::Init(bool isMPIInit, std::string logFileName, int processCou
   mLogFileName[1] = log + ".txt";
   Logger::init(mLogFileName[0]);
 
-  //mLogOutputStream.resize(streamCount);
-
   for (int k = 0; k < streamCount; k++)
   {
     std::fstream* fs = new std::fstream(mLogFileName[streamCount - 1].c_str(), std::fstream::out);
@@ -249,7 +247,6 @@ void OutputMessage::ImportantMessageAppears(std::string importantMessageFile)
     mLogFileName.resize(streamCount);
     mLogFileName[streamCount - 1] = importantMessageFile;
 
-    //mLogOutputStream.resize(streamCount);
     std::fstream* fs = new std::fstream(mLogFileName[streamCount - 1].c_str(), std::fstream::out);
     mLogOutputStream.push_back(fs);
     
@@ -293,7 +290,6 @@ void OutputMessage::OpenFileStream(std::string fileName)
     mLogFileName.resize(streamCount);
     mLogFileName[streamCount - 1] = fileName;
 
-    //mLogOutputStream.resize(streamCount);
     std::fstream* fs = new std::fstream(mLogFileName[streamCount - 1].c_str(), std::fstream::out);
     mLogOutputStream.push_back(fs);
     mLogOutputStream[mLogOutputStream.size() - 1]->open(mLogFileName[streamCount - 1].c_str(),

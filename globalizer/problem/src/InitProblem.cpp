@@ -66,7 +66,22 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
   return 0;
 }
 
+
 #ifdef _GLOBALIZER_BENCHMARKS
+void ReadParameters(IGlobalOptimizationProblem*& problem)
+{
+  std::vector<std::string> names; 
+  std::vector<std::string> values;
+  problem->GetParameters(names, values);
+
+  for (int i = 0; i < names.size(); i++)
+  {
+    values[i] = parameters.GetStringVal(names[i]);
+    if (values[i] != "")
+      problem->SetParameter(names[i], values[i]);
+  }
+}
+
 // ------------------------------------------------------------------------------------------------
 int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemManager, IGlobalOptimizationProblem*& problem)
 {
@@ -78,6 +93,8 @@ int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemMan
   }
 
   IGlobalOptimizationProblem* baseProblem = problemManager.GetProblem();
+
+  ReadParameters(baseProblem);
 
   baseProblem->Initialize();
 
@@ -94,15 +111,15 @@ int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemMan
     parameters.Dimension = baseProblem->GetDimension();
 
 
-  std::vector<double> y(baseProblem->GetDimension());
-  std::vector<std::string> u;
+  std::vector<double> y(baseProblem->GetDimension() - baseProblem->GetNumberOfDiscreteVariable());
+  std::vector<std::string> u(baseProblem->GetNumberOfDiscreteVariable());
   std::vector<double> values(baseProblem->GetNumberOfFunctions());
 
   int err = baseProblem->GetStartTrial(y, u, values);
-  if (err == IGlobalOptimizationProblem::PROBLEM_OK)
+  if ((err == IGlobalOptimizationProblem::PROBLEM_OK) && parameters.IsUseStartPoint)
   {
-    parameters.startPoint.SetSize(baseProblem->GetDimension());
-    for (int i = 0; i < baseProblem->GetDimension(); i++)
+    parameters.startPoint.SetSize(baseProblem->GetDimension() - baseProblem->GetNumberOfDiscreteVariable());
+    for (int i = 0; i < baseProblem->GetDimension() - baseProblem->GetNumberOfDiscreteVariable(); i++)
     {
       parameters.startPoint[i] = y[i];
     }

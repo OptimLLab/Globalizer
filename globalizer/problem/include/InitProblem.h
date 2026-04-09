@@ -26,6 +26,12 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
 #ifdef _GLOBALIZER_BENCHMARKS
 #include "IGlobalOptimizationProblem.h"
 #include "GlobalOptimizationProblemManager.h"
+/// <summary>
+/// Инициализаия задачи
+/// </summary>
+/// <param name="problemManager"></param>
+/// <param name="problem"></param>
+/// <returns> код ошибки</returns>
 int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemManager, IGlobalOptimizationProblem*& problem);
 #endif // _GLOBALIZER_BENCHMARKS
 

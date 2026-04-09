@@ -13,6 +13,16 @@
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+\file parameters.cpp
+
+\authors Lebedev I.
+\copyright ННГУ им. Н.И. Лобачевского
+
+\brief Реализация класса параметров
+
+*/
+
 #include <mpi.h>
 
 #include <cstring>
@@ -21,6 +31,14 @@
 #include <algorithm>
 #include <omp.h>
 #include "iostream"
+
+#include <string>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+
+#include "SearchDataSerializer.h"
 
 
 #ifdef WIN32
@@ -40,14 +58,20 @@ Parameters parameters;
 // ------------------------------------------------------------------------------------------------
 void Parameters::SetDefaultParameters()
 {
+  parameters.timeSolve = 0;
   InitOption(HELP, 0, "-HELP", "Print Help", 1);
-  InitOption(IsPlot, 0, "-PLOT", "Plot level line", 1); 
+  InitOption(IsPlot, 0, "-PLOT", "Draw a graph of the function", 1);
+  InitOption(ShowFigure, false, "-ShowFigure", "a flag indicating the need to open the resulting drawing in an interactive window on the screen", 1);
+  InitOption(HideTrialsPoints, false, "-HideTrialsPoints", "a flag indicating the need to hide trial points", 1);
+  InitOption(FigureType, LevelLayers, "-FigureType", "type of visualization of the target function (available modes : 0 - LevelLayers, 1 - Surface)", 1);
+  InitOption(CalcsType, ObjectiveFunction, "-CalcsType", "the type of value calculations for visualizing the objective function (available modes: ObjectiveFunction, Approximation, Interpolation, ByPoints, OnlyPoints)", 1);
   InitOption(PlotGridSize, 300, "-PGS", "Drawing mesh precision", 1);
+  InitOption(PlotFileName, \0, "-PlotFileName", "The name of the file to save the image", 1);
   InitOption(IsCalculateNumPoint, 0, "-ICNP", "Number of trials will be calculated at each iteration", 1);
   Separator = std::string("_"); //Переопределяем сепаратор на значение по умолчанию
   SetSeparator();
   InitOption(NumPoints, 1, "-np", "the number of points per iteration", 1);
-  InitOption(StepPrintMessages, 1000, "-spm", "StepPrintMessages", 1);
+  InitOption(StepPrintMessages, 100000, "-spm", "StepPrintMessages", 1);
   InitOption(StepSavePoint, 1000000, "-ssp", "After how many iterations to save points", 1);
 
   InitOption(TypeMethod, StandartMethod, "-tm", "HybridMethod or StandartMethod or ManyNumPointMethod", 1);
@@ -56,17 +80,17 @@ void Parameters::SetDefaultParameters()
   InitOption(NumThread, 1, "-nt", "Num OpenMP Thread", 1);
   InitOption(SizeInBlock, 32, "-sb", "Size In CUDA Block", 1);
   InitOption(IsPrintFile, false, "-IsPF", "Is Print report to File", 1);
-  
-  InitOption(Dimension, -1, "-N", "Dimension", 1);
-  
+
+  InitOption(Dimension, 1, "-N", "Dimension", 1);
+
   InitOption(r, 4.0, "-r", "r", 1);
-  
+
   InitOption(rDynamic, 0, "-rd", "Additive when dynamics change r, r = r + rDynamic / (Iteration ^ (1 / N))", 1);
   InitOption(rEps, 0.01, "-rE", "eps-reserv", 1);
   InitOption(Comment, 000, "-Comment", "Comment", 1);//ResulLog
   InitOption(ResulLog, 000, "-ResulLog", "ResulLog", 1);
   InitOption(Epsilon, 0.01, "-E", "Epsilon", 1);
-  
+
   InitOption(M_constant, 1, "-M_constant", "Initial M_constant estimations for each function", 1);
   InitOption(m, 10, "-m", "Number of evolnents", 1);
   InitOption(deviceCount, -1, "-dc", "Device count, def: -1 auto", 1);
@@ -78,8 +102,8 @@ void Parameters::SetDefaultParameters()
   InitOption(DebugAsyncCalculation, 0, "-dac", "Helps debug in async calculation", 1); // Должен существовать файл: ../_build/async.txt
   InitOption(IsPrintSectionPoint, false, "-IsPSP", "Whether to print section information in a Block Scheme", 1);
 
-  InitOption(MaxNumOfPoints, 7000000, "-MaxNP", "MaxNumOfPoints", 1);
-  
+  InitOption(MaxNumOfPoints, 1000000, "-MaxNP", "MaxNumOfPoints", 1);
+
   InitOption(IsSetDevice, false, "-sd", "Assign each process their device", 1);
   InitOption(deviceIndex, -1, "-di", "Device Index, def: -1 auto", 1);
 
@@ -90,15 +114,15 @@ void Parameters::SetDefaultParameters()
   InitOption(localVerificationNumPoint, 1, "-lvnp", "The number of iterations of a large-dimensional problem solver", 1);
 
   InitOption(HDSolverIterationCount, 1, "-hdsic", "local Verification NumPoint", 1);
-  
+
   InitOption(localMix, 0, "-lm", "local mix parameter", 1);
   InitOption(localAlpha, 15, "-la", "parameter alpha in mixed algorithm", 1);
   InitOption(sepS, Off, "-sepS", "enables separable optimization on start", 1);
   InitOption(rndS, false, "-rndS", "enables random optimization on start", 1);
   InitOption(libPath, DEFAULT_LIB, "-lib", "path to a library with the optimization problem", 1);
-  
+
   InitOption(libConfigPath, \0, "-libConf", "path to config a of library with the optimization problem", 1);
-  
+
   InitOption(stopCondition, Accuracy, "-stopCond", "stop condition type", 1);
   InitOption(isStopByAnyLevel, true, "-isbal", "Is Stop By Any Level", 1);
   InitOption(isPrintResultToConsole, true, "-isPRC", "Should print the results of the algorithm to the console", 1);
@@ -113,34 +137,44 @@ void Parameters::SetDefaultParameters()
   InitOption(DimInTask, 0_0_0_0, "-dt", "DimInSeparableTask", 4);
 
   InitOption(mpiBlockSize, 1, "-mbs", "Size of blocks in mpi calculation", 1);
-  
+
   InitOption(isUseTaskR, false, "-iutr", "isUseTaskR", 1);
   InitOption(isUseFullRecount, false, "-iufr", "isUseFullRecount", 1);
 
   InitOption(isUseIntervalR, false, "-iuir", "isUseIntervalR", 1);
   InitOption(isUseGlobalZ, false, "-iugz", "isUseGlobalZ", 1);
   InitOption(isNotUseZ, false, "-inuz", "isNotUseZ", 1);
-  
+
 
   InitOption(TypeAddLocalPoint, NotTakenIntoAccountInStoppingCriterion, "-talp", "The type of adding local refinement points (0 - as normal points, 1 - local method points are not counted in the precision stopping criterion)", 1);
   InitOption(maxCountLocalPoint, 5, "-mclp", "Maximum number of points set by the local method", 1);
   InitOption(isCalculationInBorderPoint, false, "-icibp", "Is Calculation Function In Border Point", 1);
   InitOption(LocalTuningType, WithoutLocalTuning, "-ltt", "Type of local tuning: 0 - without it, 1 - LT, 2 - LTA, 3 - LTMA", 1);
   InitOption(ltXi, 1e-6, "-ltXi", "Parameter of local tuning", 1);
-  
-  
+
+
   InitOption(isLoadFirstPointFromFile, false, "-islfp", "is load first point from file", 1);
   InitOption(FirstPointFilePath, \0, "-fpf", "path from first point file", 1);
 
   InitOption(ProcRank, -1, "-ProcRank", "Rank of process, def: -1 auto", 1);
 
-  InitOption(functionSignMultiplier, 1.0_1.0_1.0_1.0 , "-fsm", "The multiplier in front of the function that determines whether we minimize or maximize the function", 4);
+  InitOption(functionSignMultiplier, 1.0_1.0_1.0_1.0, "-fsm", "The multiplier in front of the function that determines whether we minimize or maximize the function", 4);
 
   InitOption(startPoint, MaxDouble, "-sp", "The starting point for solving the optimization problem", 0);
   InitOption(startPointValues, MaxDouble, "-spv", "The values of the functions in the starting point for solving the optimization problem", 0);
+  InitOption(IsUseStartPoint, false, "-IsUSP", "Use the starting point from the task", 1);
 
+  InitOption(IsUseExtendedConsole, false, "-IsUEC", "Use the extended console interface", 1);
+
+  InitOption(automaticParametersSetting, false, "-IsAPS", "Enable automatic adjustment of optimization algorithm parameters, if disabled, default values are used.", 1);
+
+  InitOption(fileSerializer, \0, "-fs", "The path to save and upload", 1);
   
-  
+  InitOption(MaxIterationsWithoutImprovement, 100, "-MIWI", "The maximum number of iterations without improvement, works only with the MaxIterWithoutImprovement stop criterion", 1);
+
+  InitOption(iterationsCount, 1000000, "-IC", "The maximum number of iterations of the optimization algorithm, used in automatic mode.", 1);
+
+
 
   ProcRank.SetGetter(&Parameters::GetProcRank);
   ProcRank.SetIsHaveValue(false);
@@ -219,7 +253,7 @@ int Parameters::CheckValueParameters(int index)
 
 
     // TODO::dmsi Убрать, если асинхронная схема научится работать с пачками точек
-    if (TypeCalculation == AsyncMPI) 
+    if (TypeCalculation == AsyncMPI)
     {
       mpiBlockSize = 1;
     }
@@ -244,7 +278,7 @@ int Parameters::CheckValueParameters(int index)
       }
     }
 
-   
+
 
     mIsInit = true;
   }
@@ -303,20 +337,39 @@ void Parameters::PrintParametersToFile(FILE* pf)
 }
 
 // ------------------------------------------------------------------------------------------------
+std::string getCurrentDateTime() 
+{
+  // Получаем текущее время
+  auto now = std::chrono::system_clock::now();
+  std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+  // Преобразуем в локальное время
+  std::tm* local_time = std::localtime(&now_time);
+
+  // Форматируем в строку
+  std::ostringstream oss;
+  oss << std::put_time(local_time, "%Y_%m_%d_%H_%M_%S");
+  return oss.str();
+}
+
+// ------------------------------------------------------------------------------------------------
 /// Возвращает имя файла для сохранения картинки построенных линий уровней
 std::string Parameters::GetPlotFileName()
 {
-  if (ConfigPath.ToString() == "")
+  if (PlotFileName.ToString() == "")
   {
-    return "globalizer_" + this->libPath.ToString() + ".png";
+    std::string res = "";
+    res += "globalizer_";
+    if (this->libPath.GetIsChange())
+      res += this->libPath.ToString();
+    else
+      res += getCurrentDateTime();
+    res += +".png";
+    return res;
   }
   else
   {
-    std::string res = "";
-    int i = ConfigPath.ToString().find('.');
-    res = ConfigPath.ToString().substr(0, i);
-    res += ".png";
-    return res;
+    return PlotFileName.ToString();
   }
 }
 
@@ -341,15 +394,15 @@ void Parameters::Init(int argc, char* argv[], bool isMPIInit)
   if ((mIsPrintHelp) || (HELP))
     if (mProcRank == 0)
       PrintHelp();
-/*
-  if (mProcRank == 0)
+  /*
+    if (mProcRank == 0)
 
-#ifdef CUDA_VALUE_DOUBLE_PRECISION
-    std::cout << "\nDOUBLE PRECISION\n";
-#else
-    std::cout << "\nSINGLE PRECISION\n";
-#endif //CUDA_VALUE_DOUBLE_PRECISION
-*/
+  #ifdef CUDA_VALUE_DOUBLE_PRECISION
+      std::cout << "\nDOUBLE PRECISION\n";
+  #else
+      std::cout << "\nSINGLE PRECISION\n";
+  #endif //CUDA_VALUE_DOUBLE_PRECISION
+  */
 
   if (IsSetDevice)
     SetDeviceIndex();
@@ -361,6 +414,8 @@ void Parameters::Init(int argc, char* argv[], bool isMPIInit)
 Parameters::Parameters() : BaseParameters<Parameters>::BaseParameters()
 {
   mOwner = this;
+
+  serializer = new SearchDataSerializer;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -391,15 +446,32 @@ Parameters::Parameters(Parameters& _parameters) : BaseParameters<Parameters>::Ba
   MyLevel = _parameters.MyLevel;
 
   MyMap = _parameters.MyMap;
+
+
 }
 
 // ------------------------------------------------------------------------------------------------
 Parameters::~Parameters()
-{}
+{
+}
 
 bool Parameters::IsProblem()
 {
   return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+int Parameters::GetMaxNumOMP()
+{
+  int maxNumOMP = 1;
+#ifndef USE_OneAPI
+#pragma omp parallel
+  {
+    if (omp_get_thread_num() == 0)
+      maxNumOMP = omp_get_num_threads();
+  }
+#endif
+  return maxNumOMP;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -456,7 +528,7 @@ void Parameters::SetDeviceIndex()
   if (mProcRank == 0)
   {
     //printf("pn=%d\n", GetProcNum());
-    char** allCompName = new char*[GetProcNum() + 1];
+    char** allCompName = new char* [GetProcNum() + 1];
 
     for (int i = 1; i < GetProcNum(); i++)
     {

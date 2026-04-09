@@ -1,0 +1,26 @@
+project(Globalizer_IntegrationTests)
+
+add_definitions(-DGLOBALIZER_MAX_DIMENSION=10)
+add_definitions(-DGLOBALIZER_MAX_Number_Of_Function=20)
+
+file(GLOB BENCHMARK_INTERFACE_SOURCES 
+  "${CMAKE_SOURCE_DIR}/third_party/Problems/Interface/src/*.cpp"
+)
+
+add_executable(Globalizer_IntegrationTests 
+  src/main.cpp
+  ${BENCHMARK_INTERFACE_SOURCES}
+)
+
+target_include_directories(Globalizer_IntegrationTests PRIVATE 
+  ${CMAKE_SOURCE_DIR}/third_party/Problems/Interface/include
+  ${CMAKE_SOURCE_DIR}/lib/nlohmann_json
+)
+
+target_link_libraries(Globalizer_IntegrationTests PRIVATE Globalizer_l)
+
+add_custom_command(TARGET Globalizer_IntegrationTests POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  "${CMAKE_CURRENT_SOURCE_DIR}/references/tests.json"
+  "$<TARGET_FILE_DIR:Globalizer_IntegrationTests>/tests.json"
+)

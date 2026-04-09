@@ -124,7 +124,6 @@ bool RunSingleTest(const json& config)
         parameters.r = config["r"].get<double>();
         parameters.Epsilon = config.value("epsilon", 0.01);
 
-        // ВОЗВРАЩЕНО: m = 10 (как в версии 5/5 PASS)
         parameters.m = 10;
 
         parameters.isPrintResultToConsole = false;
@@ -138,7 +137,6 @@ bool RunSingleTest(const json& config)
 
     manualProblem->Initialize();
 
-    // ВОЗВРАЩЕНО: Создание через new, удаление только solver
     Solver* solver = new Solver(manualProblem);
 
     bool passed = true;
@@ -184,7 +182,7 @@ bool RunSingleTest(const json& config)
             if (dist > 0.5) passed = false;
         }
 
-        // ВЫВОД ИТЕРАЦИЙ (НАШИ vs iOpt)
+        // ВЫВОД ИТЕРАЦИЙ
         if (config.contains("expected_iterations"))
         {
             int expectedIters = config["expected_iterations"].get<int>();
@@ -199,7 +197,6 @@ bool RunSingleTest(const json& config)
 
     std::cout << "      Status:   " << (passed ? "PASS" : "FAIL") << std::endl;
 
-    // ВОЗВРАЩЕНО: Удаляем только solver. manualProblem удалит сам solver.
     delete solver;
 
     return passed;

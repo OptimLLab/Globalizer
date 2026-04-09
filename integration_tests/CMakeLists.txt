@@ -14,7 +14,7 @@ add_executable(Globalizer_IntegrationTests
 
 target_include_directories(Globalizer_IntegrationTests PRIVATE 
   ${CMAKE_SOURCE_DIR}/third_party/Problems/Interface/include
-  ${CMAKE_SOURCE_DIR}/lib
+  ${CMAKE_SOURCE_DIR}/lib/nlohmann_json
 )
 
 target_link_libraries(Globalizer_IntegrationTests PRIVATE Globalizer_l)

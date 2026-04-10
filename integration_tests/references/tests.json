@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Hill",
+    "type": "Simple",
+    "dimension": 2,
+    "optimum": 0.0,
+    "point": [ 0.5, 0.5 ],
+    "expected_iterations": 54,
+    "tolerance": 0.001,
+    "r": 2.0
+  },
+  {
+    "name": "Rastrigin",
+    "type": "Simple",
+    "dimension": 2,
+    "optimum": 0.0,
+    "point": [ 0.0, 0.0 ],
+    "expected_iterations": 523,
+    "tolerance": 0.05,
+    "r": 2.5
+  },
+  {
+    "name": "Rastrigin_3D",
+    "type": "Simple",
+    "dimension": 3,
+    "optimum": 0.0,
+    "point": [ 0.0, 0.0, 0.0 ],
+    "expected_iterations": 2541,
+    "tolerance": 0.2,
+    "r": 2.5
+  },
+  {
+    "name": "Rastrigin_5D",
+    "type": "Simple",
+    "dimension": 5,
+    "optimum": 0.0,
+    "point": [ 0.0, 0.0, 0.0, 0.0, 0.0 ],
+    "expected_iterations": 15200,
+    "tolerance": 0.5,
+    "r": 2.5
+  },
+  {
+    "name": "StronginC3_Lambda",
+    "type": "Simple",
+    "dimension": 2,
+    "optimum": -1.489444,
+    "point": [ 0.941176, 0.941176 ],
+    "expected_iterations": 721,
+    "tolerance": 0.05,
+    "r": 4.5
+  }
+]

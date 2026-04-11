@@ -1,0 +1,246 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C98038B2-6E2D-3B96-A4D6-D7D0399413DA}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>GLOBALIZER_tests</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Globalizer\fork\Globalizer\_bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">GLOBALIZER_tests.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">GLOBALIZER_tests</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Globalizer\fork\Globalizer\_bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">GLOBALIZER_tests.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">GLOBALIZER_tests</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Globalizer\fork\Globalizer\lib\mpi_stub\include;D:\Globalizer\fork\Globalizer\globalizer\include;D:\Globalizer\fork\Globalizer\globalizer\parameters\include;D:\Globalizer\fork\Globalizer\globalizer\evolvent\include;D:\Globalizer\fork\Globalizer\globalizer\extended\include;D:\Globalizer\fork\Globalizer\globalizer\output_system\include;D:\Globalizer\fork\Globalizer\globalizer\problem\include;D:\Globalizer\fork\Globalizer\globalizer\method\include;D:\Globalizer\fork\Globalizer\globalizer\method\calculation\include;D:\Globalizer\fork\Globalizer\globalizer\method\local_method\include;D:\Globalizer\fork\Globalizer\third_party\Problems\Interface\include;D:\Globalizer\fork\Globalizer\third_party\GCGen\src;D:\Globalizer\fork\Globalizer\third_party\GCGen\sample_src;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Include;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Lib\site-packages\numpy\_core\include;D:\Globalizer\fork\Globalizer\globalizer;D:\Globalizer\fork\Globalizer\gen\tests\config;D:\Globalizer\fork\Globalizer\tests\third_party\gtest\googletest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "D:/Globalizer/fork/Globalizer/third_party/gtest/googletest/include" /external:I "D:/Globalizer/fork/Globalizer/third_party/gtest/googletest"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <OpenMPSupport>true</OpenMPSupport>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;GLOBALIZER_MAX_DIMENSION=130;GLOBALIZER_MAX_Number_Of_Function=70;_CRT_SECURE_NO_WARNINGS;NOMINMAX;NO_MPREAL;_GLOBALIZER_BENCHMARKS;_GLOBALIZER_GCGEN;USE_PYTHON;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;GLOBALIZER_MAX_DIMENSION=130;GLOBALIZER_MAX_Number_Of_Function=70;_CRT_SECURE_NO_WARNINGS;NOMINMAX;NO_MPREAL;_GLOBALIZER_BENCHMARKS;_GLOBALIZER_GCGEN;USE_PYTHON;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Globalizer\fork\Globalizer\lib\mpi_stub\include;D:\Globalizer\fork\Globalizer\globalizer\include;D:\Globalizer\fork\Globalizer\globalizer\parameters\include;D:\Globalizer\fork\Globalizer\globalizer\evolvent\include;D:\Globalizer\fork\Globalizer\globalizer\extended\include;D:\Globalizer\fork\Globalizer\globalizer\output_system\include;D:\Globalizer\fork\Globalizer\globalizer\problem\include;D:\Globalizer\fork\Globalizer\globalizer\method\include;D:\Globalizer\fork\Globalizer\globalizer\method\calculation\include;D:\Globalizer\fork\Globalizer\globalizer\method\local_method\include;D:\Globalizer\fork\Globalizer\third_party\Problems\Interface\include;D:\Globalizer\fork\Globalizer\third_party\GCGen\src;D:\Globalizer\fork\Globalizer\third_party\GCGen\sample_src;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Include;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Lib\site-packages\numpy\_core\include;D:\Globalizer\fork\Globalizer\globalizer;D:\Globalizer\fork\Globalizer\gen\tests\config;D:\Globalizer\fork\Globalizer\tests\third_party\gtest\googletest\include;D:\Globalizer\fork\Globalizer\third_party\gtest\googletest\include;D:\Globalizer\fork\Globalizer\third_party\gtest\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Globalizer\fork\Globalizer\lib\mpi_stub\include;D:\Globalizer\fork\Globalizer\globalizer\include;D:\Globalizer\fork\Globalizer\globalizer\parameters\include;D:\Globalizer\fork\Globalizer\globalizer\evolvent\include;D:\Globalizer\fork\Globalizer\globalizer\extended\include;D:\Globalizer\fork\Globalizer\globalizer\output_system\include;D:\Globalizer\fork\Globalizer\globalizer\problem\include;D:\Globalizer\fork\Globalizer\globalizer\method\include;D:\Globalizer\fork\Globalizer\globalizer\method\calculation\include;D:\Globalizer\fork\Globalizer\globalizer\method\local_method\include;D:\Globalizer\fork\Globalizer\third_party\Problems\Interface\include;D:\Globalizer\fork\Globalizer\third_party\GCGen\src;D:\Globalizer\fork\Globalizer\third_party\GCGen\sample_src;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Include;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Lib\site-packages\numpy\_core\include;D:\Globalizer\fork\Globalizer\globalizer;D:\Globalizer\fork\Globalizer\gen\tests\config;D:\Globalizer\fork\Globalizer\tests\third_party\gtest\googletest\include;D:\Globalizer\fork\Globalizer\third_party\gtest\googletest\include;D:\Globalizer\fork\Globalizer\third_party\gtest\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>D:\Globalizer\fork\Globalizer\_bin\Globalizer_l_d.lib;D:\Globalizer\fork\Globalizer\_bin\mpi_stub.lib;D:\Globalizer\fork\Globalizer\_bin\gtest.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64 /ignore:4099</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>D:/Globalizer/fork/Globalizer/_bin/GLOBALIZER_tests.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>D:/Globalizer/fork/Globalizer/_bin/GLOBALIZER_tests.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Globalizer\fork\Globalizer\lib\mpi_stub\include;D:\Globalizer\fork\Globalizer\globalizer\include;D:\Globalizer\fork\Globalizer\globalizer\parameters\include;D:\Globalizer\fork\Globalizer\globalizer\evolvent\include;D:\Globalizer\fork\Globalizer\globalizer\extended\include;D:\Globalizer\fork\Globalizer\globalizer\output_system\include;D:\Globalizer\fork\Globalizer\globalizer\problem\include;D:\Globalizer\fork\Globalizer\globalizer\method\include;D:\Globalizer\fork\Globalizer\globalizer\method\calculation\include;D:\Globalizer\fork\Globalizer\globalizer\method\local_method\include;D:\Globalizer\fork\Globalizer\third_party\Problems\Interface\include;D:\Globalizer\fork\Globalizer\third_party\GCGen\src;D:\Globalizer\fork\Globalizer\third_party\GCGen\sample_src;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Include;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Lib\site-packages\numpy\_core\include;D:\Globalizer\fork\Globalizer\globalizer;D:\Globalizer\fork\Globalizer\gen\tests\config;D:\Globalizer\fork\Globalizer\tests\third_party\gtest\googletest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "D:/Globalizer/fork/Globalizer/third_party/gtest/googletest/include" /external:I "D:/Globalizer/fork/Globalizer/third_party/gtest/googletest"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <OpenMPSupport>true</OpenMPSupport>
+      <Optimization>Full</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GLOBALIZER_MAX_DIMENSION=130;GLOBALIZER_MAX_Number_Of_Function=70;_CRT_SECURE_NO_WARNINGS;NOMINMAX;NO_MPREAL;_GLOBALIZER_BENCHMARKS;_GLOBALIZER_GCGEN;USE_PYTHON;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GLOBALIZER_MAX_DIMENSION=130;GLOBALIZER_MAX_Number_Of_Function=70;_CRT_SECURE_NO_WARNINGS;NOMINMAX;NO_MPREAL;_GLOBALIZER_BENCHMARKS;_GLOBALIZER_GCGEN;USE_PYTHON;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Globalizer\fork\Globalizer\lib\mpi_stub\include;D:\Globalizer\fork\Globalizer\globalizer\include;D:\Globalizer\fork\Globalizer\globalizer\parameters\include;D:\Globalizer\fork\Globalizer\globalizer\evolvent\include;D:\Globalizer\fork\Globalizer\globalizer\extended\include;D:\Globalizer\fork\Globalizer\globalizer\output_system\include;D:\Globalizer\fork\Globalizer\globalizer\problem\include;D:\Globalizer\fork\Globalizer\globalizer\method\include;D:\Globalizer\fork\Globalizer\globalizer\method\calculation\include;D:\Globalizer\fork\Globalizer\globalizer\method\local_method\include;D:\Globalizer\fork\Globalizer\third_party\Problems\Interface\include;D:\Globalizer\fork\Globalizer\third_party\GCGen\src;D:\Globalizer\fork\Globalizer\third_party\GCGen\sample_src;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Include;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Lib\site-packages\numpy\_core\include;D:\Globalizer\fork\Globalizer\globalizer;D:\Globalizer\fork\Globalizer\gen\tests\config;D:\Globalizer\fork\Globalizer\tests\third_party\gtest\googletest\include;D:\Globalizer\fork\Globalizer\third_party\gtest\googletest\include;D:\Globalizer\fork\Globalizer\third_party\gtest\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Globalizer\fork\Globalizer\lib\mpi_stub\include;D:\Globalizer\fork\Globalizer\globalizer\include;D:\Globalizer\fork\Globalizer\globalizer\parameters\include;D:\Globalizer\fork\Globalizer\globalizer\evolvent\include;D:\Globalizer\fork\Globalizer\globalizer\extended\include;D:\Globalizer\fork\Globalizer\globalizer\output_system\include;D:\Globalizer\fork\Globalizer\globalizer\problem\include;D:\Globalizer\fork\Globalizer\globalizer\method\include;D:\Globalizer\fork\Globalizer\globalizer\method\calculation\include;D:\Globalizer\fork\Globalizer\globalizer\method\local_method\include;D:\Globalizer\fork\Globalizer\third_party\Problems\Interface\include;D:\Globalizer\fork\Globalizer\third_party\GCGen\src;D:\Globalizer\fork\Globalizer\third_party\GCGen\sample_src;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Include;D:\Globalizer\fork\Globalizer\build_64\Globalizer_env\Lib\site-packages\numpy\_core\include;D:\Globalizer\fork\Globalizer\globalizer;D:\Globalizer\fork\Globalizer\gen\tests\config;D:\Globalizer\fork\Globalizer\tests\third_party\gtest\googletest\include;D:\Globalizer\fork\Globalizer\third_party\gtest\googletest\include;D:\Globalizer\fork\Globalizer\third_party\gtest\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>D:\Globalizer\fork\Globalizer\_bin\Globalizer_l.lib;D:\Globalizer\fork\Globalizer\_bin\mpi_stub.lib;D:\Globalizer\fork\Globalizer\_bin\gtest.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64 /ignore:4099</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>D:/Globalizer/fork/Globalizer/_bin/GLOBALIZER_tests.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>D:/Globalizer/fork/Globalizer/_bin/GLOBALIZER_tests.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Globalizer\fork\Globalizer\tests\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule D:/Globalizer/fork/Globalizer/tests/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/Globalizer/fork/Globalizer -BD:/Globalizer/fork/Globalizer/gen --check-stamp-file D:/Globalizer/fork/Globalizer/gen/tests/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Globalizer\fork\Globalizer\tests\templates\gtest_config.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Globalizer\fork\Globalizer\gen\tests\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule D:/Globalizer/fork/Globalizer/tests/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/Globalizer/fork/Globalizer -BD:/Globalizer/fork/Globalizer/gen --check-stamp-file D:/Globalizer/fork/Globalizer/gen/tests/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Globalizer\fork\Globalizer\tests\templates\gtest_config.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Globalizer\fork\Globalizer\gen\tests\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Globalizer\fork\Globalizer\tests\src\CalculationProblem.h" />
+    <ClCompile Include="D:\Globalizer\fork\Globalizer\tests\src\test_calculation.cpp" />
+    <ClInclude Include="D:\Globalizer\fork\Globalizer\tests\src\test_common.h" />
+    <ClCompile Include="D:\Globalizer\fork\Globalizer\tests\src\test_data.cpp" />
+    <ClCompile Include="D:\Globalizer\fork\Globalizer\tests\src\test_dualQueue.cpp" />
+    <ClCompile Include="D:\Globalizer\fork\Globalizer\tests\src\test_evolvent.cpp" />
+    <ClCompile Include="D:\Globalizer\fork\Globalizer\tests\src\test_main.cpp" />
+    <ClCompile Include="D:\Globalizer\fork\Globalizer\tests\src\test_method.cpp" />
+    <ClCompile Include="D:\Globalizer\fork\Globalizer\tests\src\test_parameter_properties.cpp" />
+    <ClCompile Include="D:\Globalizer\fork\Globalizer\tests\src\test_queue.cpp" />
+    <ClCompile Include="D:\Globalizer\fork\Globalizer\tests\src\test_task.cpp" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="D:\Globalizer\fork\Globalizer\gen\ZERO_CHECK.vcxproj">
+      <Project>{FDA08FEE-20A0-3336-A3E5-F520B3F0E843}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="D:\Globalizer\fork\Globalizer\gen\Globalizer_l.vcxproj">
+      <Project>{5A17974A-B0C7-3C24-B7C7-52261BBB28E1}</Project>
+      <Name>Globalizer_l</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Globalizer\fork\Globalizer\gen\third_party\gtest\googletest\gtest.vcxproj">
+      <Project>{F51FB824-9C0A-3812-B383-AE96B06A0E31}</Project>
+      <Name>gtest</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Globalizer\fork\Globalizer\gen\mpi_stub.vcxproj">
+      <Project>{56A25925-537F-3A41-92D0-B3E98AD0F272}</Project>
+      <Name>mpi_stub</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -24,6 +24,7 @@ option(GLOBALIZER_BUILD_INTEGRATION_TESTS "Set ON to build integration tests" OF
 
 option(GLOBALIZER_ONE_MPI_PROCESS_PER_NODE "ONE PROCESS PER NODE" OFF)
 option(GLOBALIZER_PYTHON "Set ON to use Python" OFF)
+option(PYGlobalizer "Set ON to use Python interface" OFF)
 
 set(GLOBALIZER_DEBUG_SUFFIX   d)
 
@@ -325,11 +326,31 @@ foreach(main_filename ${main_list})
     
     if (IS_GNU_COMPILER)
       set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed -ldl -fopenmp")
+
     endif()
   endif()
 
 
 endforeach()
+
+if(PYGlobalizer)
+	find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development)
+
+	set(PYBIND11_FINDPYTHON ON)
+	find_package(pybind11 CONFIG REQUIRED)
+
+	pybind11_add_module(PYGlobalizer ${PROJECT_SOURCE_DIR}/PYGlobalizer/PYGlobalizer.cpp ${PROJECT_SOURCE_DIR}/PYGlobalizer/PYProblem.cpp)
+
+	# Добавляем библиотеки с использованием keyword-синтаксиса
+	target_link_libraries(PYGlobalizer 
+    		PRIVATE
+    		${GLOBALIZER_LIB_NAME}
+    		# ${PROJECT_SOURCE_DIR}/mpi_stub.lib
+    		${PYTHON_LIBRARIES}
+)
+
+install(TARGETS PYGlobalizer DESTINATION .)
+endif()
 
 
 #add_executable(${GLOBALIZER_PROJECT_NAME} ${GLOBALIZER_EXAMPLES_SRC_DIR}/Main.cpp)

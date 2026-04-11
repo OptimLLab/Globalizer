@@ -271,6 +271,7 @@ void Solver::AsyncCalculation()
 // ------------------------------------------------------------------------------------------------
 int Solver::Solve()
 {
+    std::cout << "Solve started" << std::endl;
   try
   {
     if (CheckParameters())
@@ -286,11 +287,16 @@ int Solver::Solve()
     }
     else
     {
+        //std::cout << "Clear data..." << std::endl;
       ClearData();
+      //std::cout << "Cleared" << std::endl;
       CreateProcess();
+      //std::cout << "Created process" << std::endl;
       if (addPoints != nullptr)
         mProcess->InsertPoints(*addPoints);
+      //std::cout << "Solve()" << std::endl;
       mProcess->Solve();
+      //std::cout << "Solve() - finished" << std::endl;
 
       if (parameters.IsPlot)
       {

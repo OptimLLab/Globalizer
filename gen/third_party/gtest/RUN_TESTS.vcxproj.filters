@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\Globalizer\fork\Globalizer\gen\CMakeFiles\627c17ca48e93169ba0b7021a56c63c1\RUN_TESTS_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{D060C172-95C8-3ECE-B4AF-467D77518F10}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

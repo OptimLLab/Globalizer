@@ -68,6 +68,10 @@ PYProblem::PYProblem(py::object data) {
 		isSetOptimum = false;
 	}
 
+	if (py::hasattr(data, "_num_crit")) {
+		this->mNumberOfCriterions = data.attr("_num_crit").cast<int>();
+	}
+
 	this->mNumberOfConstraints = functionsOfProblem.size() - this->mNumberOfCriterions;
 	std::cout << "Number of constraints: " << this->mNumberOfConstraints << std::endl;
 	std::cout << "Number of criterions: " << this->mNumberOfCriterions << std::endl;
@@ -82,27 +86,9 @@ PYProblem::PYProblem(py::object data) {
 				optimumCoordinate[i] = optimumCoordinate_[i];
 		}*/
 	}
-
-	/*double* tempU = new double[GetDimension()];
-	double* tempL = new double[GetDimension()];
-
-	GetBounds(tempL, tempU);
-
-	std::cout << "Check upper bounds: " << std::endl;
-	for (int i = 0; i < GetDimension(); i++) {
-		std::cout << i << ": " << tempU[i] << std::endl;
-	}
-
-	std::cout << "Check lower bounds: " << std::endl;
-	for (int i = 0; i < GetDimension(); i++) {
-		std::cout << i << ": " << tempL[i] << std::endl;
-	}*/
 }
 
 void PYProblem::GetBounds(double* lower, double* upper) {
-	//if (this->mIsInit) - fix!!!
-	/*std::cout << "Getting bounds..." << std::endl;
-	std::cout << "Current dimension: " << Dimension << std::endl;*/
 	for (int i = 0; i < Dimension; i++)
 	{
 		lower[i] = lowerBounds[i];
@@ -111,17 +97,13 @@ void PYProblem::GetBounds(double* lower, double* upper) {
 }
 
 double PYProblem::CalculateFunctionals(const double* y, int fNumber) {
-	//std::cout << "CalculateFunctionals()PYGlobalizer - begin" << std::endl;
 	if (fNumber >= functionsOfProblem.size())
 		throw EXCEPTION("Error function number");
 
-	//std::cout << "CalculateFunctionals()PYGlobalizer - begin2" << std::endl;
 	double temp = 0.0;
 
 	try {
-		//std::cout << "Calling Python function..." << std::endl;
 		temp = functionsOfProblem[fNumber](y);
-		//std::cout << "Python function returned: " << temp << std::endl;
 	}
 	catch (const py::error_already_set& e) {
 		std::cerr << "PYTHON ERROR: " << e.what() << std::endl;
@@ -137,6 +119,5 @@ double PYProblem::CalculateFunctionals(const double* y, int fNumber) {
 		throw;
 	}
 
-	//std::cout << "Func number" << fNumber << std::endl;
 	return temp;
 }

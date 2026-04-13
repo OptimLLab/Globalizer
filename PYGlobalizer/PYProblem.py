@@ -7,11 +7,12 @@ class PYProblem:
     Инициализация объекта-задачи
     """
 
-    def __init__(self, dimension: Optional[int] = None):
+    def __init__(self, dimension: Optional[int] = None, numCriterions: Optional[int] = None):
         self._functions: List[Callable] = []
         self._lower_bounds: List[float] = []
         self._upper_bounds: List[float] = []
         self._dimension: Optional[int] = dimension
+        self._num_crit: Optional[int] = numCriterions
 
     def add_function(self, func: Callable, name: Optional[str] = None) -> None:
         """

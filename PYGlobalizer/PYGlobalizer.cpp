@@ -16,11 +16,8 @@ void solve(py::object& data) {
 	//problem-> переопределить get-методы
 	std::cout << problem->GetDimension() << std::endl;
 	Solver solver(problem);
-	//std::cout << "Solver created" << std::endl;
 	if (solver.Solve() != SYSTEM_OK)
 		throw EXCEPTION("Error: solver.Solve crash!!!");
-
-	//std::cout << "Solver has been executed" << std::endl;
 }
 
 PYBIND11_MODULE(PYGlobalizer, m) {

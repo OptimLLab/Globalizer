@@ -82,13 +82,10 @@ void Process::Solve()
 {
   Trial OptimEstimation, NewOptimEstimation;
 
-  //std::cout << "Solve() timer started" << std::endl;
   Timer.Start();
   if (isFirstRun)
   {
-      //std::cout << "First run" << std::endl;
     BeginIterations();
-    //std::cout << "BeginIterations() - success" << std::endl;
     isFirstRun = false;
   }
   OptimEstimation = *(pMethod->GetOptimEstimation());
@@ -122,9 +119,7 @@ void Process::Solve()
     }
     pMethod->GetIterationCount();
 
-    //std::cout << "DoIteration() - begin: " << pMethod->GetIterationCount() << std::endl;
     DoIteration();
-    //std::cout << "DoIteration() - finish: " << pMethod->GetIterationCount() << std::endl;
 
     NewOptimEstimation = *(pMethod->GetOptimEstimation());
     if (NewOptimEstimation.FuncValues[NewOptimEstimation.index] !=

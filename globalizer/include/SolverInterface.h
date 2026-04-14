@@ -47,6 +47,8 @@ public:
   virtual std::vector<Trial*>& GetAllPoint() = 0;
   /// Возвращает полученное решение
   virtual SolutionResult* GetSolutionResult() = 0;
+  /// Выполняет автоматическую настройку параметров решателя
+  virtual void AutoConfig() {};
 };
 
 #endif

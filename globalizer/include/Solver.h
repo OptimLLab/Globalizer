@@ -102,6 +102,9 @@ public:
 
   /// Возвращает поисковую информацию
   SearchData* GetData();
+
+  /// Выполняет автоматическую настройку параметров решателя
+  virtual void AutoConfig();
 };
 
 #endif //solver.h

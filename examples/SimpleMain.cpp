@@ -159,6 +159,9 @@ int main(int argc, char* argv[])
   if (solver.Solve() != SYSTEM_OK)
     throw EXCEPTION("Error: solver.Solve crash!!!");
 
+  if (parameters.IsMPIInit())
+    MPI_Finalize();
+
   return 0;
 }
 

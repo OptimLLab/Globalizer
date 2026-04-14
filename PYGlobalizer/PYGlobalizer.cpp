@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+п»ї/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -16,11 +16,11 @@
 
 /**
 \file PYGlobalizer.cpp
-\authors Егоров К.С.
+\authors Р•РіРѕСЂРѕРІ Рљ.РЎ.
 \date 2026
-\copyright ННГУ им. Н.И. Лобачевского
-\brief Реализация модуля интерфейса для Python
-\details Реализация модуля интерфейса для Python с использованием pybind11
+\copyright РќРќР“РЈ РёРј. Рќ.Р. Р›РѕР±Р°С‡РµРІСЃРєРѕРіРѕ
+\brief Р РµР°Р»РёР·Р°С†РёСЏ РјРѕРґСѓР»СЏ РёРЅС‚РµСЂС„РµР№СЃР° РґР»СЏ Python
+\details Р РµР°Р»РёР·Р°С†РёСЏ РјРѕРґСѓР»СЏ РёРЅС‚РµСЂС„РµР№СЃР° РґР»СЏ Python СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј pybind11
 */
 
 #include <iostream>
@@ -32,28 +32,30 @@
 
 namespace py = pybind11;
 
-/// Функция, реализующая приём задачи из Python и вызов решателя Globalizer
-void solve(py::object& data) {
-	/// Инициализация Globalizer
-	GlobalizerInitialization(0, nullptr, false, true);
-	/// Создание экземпляра класса задач, получаемых из Python
-	IProblem* problem = new PYProblem(data);
+/// Р¤СѓРЅРєС†РёСЏ, СЂРµР°Р»РёР·СѓСЋС‰Р°СЏ РїСЂРёС‘Рј Р·Р°РґР°С‡Рё РёР· Python Рё РІС‹Р·РѕРІ СЂРµС€Р°С‚РµР»СЏ Globalizer
+void solve(py::object& data) 
+{
+  /// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Globalizer
+  GlobalizerInitialization(0, nullptr, false, true);
+  /// РЎРѕР·РґР°РЅРёРµ СЌРєР·РµРјРїР»СЏСЂР° РєР»Р°СЃСЃР° Р·Р°РґР°С‡, РїРѕР»СѓС‡Р°РµРјС‹С… РёР· Python
+  IProblem* problem = new PYProblem(data);
 
-	/// инициализация задачи
-	problem->Initialize();
-	/// Установка размерности в параметры
-	parameters.Dimension = problem->GetDimension();
-	/// Создание решателя
-	Solver solver(problem);
-	/// Запуск решателя с проверкой
-	if (solver.Solve() != SYSTEM_OK)
-		throw EXCEPTION("Error: solver.Solve crash!!!");
+  /// РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р·Р°РґР°С‡Рё
+  problem->Initialize();
+  /// РЈСЃС‚Р°РЅРѕРІРєР° СЂР°Р·РјРµСЂРЅРѕСЃС‚Рё РІ РїР°СЂР°РјРµС‚СЂС‹
+  parameters.Dimension = problem->GetDimension();
+  /// РЎРѕР·РґР°РЅРёРµ СЂРµС€Р°С‚РµР»СЏ
+  Solver solver(problem);
+  /// Р—Р°РїСѓСЃРє СЂРµС€Р°С‚РµР»СЏ СЃ РїСЂРѕРІРµСЂРєРѕР№
+  if (solver.Solve() != SYSTEM_OK)
+    throw EXCEPTION("Error: solver.Solve crash!!!");
 }
 
-/// Добавление модуля
-PYBIND11_MODULE(PYGlobalizer, m) {
-	/// Добавление справки
-	m.doc() = "Python interface for Globalizer";
-	/// Добавление вызываемой функции
-	m.def("solve", &solve, "Solve method");
+/// Р”РѕР±Р°РІР»РµРЅРёРµ РјРѕРґСѓР»СЏ
+PYBIND11_MODULE(PYGlobalizer, m) 
+{
+  /// Р”РѕР±Р°РІР»РµРЅРёРµ СЃРїСЂР°РІРєРё
+  m.doc() = "Python interface for Globalizer";
+  /// Р”РѕР±Р°РІР»РµРЅРёРµ РІС‹Р·С‹РІР°РµРјРѕР№ С„СѓРЅРєС†РёРё
+  m.def("solve", &solve, "Solve method");
 }

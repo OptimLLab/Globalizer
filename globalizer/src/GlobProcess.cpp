@@ -740,10 +740,7 @@ void Process::DoIteration()
         isPrintOptimEstimation = true;
       }
 
-      //std::cout << "CalculateFunctionals() - begin" << std::endl;
       pMethod->CalculateFunctionals();
-      //std::cout << "CalculateFunctionals() - finished" << std::endl;
-
 
       for (int j = 0; j < pTask->GetNumOfFunc(); j++)
       {

@@ -7,7 +7,7 @@ class PYProblem:
     Инициализация объекта-задачи
     """
 
-    def __init__(self, dimension: Optional[int] = None, numCriterions: Optional[int] = None):
+    def __init__(self, dimension: Optional[int] = None, numCriterions: Optional[int] = 1):
         self._functions: List[Callable] = []
         self._lower_bounds: List[float] = []
         self._upper_bounds: List[float] = []

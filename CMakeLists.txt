@@ -200,7 +200,7 @@ if (GLOBALIZER_USE_CUDA)
   find_package(CUDA REQUIRED)
 endif()
 
-
+set(GLOBALIZER_BENCHMARKS_Interface "")
 #add problems
 if(${GLOBALIZER_BUILD_PROBLEMS})
   add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/Problems)
@@ -290,6 +290,20 @@ else()
 endif()
 
 add_library(${GLOBALIZER_LIB_NAME} STATIC ${ALL_SRC_FILES} ${GCGEN_SOURCES} ${GCGEN_HEADERS})
+
+
+target_include_directories(${GLOBALIZER_LIB_NAME} PUBLIC
+    ${GLOBALIZER_COMMON_SRC_DIR}/include
+    ${GLOBALIZER_PARAMETERS_DIR}/include
+    ${GLOBALIZER_evolvent_DIR}/include
+    ${GLOBALIZER_extended_DIR}/include
+    ${GLOBALIZER_output_system_DIR}/include
+    ${GLOBALIZER_problem_DIR}/include
+    ${GLOBALIZER_method_DIR}/include
+    ${GLOBALIZER_calculation_DIR}/include
+    ${GLOBALIZER_local_method_DIR}/include
+	${GLOBALIZER_BENCHMARKS_Interface}/include/
+)
 
 file(GLOB main_list "${GLOBALIZER_EXAMPLES_SRC_DIR}/*.cpp")
 

@@ -1,0 +1,3 @@
+1. Активируем окружение: conda activate "D:\Globalizer\fork\Globalizer\build_64\Globalizer_env" - нужно прописать
+свой путь (потом поправлю)
+2. Запускаем :)

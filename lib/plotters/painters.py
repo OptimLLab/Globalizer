@@ -43,7 +43,13 @@ class StaticPainter(Painter):
                  cc,
                  plotter_type,
                  object_function_plotter_type,
-                 is_points_at_bottom
+                 constraints_plotter_type,
+                 levels,
+                 grid_obj,
+                 grid_c,
+                 is_points_at_bottom,
+                 is_need_hide_no_feasible_points,
+                 is_need_fill_feasible_region
     ):
 
         self.parameters_numbers = parameters_numbers
@@ -64,9 +70,18 @@ class StaticPainter(Painter):
         self.cc = cc
         self.plotter_type = plotter_type
         self.object_function_plotter_type = object_function_plotter_type
+        self.constraints_plotter_type = constraints_plotter_type
         self.is_points_at_bottom = is_points_at_bottom
-        self.hatch = '/'  # !!!!!!!!!!!!!!!!!!
+        self.is_need_hide_no_feasible_points = is_need_hide_no_feasible_points
+        self.hatch = None
+        if plotter_type == 'lines layers' and is_need_fill_feasible_region:
+            self.hatch = ' '
+        self.levels = None
+        if plotter_type == 'lines layers':
+            self.levels = levels
 
+        self.grid_obj = grid_obj
+        self.grid_c = grid_c
         self.section_points = []
         self.section_values = []
 
@@ -97,6 +112,7 @@ class StaticPainter(Painter):
                                      self.lb,
                                      self.rb,
                                      self.object_function_plotter_type,
+                                     self.constraints_plotter_type,
                                      self.plotter_type,
                                      self.is_points_at_bottom)
 
@@ -106,9 +122,9 @@ class StaticPainter(Painter):
             if self.object_function_plotter_type == 'objective function':
                 self.plotter.plot_by_grid(self.x, self.z, linecolor='blue', transparency=0.9)
             elif self.object_function_plotter_type == 'interpolation':
-                self.plotter.plot_interpolation(self.points, self.values, points_count=100, transparency=0.9)
+                self.plotter.plot_interpolation(self.points, self.values, points_count=self.grid_obj, transparency=0.9)
             elif self.object_function_plotter_type == 'approximation':
-                self.plotter.plot_approximation(self.points, self.values, points_count=50, transparency=0.9)
+                self.plotter.plot_approximation(self.points, self.values, points_count=self.grid_obj, transparency=0.9)
             elif self.object_function_plotter_type == 'by points':
                 self.plotter.plot_by_points(self.points, self.values, transparency=0.9)
             elif self.object_function_plotter_type == 'only points':
@@ -117,34 +133,35 @@ class StaticPainter(Painter):
         else:
             if self.plotter_type == 'lines layers' or self.plotter_type == 'surface':
                 if self.object_function_plotter_type == "objective function":
-                    self.plotter.plot_by_grid(self.x, self.z, levels=30)
+                    self.plotter.plot_by_grid(self.x, self.z, levels=self.levels)
                 elif self.object_function_plotter_type == 'interpolation':
-                    self.plotter.plot_interpolation(self.points, self.values, points_count=50)
+                    self.plotter.plot_interpolation(self.points, self.values, points_count=self.grid_obj, levels=self.levels)
                 elif self.object_function_plotter_type == 'approximation':
-                    self.plotter.plot_approximation(self.points, self.values, points_count=50)
+                    self.plotter.plot_approximation(self.points, self.values, points_count=self.grid_obj, levels=self.levels)
                 elif self.object_function_plotter_type == 'by points':
-                    self.plotter.plot_by_points(self.points, self.values)
+                    self.plotter.plot_by_points(self.points, self.values, levels=self.levels)
                 elif self.object_function_plotter_type == 'only points':
                     pass
 
     def paint_constraints(self):
-        if self.hatch == '':
+        if not self.hatch:
             if self.plotter_type != 'surface':
-                if self.object_function_plotter_type == "objective function":
+                if self.constraints_plotter_type == "objective function":
                     if len(self.parameters_numbers) > 1 and len(self.c) > 0:
                         for i in range(len(self.c[0])):
                             self.plotter.plot_by_grid(self.x, [cj[i] for cj in self.c], colormap='twilight', linewidths=1, levels=0, transparency=0.6)
-                elif self.object_function_plotter_type == 'interpolation':
+                elif self.constraints_plotter_type == 'interpolation':
                     if len(self.parameters_numbers) > 1 and len(self.cc[0]) > 0:
                         for i in range(len(self.cc) // 2):
-                            self.plotter.plot_interpolation(self.cc[2 * i], self.cc[2 * i + 1], colormap='twilight', linewidths=1, transparency=0.6, levels=0)
+                            self.plotter.plot_interpolation(self.cc[2 * i], self.cc[2 * i + 1], points_count=self.grid_c,
+                                                            colormap='twilight', linewidths=1, transparency=0.6, levels=0)
         else:
-            if self.object_function_plotter_type == "objective function":
+            if self.constraints_plotter_type == "objective function":
                 if len(self.parameters_numbers) > 1 and len(self.c) > 0:
                     x1 = [xi[0] for xi in self.x]
                     x2 = [xi[1] for xi in self.x]
                     self.plotter.plot_hatch_by_grid(x1, x2, self.c)
-            elif self.object_function_plotter_type == 'interpolation':
+            elif self.constraints_plotter_type == 'interpolation':
                 if len(self.parameters_numbers) > 1 and len(self.cc[0]) > 0:
                     x1 = []
                     x2 = []
@@ -153,7 +170,7 @@ class StaticPainter(Painter):
                         x1.append(np.array(self.cc[2 * i])[:, self.parameters_numbers[0]])
                         x2.append(np.array(self.cc[2 * i])[:, self.parameters_numbers[1]])
                         z.append(np.array(self.cc[2 * i + 1]))
-                    self.plotter.plot_hatch_by_interpolate(x1, x2, z)
+                    self.plotter.plot_hatch_by_interpolate(x1, x2, z, points_count=self.grid_c)
 
     def paint_points(self):
         flag = True
@@ -168,6 +185,8 @@ class StaticPainter(Painter):
 
             self.plotter.plot_points(points, values, color, mrkrs=2)
 
+            if self.is_need_hide_no_feasible_points:
+                break
             if len(self.x_nc) > 0 and flag:
                 points = self.x_nc
                 values = [self.sol_value - (max(values) - min(values)) * 0.3] * len(self.x_nc)

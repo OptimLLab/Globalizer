@@ -81,7 +81,7 @@ class Plotter:
             mask &= (zgrid[k + 1] <= 0)
         self.ax.contourf(xgrid, ygrid, mask.astype(float), levels=[0.5, 1.0], alpha=0.6, colors=["#00ff483e"])
 
-    def plot_hatch_by_interpolate(self, x1, x2, zc):
+    def plot_hatch_by_interpolate(self, x1, x2, zc, points_count=200):
         interp = []
         #try:
         for i in range(len(zc)):
@@ -92,12 +92,11 @@ class Plotter:
         #    print(f"\033[33m\nWARNING: the graph is plotted without displaying the constraints!\n\n\
         #           The trials number is too large to plot using Rbf-interpolation.\n\n\
         #           Possible solutions:\n\
-         #          - Reduce the number of points to plot.\n\
-         #          Original error text of scipy.interpolate.Rbf:\n\
-         #          {err}\n\n\033[0m")
-         #   return
+        #          - Reduce the number of points to plot.\n\
+        #          Original error text of scipy.interpolate.Rbf:\n\
+        #          {err}\n\n\033[0m")
+        #   return
 
-        points_count = 200
         xgrid = np.linspace(self.leftBounds[0], self.rightBounds[0], points_count)
         ygrid = np.linspace(self.leftBounds[1], self.rightBounds[1], points_count)
         xgrid, ygrid = np.meshgrid(xgrid, ygrid)
@@ -116,7 +115,7 @@ class Plotter:
         self.ax.contourf(xgrid, ygrid, mask.astype(float), levels=[0.5, 1.0], alpha=0.6, colors=["#00ff483e"])
 
     def plot_contourf(self, x1, x2, z, colormap, levels):
-        self.ax.contourf(x1, x2, z, cmap=colormap, levels=levels)
+        c = self.ax.contourf(x1, x2, z, cmap=colormap, levels=levels)
 
     def plot_surface(self, x1, x2, z, colormap, transparency):
         self.ax.plot_surface(x1, x2, z, cmap=colormap, alpha=transparency)
@@ -180,15 +179,16 @@ class Plotter3D(Plotter):
     """
     Плоттер для построения графика для задач различной размерности
     """
-    def __init__(self, parameters_numbers, left_bounds, right_bounds, objective_function,
-                 plotter_type, object_function_plotter_type):
+    def __init__(self, parameters_numbers, left_bounds, right_bounds, objective_function_plotter_type,
+                 constraints_plotter_type, plotter_type, is_points_at_bottom):
         self.indexes = parameters_numbers
         self.leftBounds = left_bounds
         self.rightBounds = right_bounds
-        self.objectiveFunction = objective_function
+        self.objective_function_type = objective_function_plotter_type
+        self.constraints_type = constraints_plotter_type
 
         self.plotterType = plotter_type
-        self.objectiveFunctionPlotterType = object_function_plotter_type
+        self.is_points_at_bottom = is_points_at_bottom
 
         self.figure_style_settings_setup()
 
@@ -204,7 +204,7 @@ class Plotter3D(Plotter):
         self.ax.tick_params(axis='both', labelsize=8)
         self.ax.set_facecolor('white')
 
-    def plot_by_grid(self, x, z, colormap=plt.cm.viridis, linewidths=1, levels=20, transparency=1):
+    def plot_by_grid(self, x, z, colormap=plt.cm.viridis, linewidths=1, levels=25, transparency=1):
         x1 = [xi[0] for xi in x]
         x2 = [xi[1] for xi in x]
 
@@ -291,7 +291,7 @@ Original error text of scipy.interpolate.Rbf:\n\
         if self.plotterType == 'lines layers':
             self.ax.scatter(np.array(points)[:, self.indexes[0]], np.array(points)[:, self.indexes[1]], color=clr, marker=mrkr, s=mrkrs)
         elif self.plotterType == 'surface':
-            if self.objectiveFunctionPlotterType == 'by points':
+            if self.objective_function_type == 'by points':
                 self.ax.scatter(np.array(points)[:, self.indexes[0]], np.array(points)[:, self.indexes[1]], values,
                                 s=mrkrs, color=clr, marker=mrkr, alpha=0.2)
             else:

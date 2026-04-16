@@ -86,8 +86,8 @@ void calculate_z_matrix(
 
 #ifdef USE_PYTHON
 void make_problem_info_file(IProblem* problem, SolutionResult* result, const char* problem_file_name = "_problem_info.txt",
-  CalcsTypes calcs_type = ObjectiveFunction, std::initializer_list<int> params = { 0, 1 },
-  std::initializer_list<double[2]> bounds = {}, int points_count = 100) {
+  CalcsTypes calcs_type = ObjectiveFunction, CalcsTypes calcs_type_c = ObjectiveFunction, std::initializer_list<int> params = { 0, 1 },
+  std::initializer_list<double[2]> bounds = {}, int objective_grid_size = 100, int constraints_grid_size = 200) {
 
     FILE* pf = fopen(problem_file_name, "w+");
 
@@ -127,10 +127,14 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
   }
   fprintf(pf, "%lf\n", right_bound[problem->GetDimension() - 1]);
 
-  if (calcs_type == ObjectiveFunction) {
+  fprintf(pf, "%d %d\n", calcs_type == ObjectiveFunction, calcs_type_c == ObjectiveFunction);
+
+  if (calcs_type == ObjectiveFunction || calcs_type_c == ObjectiveFunction) {
+    int points_count = (calcs_type == ObjectiveFunction) ? objective_grid_size : constraints_grid_size;
+
     double* dx = new double[params.size()];
     for (int i = 0; i < params.size(); i++) {
-      dx[i] = fabs(right_bound[*(params.begin() + i)] - left_bound[*(params.begin() + i)]) / points_count;
+      dx[i] = fabs(right_bound[*(params.begin() + i)] - left_bound[*(params.begin() + i)]) / objective_grid_size;
     }
 
     std::vector<std::vector<double>> x(params.size());
@@ -138,13 +142,15 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
         x[i] = arange(left_bound[*(params.begin() + i)], right_bound[*(params.begin() + i)], dx[i]);
     }
 
+    int NumOfFunctionalsForCalc = problem->GetNumberOfFunctions() - 1 + (calcs_type == ObjectiveFunction);
+
     if (params.size() == 2) {
         std::vector<std::vector<double>> xgrid;
         std::vector<std::vector<double>> ygrid;
         meshgrid(x[0], x[1], xgrid, ygrid);
-
-        std::vector <std::vector<std::vector<double>>> z(problem->GetNumberOfFunctions());
-        for (int i = 0; i < problem->GetNumberOfFunctions(); i++)
+        
+        std::vector <std::vector<std::vector<double>>> z(NumOfFunctionalsForCalc);
+        for (int i = 0; i < NumOfFunctionalsForCalc; i++)
             calculate_z_matrix(problem, xgrid, ygrid, z[i], i);
 
         size_t rows = xgrid.size();
@@ -153,15 +159,15 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
         for (size_t i = 0; i < rows; ++i) {
             for (size_t j = 0; j < cols; ++j) {
                 fprintf(pf, "%lf %lf ", xgrid[i][j], ygrid[i][j]);
-                for (int k = 0; k < problem->GetNumberOfFunctions(); k++) {
+                for (int k = 0; k < NumOfFunctionalsForCalc; k++) {
                     fprintf(pf, "| %lf ", z[k][i][j]);
                 }
                 fprintf(pf, "\n");
             }
         }
     } else if (params.size() == 1) {
-          std::vector <std::vector<double>> z(problem->GetNumberOfFunctions());
-          for (int i = 0; i < problem->GetNumberOfFunctions(); i++) {
+          std::vector <std::vector<double>> z(NumOfFunctionalsForCalc);
+          for (int i = 0; i < NumOfFunctionalsForCalc; i++) {
               z[i].resize(x.size());
               double* x1 = new double[1];
               for (int k = 0; k < x.size(); k++) {
@@ -185,10 +191,13 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
 #endif
 
 #ifdef USE_PYTHON
+
 void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
     std::initializer_list<int> params, std::initializer_list<double[2]> bounds,
     wchar_t* output_file_name, FigureTypes figure_type, CalcsTypes calcs_type,
-    bool show_figure, bool hide_trials_points, bool move_points_under_graph)
+    CalcsTypes calcs_type_c, int levels, int objective_grid_size, int constraints_grid_size,
+    bool fill_feasible_region, bool hide_trials_points, bool hide_no_feasible_points,
+    bool move_points_under_graph, bool show_figure)
 {
     if (problem == nullptr)
     {
@@ -245,6 +254,7 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
         main_ts = PyEval_SaveThread();  // Освобождаем GIL в каждом потоке
         isPythonInit = true;
     }
+
     PyGILState_STATE gstate = PyGILState_Ensure();
 
     std::filesystem::path build_path = std::filesystem::absolute("./");
@@ -264,9 +274,13 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
 
     std::wstring _solver_output_file = std::wstring(solver_output_file.begin(), solver_output_file.end());
     std::wstring _problem_info_file = std::wstring(problem_info_file.begin(), problem_info_file.end());
+    
     std::wstring _eps = std::to_wstring(parameters.Epsilon);
+    std::wstring _levels = std::to_wstring(levels);
+    std::wstring _objective_grid_size = std::to_wstring(objective_grid_size);
+    std::wstring _constraints_grid_size = std::to_wstring(constraints_grid_size);
 
-    make_problem_info_file(problem, result, problem_info_file.c_str(), calcs_type, params, bounds, 200);
+    make_problem_info_file(problem, result, problem_info_file.c_str(), calcs_type, calcs_type_c, params, bounds, objective_grid_size, constraints_grid_size);
 
     wchar_t* __build_path = wcsdup(build_path.wstring().c_str());
     wchar_t* __script_path = wcsdup(script_path.wstring().c_str());
@@ -274,24 +288,35 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
 
     wchar_t* __solver_output_file = _solver_output_file.data();
     wchar_t* __problem_info_file = _problem_info_file.data();
-    wchar_t* __eps = _eps.data();
 
-    wchar_t __show_figure[6];
-    wchar_t __hide_trials_points[6];
-    wchar_t __move_points_under_graph[6];
+    wchar_t* __eps = _eps.data();
+    wchar_t* __levels = _levels.data();
+    wchar_t* __objective_grid_size = _objective_grid_size.data();
+    wchar_t* __constraints_grid_size = _constraints_grid_size.data();
+
     wchar_t __figure_type[64];
     wchar_t __calcs_type[64];
+    wchar_t __calcs_type_c[64];
 
-    wcscpy(__show_figure, show_figure ? L"True" : L"False");
-    wcscpy(__hide_trials_points, hide_trials_points ? L"True" : L"False");
-    wcscpy(__move_points_under_graph, move_points_under_graph ? L"True" : L"False");
+    wchar_t __fill_feasible_region[6];
+    wchar_t __hide_trials_points[6];
+    wchar_t __hide_no_feasible_points[6];
+    wchar_t __move_points_under_graph[6];
+    wchar_t __show_figure[6];
 
     wcscpy(__figure_type, figure_type == LevelLayers ? L"lines layers" : L"surface");
     wcscpy(__calcs_type, calcs_type == ObjectiveFunction ? L"objective function" :
-      calcs_type == Approximation ? L"approximation" :
-      calcs_type == Interpolation ? L"interpolation" :
-      calcs_type == ByPoints ? L"by points" :
-      L"only points");
+        calcs_type == Approximation ? L"approximation" :
+        calcs_type == Interpolation ? L"interpolation" :
+        calcs_type == ByPoints ? L"by points" :
+        L"only points");
+    wcscpy(__calcs_type_c, calcs_type_c == ObjectiveFunction || calcs_type == ObjectiveFunction ? L"objective function" : L"interpolation");
+
+    wcscpy(__fill_feasible_region, fill_feasible_region ? L"True" : L"False");
+    wcscpy(__hide_trials_points, hide_trials_points ? L"True" : L"False");
+    wcscpy(__hide_no_feasible_points, hide_no_feasible_points ? L"True" : L"False");
+    wcscpy(__move_points_under_graph, move_points_under_graph ? L"True" : L"False");
+    wcscpy(__show_figure, show_figure ? L"True" : L"False");
 
     wchar_t* args[] =
     {
@@ -300,13 +325,19 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
             __solver_output_file,
             __problem_info_file,
             __eps,
+            __levels,
+            __objective_grid_size,
+            __constraints_grid_size,
             __figure_type,
             __calcs_type,
+            __calcs_type_c,
             __params,
             __move_points_under_graph,
             output_file_name,
             __show_figure,
             __hide_trials_points,
+            __hide_no_feasible_points,
+            __fill_feasible_region,
             NULL
     };
 

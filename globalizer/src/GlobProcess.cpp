@@ -769,7 +769,6 @@ void Process::DoIteration()
 
       pMethod->CalculateFunctionals();
 
-
       for (int j = 0; j < pTask->GetNumOfFunc(); j++)
       {
         functionCalculationCount[j] += pMethod->GetFunctionCalculationCount()[j];

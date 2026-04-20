@@ -32,6 +32,7 @@ int main(int argc, char* argv[])
 
   // Решатель
   HDSolver solver(problem);
+
   // Решаем задачу
   if (solver.Solve() != SYSTEM_OK)
     throw EXCEPTION("Error: solver.Solve crash!!!");

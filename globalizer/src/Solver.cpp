@@ -55,6 +55,9 @@ Solver::Solver(IProblem* problem)
   isExternalTask = false;
 
   addPoints = nullptr;
+
+  // Настраиваем параметры
+  AutoConfig();
 }
 
 #ifdef _GLOBALIZER_BENCHMARKS
@@ -110,24 +113,7 @@ int Solver::CheckParameters()
     }
   }
 
-  if (parameters.automaticParametersSetting)
-  {
-    if (parameters.MaxNumOfPoints > 100
-      && parameters.NumThread.GetIsChange() == false && parameters.NumPoints.GetIsChange() == false
-      && parameters.TypeCalculation == OMP)
-    {
-      if (parameters.Dimension > 2 && parameters.Dimension < 10 && parameters.startPoint.GetIsChange() == false)
-      {
-        parameters.NumThread = std::max(int(parameters.GetMaxNumOMP() / 2), 1);
-        parameters.NumPoints = parameters.NumThread;
-      }
-      if (parameters.Dimension > 5
-        && parameters.r.GetIsChange() == false)
-      {
-        parameters.r = parameters.r * 2;
-      }
-    }
-  }
+
 
   if (parameters.IsPlot)
   {
@@ -300,11 +286,18 @@ int Solver::Solve()
         wchar_t* output_file_name = new wchar_t[wstring.size() + 1];
         wcscpy(output_file_name, wstring.c_str());
         bool show_figure = parameters.ShowFigure;
-        bool move_points_under_graph = false;
+        bool hide_trials_points = parameters.HideTrialsPoints;
+        bool move_points_under_graph = parameters.MoveTrialPointsUnderGraph;
+        bool fill_feasible_region = parameters.FillFeasibleRegion;
+        bool hide_no_feasible_points = parameters.HideNoFeasiblePoints;
         FigureTypes figure_type =parameters.FigureType;
         CalcsTypes calcs_type = parameters.CalcsType;
+        CalcsTypes calcs_type_c = parameters.CalcsTypeC;
+        int levels = parameters.Levels;
+        int objective_grid_size = parameters.ObjectiveGridSize;
+        int constraints_grid_size = parameters.ConstraintsGridSize;
 
-        Plotter::draw_plot(this->mProblem, GetSolutionResult(), { 0, 1 }, output_file_name, figure_type, calcs_type, show_figure, move_points_under_graph);
+        Plotter::draw_plot(this->mProblem, GetSolutionResult(), { 0, 1 }, {}, output_file_name, figure_type, calcs_type, calcs_type_c, levels, objective_grid_size, constraints_grid_size, fill_feasible_region, hide_trials_points, hide_no_feasible_points, move_points_under_graph, show_figure);
 #else
         print << "Plotter is not work!!!\nPython libraries doesn't find!!!\n";
 #endif
@@ -499,8 +492,47 @@ Task* Solver::GetTask()
 }
 
 
-/// Возвращает поисковую информацию
+
+// ------------------------------------------------------------------------------------------------
 SearchData* Solver::GetData()
 {
   return pData;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Solver::AutoConfig()
+{
+  if (parameters.iterationsCount.GetIsChange() == true)
+  {
+    if (parameters.MaxNumOfPoints.GetIsChange() == false)
+    {
+      parameters.MaxNumOfPoints = parameters.iterationsCount;
+    }
+  }
+  else
+  {
+    if (parameters.iterationsCount.GetIsChange() == false)
+    {
+      parameters.iterationsCount = parameters.MaxNumOfPoints;
+    }
+  }
+
+  if (parameters.automaticParametersSetting)
+  {
+    if (parameters.MaxNumOfPoints > 100
+      && parameters.NumThread.GetIsChange() == false && parameters.NumPoints.GetIsChange() == false
+      && parameters.TypeCalculation == OMP)
+    {
+      if (parameters.Dimension > 2 && parameters.Dimension < 10 && parameters.startPoint.GetIsChange() == false)
+      {
+        parameters.NumThread = std::max(int(parameters.GetMaxNumOMP() / 2), 1);
+        parameters.NumPoints = parameters.NumThread;
+      }
+      if (parameters.Dimension > 5
+        && parameters.r.GetIsChange() == false)
+      {
+        parameters.r = parameters.r * 2;
+      }
+    }
+  }
 }

@@ -61,9 +61,19 @@ void Parameters::SetDefaultParameters()
   parameters.timeSolve = 0;
   InitOption(HELP, 0, "-HELP", "Print Help", 1);
   InitOption(IsPlot, 0, "-PLOT", "Draw a graph of the function", 1);
-  InitOption(ShowFigure, false, "-ShowFigure", "a flag indicating the need to open the resulting drawing in an interactive window on the screen", 1);
+  
   InitOption(FigureType, LevelLayers, "-FigureType", "type of visualization of the target function (available modes : 0 - LevelLayers, 1 - Surface)", 1);
   InitOption(CalcsType, ObjectiveFunction, "-CalcsType", "the type of value calculations for visualizing the objective function (available modes: ObjectiveFunction, Approximation, Interpolation, ByPoints, OnlyPoints)", 1);
+  InitOption(CalcsTypeC, ObjectiveFunction, "-CalcsTypeC", "the type of value calculations for visualizing the constraints, if CalcsType = ObjectiveFunction it's automatically matched (available modes: ObjectiveFunction, Approximation, Interpolation, ByPoints)", 1);
+  InitOption(Levels, 25, "-lvls", "the number of level lines for visualizing in mode LevelLayers", 1);
+  InitOption(ObjectiveGridSize, 100, "-grido", "the number of grid points for visualizing the objective function", 1);
+  InitOption(ConstraintsGridSize, 200, "-gridc", "the number of grid points for visualizing the constraints", 1);
+  InitOption(FillFeasibleRegion, false, "-FillFeasibleRegion", "a flag indicating the need to fill feasible region with color", 1);
+  InitOption(HideNoFeasiblePoints, false, "-HideNoFeasiblePoint", "a flag indicating the need to hide no feasible trial points", 1);
+  InitOption(HideTrialsPoints, false, "-HideTrialsPoints", "a flag indicating the need to hide trial points", 1);
+  InitOption(MoveTrialPointsUnderGraph, false, "-MoveTrialPointsUnderGraph", "a flag indicating the need to move trial points under the graph", 1);
+  InitOption(ShowFigure, false, "-ShowFigure", "a flag indicating the need to open the resulting drawing in an interactive window on the screen", 1);
+
   InitOption(PlotGridSize, 300, "-PGS", "Drawing mesh precision", 1);
   InitOption(PlotFileName, \0, "-PlotFileName", "The name of the file to save the image", 1);
   InitOption(IsCalculateNumPoint, 0, "-ICNP", "Number of trials will be calculated at each iteration", 1);

@@ -20,8 +20,11 @@ option(GLOBALIZER_MAX_Number_Of_Function "Set MAX Number Of Function Globalizer"
 option(GLOBALIZER_BUILD_PROBLEMS "Set ON to build problems" OFF)
 option(GLOBALIZER_USE_DOXYGEN "Set ON to build documentation" OFF)
 option(GLOBALIZER_BUILD_GCGEN "Set ON to build GCGen" OFF)
+option(GLOBALIZER_BUILD_INTEGRATION_TESTS "Set ON to build integration tests" OFF)
+
 option(GLOBALIZER_ONE_MPI_PROCESS_PER_NODE "ONE PROCESS PER NODE" OFF)
 option(GLOBALIZER_PYTHON "Set ON to use Python" OFF)
+option(PYGlobalizer "Set ON to use Python interface" OFF)
 
 set(GLOBALIZER_DEBUG_SUFFIX   d)
 
@@ -46,7 +49,11 @@ if(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE AND
   message("CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE})
 else()
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG   ${GLOBALIZER_OUTPUT_DIRECTORY})
- set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${GLOBALIZER_OUTPUT_DIRECTORY})
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${GLOBALIZER_OUTPUT_DIRECTORY})
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG   ${GLOBALIZER_OUTPUT_DIRECTORY})
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${GLOBALIZER_OUTPUT_DIRECTORY})
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG   ${GLOBALIZER_OUTPUT_DIRECTORY})
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${GLOBALIZER_OUTPUT_DIRECTORY})
 endif()
 
 include(cmake/globalizer_utils.cmake)
@@ -193,7 +200,7 @@ if (GLOBALIZER_USE_CUDA)
   find_package(CUDA REQUIRED)
 endif()
 
-
+set(GLOBALIZER_BENCHMARKS_Interface "")
 #add problems
 if(${GLOBALIZER_BUILD_PROBLEMS})
   add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/Problems)
@@ -203,6 +210,12 @@ if(${GLOBALIZER_BUILD_PROBLEMS})
   file(GLOB GLOBALIZER_BENCHMARKS_Interface_SOURCES ${GLOBALIZER_BENCHMARKS_Interface}/src/*.c ${GLOBALIZER_BENCHMARKS_Interface}/src/*.cpp)
   add_definitions(-D_GLOBALIZER_BENCHMARKS)		
   include_directories(${GLOBALIZER_BENCHMARKS_Interface}/include/)
+endif()
+
+if(${GLOBALIZER_BUILD_INTEGRATION_TESTS})
+  add_definitions(-D_GLOBALIZER_BENCHMARKS)
+ 
+  include_directories(${PROJECT_SOURCE_DIR}/third_party/Problems/Interface/include)
 endif()
 
 if(${GLOBALIZER_BUILD_GCGEN})
@@ -278,6 +291,20 @@ endif()
 
 add_library(${GLOBALIZER_LIB_NAME} STATIC ${ALL_SRC_FILES} ${GCGEN_SOURCES} ${GCGEN_HEADERS})
 
+
+target_include_directories(${GLOBALIZER_LIB_NAME} PUBLIC
+    ${GLOBALIZER_COMMON_SRC_DIR}/include
+    ${GLOBALIZER_PARAMETERS_DIR}/include
+    ${GLOBALIZER_evolvent_DIR}/include
+    ${GLOBALIZER_extended_DIR}/include
+    ${GLOBALIZER_output_system_DIR}/include
+    ${GLOBALIZER_problem_DIR}/include
+    ${GLOBALIZER_method_DIR}/include
+    ${GLOBALIZER_calculation_DIR}/include
+    ${GLOBALIZER_local_method_DIR}/include
+	${GLOBALIZER_BENCHMARKS_Interface}/include/
+)
+
 file(GLOB main_list "${GLOBALIZER_EXAMPLES_SRC_DIR}/*.cpp")
 
 
@@ -313,11 +340,31 @@ foreach(main_filename ${main_list})
     
     if (IS_GNU_COMPILER)
       set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed -ldl -fopenmp")
+
     endif()
   endif()
 
 
 endforeach()
+
+if(PYGlobalizer)
+	find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development)
+
+	set(PYBIND11_FINDPYTHON ON)
+	find_package(pybind11 CONFIG REQUIRED)
+
+	pybind11_add_module(PYGlobalizer ${PROJECT_SOURCE_DIR}/PYGlobalizer/PYGlobalizer.cpp ${PROJECT_SOURCE_DIR}/PYGlobalizer/PYProblem.cpp)
+
+	# Добавляем библиотеки с использованием keyword-синтаксиса
+	target_link_libraries(PYGlobalizer 
+    		PRIVATE
+    		${GLOBALIZER_LIB_NAME}
+    		# ${PROJECT_SOURCE_DIR}/mpi_stub.lib
+    		${PYTHON_LIBRARIES}
+)
+
+install(TARGETS PYGlobalizer DESTINATION .)
+endif()
 
 
 #add_executable(${GLOBALIZER_PROJECT_NAME} ${GLOBALIZER_EXAMPLES_SRC_DIR}/Main.cpp)
@@ -370,7 +417,10 @@ if (IS_GNU_COMPILER)
   target_compile_options(${GLOBALIZER_LIB_NAME} INTERFACE -march=native -fopenmp)
 endif()
 
-
+# add integration tests
+if(${GLOBALIZER_BUILD_INTEGRATION_TESTS})
+  add_subdirectory(${PROJECT_SOURCE_DIR}/integration_tests)
+endif()
 
 #add tests
 if(${GLOBALIZER_BUILD_TESTS})

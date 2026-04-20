@@ -66,12 +66,13 @@ def ReadProblemFile(dir, file_for_reading):
         x = []
         z = []
         c = []
-
+        is_objective_calc = False
+        is_constraints_calc = False
         isFirst = True
-
+        isSecond = True
         for line in file:
             if isFirst:
-                splitedline = line.split(' ')
+                splitedline = line.split()
                 dim = int(splitedline[0])
                 lb_line = splitedline[1].split('_')
                 rb_line = splitedline[2].split('_')
@@ -81,22 +82,30 @@ def ReadProblemFile(dir, file_for_reading):
                     rb.append(float(val))
                 isFirst = False
                 continue
+            if isSecond:
+                splitedline = line.split(' ')
+                is_objective_calc = bool(int(splitedline[0]))
+                is_constraints_calc = bool(int(splitedline[1]))
+                isSecond = False
+                continue
 
-            splitedline = line.split(' | ')
+            if is_objective_calc or is_constraints_calc:  # необязательная проверка, для надежности от пустых строк
+                splitedline = line.split(' | ')
 
-            point = splitedline[0].split(' ')
-            value = splitedline[len(splitedline) - 1].split(' ')
+                point = splitedline[0].split(' ')
+                xi = []
+                for j in range(len(point)):
+                    xi.append(float(point[j]))
+                x.append(xi)
 
-            xi = []
-            for j in range(len(point)):
-                xi.append(float(point[j]))
-            x.append(xi)
-            z.append(float(value[0]))
+                if is_objective_calc:
+                    value = splitedline[len(splitedline) - 1].split(' ')
+                    z.append(float(value[0]))
 
-            ci = []
-            for j in range(1, len(splitedline) - 1):
-                ci.append(float(splitedline[j].split(' ')[0]))
-            if len(ci) > 0:
-                c.append(ci)
+                ci = []
+                for j in range(1, len(splitedline) - is_objective_calc):
+                    ci.append(float(splitedline[j].split(' ')[0]))
+                if len(ci) > 0:
+                    c.append(ci)
 
     return dim, lb, rb, x, z, c

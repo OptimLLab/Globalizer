@@ -23,12 +23,7 @@
 #include "Parameters.h"
 #include "Performance.h"
 #include "ProblemInterface.h"
-#include "EvolventInterface.h"
-//#include "TLinearEvolvent.h"
-//#include "TNoninjectiveEvolvent.h"
-//#include "TRotatedEvolvent.h"
-//#include "TShiftedEvolvent.h"
-//#include "TSmoothEvolvent.h"
+#include "Evolvent.h"
 #include "CalculationFactory.h"
 
 //extern const int MaxNumOfTaskLevels;
@@ -63,7 +58,7 @@ protected:
   - множественная сдвиговая развертка
   - множественная вращаемая развертка
   */
-  IEvolvent* pEvolvent;
+  Evolvent* evolvent;
   /// Вычислитель
   Calculation* calculation;
 

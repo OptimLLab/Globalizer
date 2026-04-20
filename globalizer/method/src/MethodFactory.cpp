@@ -22,7 +22,7 @@
 
 // ------------------------------------------------------------------------------------------------
 IMethod* MethodFactory::CreateMethod(Task& _pTask, SearchData& _pData,
-  Calculation& _Calculation, IEvolvent& _Evolvent)
+  Calculation& _Calculation, Evolvent& _Evolvent)
 {
   IMethod* pMethod = 0;
   if (parameters.TypeMethod == StandartMethod)

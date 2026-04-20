@@ -72,7 +72,7 @@ protected:
 public:
 
   MixedIntegerMethod(Task& _pTask, SearchData& _pData,
-    Calculation& _Calculation, IEvolvent& _Evolvent);
+    Calculation& _Calculation, Evolvent& _Evolvent);
   virtual ~MixedIntegerMethod();
 
   /** Функция выполняет первую итерацию метода

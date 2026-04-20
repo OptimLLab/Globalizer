@@ -40,7 +40,7 @@
 
 // ------------------------------------------------------------------------------------------------
 Method::Method(Task& _pTask, SearchData& _pData,
-  Calculation& _Calculation, IEvolvent& _Evolvent) :
+  Calculation& _Calculation, Evolvent& _Evolvent) :
   pTask(_pTask), pData(&_pData),
   calculation(_Calculation), evolvent(_Evolvent)
 {

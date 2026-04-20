@@ -40,7 +40,7 @@
 
 // ------------------------------------------------------------------------------------------------
 Method_RSA::Method_RSA(Task& _pTask, SearchData& _pData,
-    Calculation& _Calculation, IEvolvent& _Evolvent) :
+    Calculation& _Calculation, Evolvent& _Evolvent) :
     pTask(_pTask), pData(&_pData),
     calculation(_Calculation), evolvent(_Evolvent)
 {
@@ -184,14 +184,7 @@ void Method_RSA::CalculateImage(Trial& pCurTrialsj)
 void Method_RSA::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestIntervalsj)
 {
     // Вычисляем x
-    //Extended delta_x = BestIntervalsj->xr() - BestIntervalsj->xl();
-    Extended left_x = BestIntervalsj->xl(), right_x = BestIntervalsj->xr();
-    double left_z = BestIntervalsj->LeftPoint->GetValue(), right_z = BestIntervalsj->RightPoint->GetValue();
-    Extended delta_x = right_x - left_x;
-    double sign = right_z - left_z < 0.0 ? -1.0 : 1.0;
-    Extended point_x = 0.5 * (left_x + right_x);// -sign * 0.25 * pow(abs(right_z - left_z) / (right_z + left_z), pTask.GetN()) * delta_x;
-    pCurTrialsj.SetX(point_x);
-    //pCurTrialsj.SetX(0.5 * (BestIntervalsj->xl() + BestIntervalsj->xr()));
+    pCurTrialsj.SetX(0.5 * (BestIntervalsj->xl() + BestIntervalsj->xr()));
 
     pCurTrialsj.leftInterval = BestIntervalsj;
     pCurTrialsj.rightInterval = BestIntervalsj;
@@ -545,6 +538,22 @@ void Method_RSA::Recalc()
 {
     if (pData->IsRecalc())
     {
+        // Обновить текущие значение минимумов
+        for (int v = 0; v <= pData->GetBestTrial()->index; v++)
+        {
+            if (v < pData->GetBestTrial()->index)
+            {
+                pData->Z[v] = -pData->M[v] * parameters.rEps;
+            }
+            else
+            {
+                if (pData->GetBestTrial()->FuncValues[v] != MaxDouble)
+                    pData->Z[v] = pData->GetBestTrial()->FuncValues[v];
+                else
+                    pData->Z[v] = 0;
+            }
+        }
+
         pData->ClearQueue();
         for (SearcDataIterator it = pData->GetBeginIterator(); it; ++it)
         {
@@ -1072,119 +1081,36 @@ void Method_RSA::RenewSearchData()
 {
     for (unsigned int j = 0; j < iteration.pCurTrials.size(); j++)
     {
-        SearchInterval* interval = iteration.pCurTrials[j]->leftInterval;
-        pData->PushToQueue((interval));
-    }
-
-    for (unsigned int j = 0; j < iteration.pCurTrials.size(); j++)
-    {
         if (iteration.pCurTrials[j] == 0)
             continue;
 
-        SearchInterval* p;
-        SearchInterval* interval;
+        SearchInterval* p = 0;
+        SearchInterval* interval = iteration.pCurTrials[j]->leftInterval;
+        p = AddCurrentPoint(*iteration.pCurTrials[j], interval);
 
-        if (parameters.MapType == mpNoninjective) {
-            Extended* x_ = new Extended[1 << parameters.Dimension];
-            int kpp = evolvent.GetNoninjectivePreimages(iteration.pCurTrials[j]->y, x_);
+        if (p == 0)
+            continue;
 
-            std::vector<Trial*> tmp(kpp+1);
-
-            for (int i = 0; i < kpp+1; ++i) 
-            {
-                tmp[i] = TrialFactory::CreateTrial(iteration.pCurTrials[j]);
-                pData->GetTrials().push_back(tmp[i]);
-            }
-
-            for (int i = 0; i < kpp+1; ++i)
-            {
-                if (i < kpp)
-                    tmp[i]->SetX(x_[i]);
-                p = 0;
-                interval = 0;
-                p = AddCurrentPoint(*tmp[i], 0);
-                interval = tmp[i]->leftInterval;
-
-                if (p == 0)
-                    continue;
-
-                //Обработка началной итерации
-                if (iteration.IterationCount == 1)
-                {
-                    pData->SetRecalc(true);
-                }
-
-                // Если полный пересчет не нужен - обновляем только очереди характеристик
-                p->R = CalculateGlobalR(p);
-                pData->PushToQueue(p);
-
-                (interval)->R = CalculateGlobalR((interval));
-
-                pData->TrickleUp(interval);
-
-            }
-
-            delete[] x_;
-        }
-        else if(parameters.MapType == mpLinar){
-            p = 0;
+        if (interval == 0)
             interval = iteration.pCurTrials[j]->leftInterval;
-            p = AddCurrentPoint(*iteration.pCurTrials[j], interval);
 
-            if (p == 0)
-                continue;
-
-            if (interval == 0)
-                interval = iteration.pCurTrials[j]->leftInterval;
-
-            //Обработка началной итерации
-            if (iteration.IterationCount == 1)
-            {
-                pData->SetRecalc(true);
-            }
-
-            // Если полный пересчет не нужен - обновляем только очереди характеристик
-            if (!pData->IsRecalc())
-            {
-                // Удалять интервалы из очереди не надо - они уже удалены в GetBestIntervals
-                // Вставляем два новых интервала
-                p->R = CalculateGlobalR(p);
-                pData->PushToQueue(p);
-
-                (interval)->R = CalculateGlobalR((interval));
-
-                pData->PushToQueue((interval));
-            }
+        //Обработка началной итерации
+        if (iteration.IterationCount == 1)
+        {
+            pData->SetRecalc(true);
         }
-        else {
-            p = 0;
-            interval = iteration.pCurTrials[j]->leftInterval;
-            p = AddCurrentPoint(*iteration.pCurTrials[j], interval);
 
-            if (p == 0)
-                continue;
+        // Если полный пересчет не нужен - обновляем только очереди характеристик
+        if (!pData->IsRecalc())
+        {
+            // Удалять интервалы из очереди не надо - они уже удалены в GetBestIntervals
+            // Вставляем два новых интервала
+            p->R = CalculateGlobalR(p);
+            pData->PushToQueue(p);
 
-            if (interval == 0)
-                interval = iteration.pCurTrials[j]->leftInterval;
+            (interval)->R = CalculateGlobalR((interval));
 
-            //Обработка началной итерации
-            if (iteration.IterationCount == 1)
-            {
-                pData->SetRecalc(true);
-            }
-
-            // Если полный пересчет не нужен - обновляем только очереди характеристик
-            if (!pData->IsRecalc())
-            {
-                // Удалять интервалы из очереди не надо - они уже удалены в GetBestIntervals
-                // Вставляем два новых интервала
-                p->R = CalculateGlobalR(p);
-                pData->PushToQueue(p);
-
-                (interval)->R = CalculateGlobalR((interval));
-
-                pData->PushToQueue((interval));
-            }
+            pData->PushToQueue((interval));
         }
     }
     isFindInterval = false;

@@ -78,7 +78,7 @@ protected:
     - множественна€ сдвигова€ развертка
     - множественна€ вращаема€ развертка
     */
-    IEvolvent& evolvent;
+    Evolvent& evolvent;
 
     // ----------------------------------------------------------------------------
     // ¬нутренние данные метода
@@ -223,7 +223,7 @@ protected:
 public:
 
     Method_RSA(Task& _pTask, SearchData& _pData,
-        Calculation& _Calculation, IEvolvent& _Evolvent);
+        Calculation& _Calculation, Evolvent& _Evolvent);
     virtual ~Method_RSA();
 
     /** ‘ункци€ выполн€ет первую итерацию метода

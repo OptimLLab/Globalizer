@@ -130,7 +130,6 @@ if (${GLOBALIZER_ONE_MPI_PROCESS_PER_NODE})
 	add_definitions(-DONE_MPI_PROCESS_PER_NODE)
 endif()
 
-
 #add MPFR_GMP_MPIR
 if (${GLOBALIZER_USE_MP})
 	add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/mpfr_gmp_mpir)
@@ -373,6 +372,7 @@ endif()
 
 												  
 include_directories(${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
+
 
 	
 if (${IS_CLANG_COMPILER})	

@@ -2,28 +2,28 @@
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
-//                       Copyright (c) 2015 by UNN.                        //
+//                       Copyright (c) 2026 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      method_factory.h                                            //
+//  File:      evolvent_factory.h                                          //
 //                                                                         //
-//  Purpose:   Header file for method factory class                        //
+//  Purpose:   Header file for evolvent factory class                      //
 //                                                                         //
-//  Author(s): Lebedev I.                                                  //
+//  Author(s): Zaitsev A.                                                  //
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __METHOD_FACTORY_H__
-#define __METHOD_FACTORY_H__
+#ifndef __EVOLVENT_FACTORY_H__
+#define __EVOLVENT_FACTORY_H__
 
-#include "Method.h"
-#include "RSAMethod.hpp"
+#include "Common.h"
+#include "Parameters.h"
+#include "Evolvent.h"
 
-class MethodFactory
+class EvolventFactory
 {
 public:
-  static IMethod* CreateMethod(Task& _pTask, SearchData& _pData,
-    Calculation& _Calculation, IEvolvent& _Evolvent);
+  static IEvolvent* CreateEvolvent(int _N, int _m);
 };
 
 #endif

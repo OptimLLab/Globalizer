@@ -5,9 +5,9 @@
 //                       Copyright (c) 2015 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      evolvent.h                                                  //
+//  File:      evolventinterface.h                                         //
 //                                                                         //
-//  Purpose:   Header file for evolvent classes                            //
+//  Purpose:   Header file for evolvent interface classes                  //
 //                                                                         //
 //  Author(s): Barkalov K., Sysoyev A.                                     //
 //                                                                         //
@@ -15,7 +15,7 @@
 
 
 /**
-\file evolvent.h
+\file evolventinterface.h
 
 \authors Баркалов К., Сысоев А.
 \date 2015-2016
@@ -26,12 +26,11 @@
 \details Объявление класса #Evolvent и сопутствующих типов данных
 */
 
-#ifndef __EVOLVENT_H__
-#define __EVOLVENT_H__
+#ifndef __EVOLVENT_INTERFACE_H__
+#define __EVOLVENT_INTERFACE_H__
 
 #include "Common.h"
 #include "Extended.h"
-#include "EvolventInterface.h"
 #include <vector>
 
 // ------------------------------------------------------------------------------------------------
@@ -42,7 +41,7 @@
 Класс #Evolvent предоставляет средства для преобразования координат между
 гиперкубом [-1/2, 1/2]^N и гиперинтервалом D.
 */
-class Evolvent : public IEvolvent
+class IEvolvent
 {
 protected:
   /// Точность разложения гиперкуба
@@ -65,73 +64,59 @@ protected:
   Extended nexpExtended;
 
 
-  virtual void CalculateNumbr(Extended* s, long long* u, long long* v, long long* l);
+  virtual void CalculateNumbr(Extended* s, long long* u, long long* v, long long* l) = 0;
 
   /// вычисление вспомогательного центра u(s) и соответствующих ему v(s) и l(s)
-  virtual void CalculateNode(Extended is, int n, long long* u, long long* v, long long* l);
+  virtual void CalculateNode(Extended is, int n, long long* u, long long* v, long long* l) = 0;
   /// Преобразование из гиперкуба P в гиперинтервал D
-  virtual void transform_P_to_D();
+  virtual void transform_P_to_D() = 0;
   /// Преобразование из гиперинтервала D в гиперкуб P
-  virtual void transform_D_to_P();
+  virtual void transform_D_to_P() = 0;
   /// Получить точку y по x
-  virtual double* GetYOnX(const Extended& _x);
+  virtual double* GetYOnX(const Extended& _x) = 0;
   /// Получить x по точке y
-  virtual Extended GetXOnY();
+  virtual Extended GetXOnY() = 0;
 
 public:
-
-  /**
-  \brief Конструктор класса #Evolvent
-  */
-  Evolvent(int _N = 2, int _m = 10);
-
-  /**
-  \brief Конструктор копирования
-  */
-  Evolvent(const Evolvent& evolvent);
-
-  /// Деструктор класса #Evolvent
-  virtual ~Evolvent();
-
   /**
   \brief Возвращает левые границы поисковой области (A)
   */
-  virtual const double* getA() const { return A; }
+	virtual const double* getA() const = 0;
 
   /**
   \brief Возвращает правые границы поисковой области (B)
   */
-  virtual const double* getB() const { return B; }
+	virtual const double* getB() const = 0;
 
   /**
   \brief Установка границ поисковой области
   */
-  virtual void SetBounds(const double* _A, const double* _B);
+	virtual void SetBounds(const double* _A, const double* _B) = 0;
 
   /**
   \brief Преобразование x в y (x -> y)
   */
-  virtual void GetImage(const Extended& x, double* _y, int EvolventNum = 0);
+  virtual void GetImage(const Extended& x, double* _y, int EvolventNum = 0) = 0;
 
   /**
   \brief Преобразование y в x (y -> x)
   */
-  virtual void GetInverseImage(double* _y, Extended& x);
+  virtual void GetInverseImage(double* _y, Extended& x) = 0;
 
   /**
   \brief Преобразование y в x (y -> x)
   */
-  virtual void GetPreimages(double* _y, Extended* x);
+  virtual void GetPreimages(double* _y, Extended* x) = 0;
 
   /**
-  \brief Оператор присваивания
-  */
-  virtual Evolvent& operator=(const Evolvent& evolvent);
+	\brief Неинъективное преобразование y в x (y -> x)
+	*/
+  virtual int GetNoninjectivePreimages(double* _y, Extended* x) { return 0; };
 
   /**
   \brief Вычисляет функцию существования точки в развертки EvolventNum для y, <0 - существует
   */
- virtual double ZeroConstraintCalc(const double* _y, int EvolventNum = 0);
+  virtual double ZeroConstraintCalc(const double* _y, int EvolventNum = 0) = 0;
 };
 
 #endif

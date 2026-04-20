@@ -22,7 +22,7 @@
 
 
 // ------------------------------------------------------------------------------------------------
-Calculation* CalculationFactory::CreateCalculation2(Task& _pTask, Evolvent* evolvent)
+Calculation* CalculationFactory::CreateCalculation2(Task& _pTask, IEvolvent* evolvent)
 {
     Calculation* calculation = 0;
 
@@ -111,7 +111,7 @@ Calculation* CalculationFactory::CreateCalculation2(Task& _pTask, Evolvent* evol
 
 
 // ------------------------------------------------------------------------------------------------
-Calculation* CalculationFactory::CreateCalculation(Task& _pTask, Evolvent* evolvent)
+Calculation* CalculationFactory::CreateCalculation(Task& _pTask, IEvolvent* evolvent)
 {
     Calculation* calculation = 0;
 
@@ -191,7 +191,7 @@ Calculation* CalculationFactory::CreateCalculation(Task& _pTask, Evolvent* evolv
     return calculation;
 }
 
-Calculation* CalculationFactory::CreateNewCalculation(Task& _pTask, Evolvent* evolvent)
+Calculation* CalculationFactory::CreateNewCalculation(Task& _pTask, IEvolvent* evolvent)
 {
     Calculation* calculation = 0;
 

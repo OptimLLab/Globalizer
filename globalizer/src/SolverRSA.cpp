@@ -177,7 +177,7 @@ void Solver_RSA::MpiCalculation()
         }
 
         IProblem* _problem = mProblem;
-        Task* _pTask = TaskFactory::CreateTask(_problem, 0);;
+        Task* _pTask = TaskFactory::CreateTask(_problem, 0);
         Calculation* calculation;
         if (parameters.calculationsArray[1] == OMP) {
             calculation = new OMPCalculation(*_pTask);

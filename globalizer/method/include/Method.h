@@ -80,7 +80,7 @@ protected:
   - множественная сдвиговая развертка
   - множественная вращаемая развертка
   */
-  Evolvent& evolvent;
+  IEvolvent& evolvent;
 
   // ----------------------------------------------------------------------------
   // Внутренние данные метода
@@ -244,7 +244,7 @@ protected:
 public:
 
   Method(Task& _pTask, SearchData& _pData,
-    Calculation& _Calculation, Evolvent& _Evolvent);
+    Calculation& _Calculation, IEvolvent& _Evolvent);
   virtual ~Method();
 
   /** Функция выполняет первую итерацию метода

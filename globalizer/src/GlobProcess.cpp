@@ -47,21 +47,6 @@ pData(&data), pTask(&task)
 
   pEvolvent = EvolventFactory::CreateEvolvent(parameters.Dimension, parameters.m);
 
-  /*if (parameters.MapType == mpBase)
-    evolvent = new Evolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
-  else if (parameters.MapType == mpLinar)
-      evolvent = new LinearEvolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
-  else if (parameters.MapType == mpNoninjective)
-      evolvent = new NoninjectiveEvolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
-  else if (parameters.MapType == mpRotated)
-      evolvent = new RotatedEvolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
-  else if (parameters.MapType == mpShifted)
-      evolvent = new ShiftedEvolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
-  else if (parameters.MapType == mpSmooth)
-      evolvent = new SmoothEvolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
-  else
-    throw EXCEPTION("Unknown type of evolvent");*/
-
   calculation = CalculationFactory::CreateCalculation(*pTask, pEvolvent);
 
   pMethod = MethodFactory::CreateMethod(*pTask, *pData, *calculation, *pEvolvent);

@@ -23,6 +23,7 @@
 #include "Common.h"
 #include "GlobProcess.h"
 #include "MethodFactory.h"
+#include "EvolventFactory.h"
 #include "MPICalculationAsync.h"
 
 
@@ -44,14 +45,26 @@ pData(&data), pTask(&task)
 {
   isFirstRun = true;
 
-  if (parameters.MapType == mpBase)
+  pEvolvent = EvolventFactory::CreateEvolvent(parameters.Dimension, parameters.m);
+
+  /*if (parameters.MapType == mpBase)
     evolvent = new Evolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
+  else if (parameters.MapType == mpLinar)
+      evolvent = new LinearEvolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
+  else if (parameters.MapType == mpNoninjective)
+      evolvent = new NoninjectiveEvolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
+  else if (parameters.MapType == mpRotated)
+      evolvent = new RotatedEvolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
+  else if (parameters.MapType == mpShifted)
+      evolvent = new ShiftedEvolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
+  else if (parameters.MapType == mpSmooth)
+      evolvent = new SmoothEvolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
   else
-    throw EXCEPTION("Unknown type of evolvent");
+    throw EXCEPTION("Unknown type of evolvent");*/
 
-  calculation = CalculationFactory::CreateCalculation(*pTask, evolvent);
+  calculation = CalculationFactory::CreateCalculation(*pTask, pEvolvent);
 
-  pMethod = MethodFactory::CreateMethod(*pTask, *pData, *calculation, *evolvent);
+  pMethod = MethodFactory::CreateMethod(*pTask, *pData, *calculation, *pEvolvent);
 
   functionCalculationCount.resize(pTask->GetNumOfFunc());
 
@@ -68,7 +81,7 @@ Process::~Process()
 {
   delete calculation;
   delete pMethod;
-  delete evolvent;
+  delete pEvolvent;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -157,21 +170,35 @@ void Process::Reset(SearchData* data, Task* task)
   isFirstRun = true;
   pData = data;
   pTask = task;
-  if (evolvent == 0)
+  if (pEvolvent == 0)
   {
-    if (parameters.MapType == mpBase)
-      evolvent = new Evolvent(parameters.Dimension, parameters.m);
+      //Task* _pTask = TaskFactory::CreateTask(_problem, 0);
+
+      pEvolvent = EvolventFactory::CreateEvolvent(parameters.Dimension, parameters.m);
+
+      /*if (parameters.MapType == mpBase)
+          evolvent = new Evolvent(Factory);
+      else if (parameters.MapType == mpLinar)
+          evolvent = new LinearEvolvent(parameters.Dimension, parameters.m);
+      else if (parameters.MapType == mpNoninjective)
+          evolvent = new NoninjectiveEvolvent(parameters.Dimension, parameters.m);
+      else if (parameters.MapType == mpRotated)
+          evolvent = new RotatedEvolvent(parameters.Dimension, parameters.m);
+      else if (parameters.MapType == mpShifted)
+          evolvent = new ShiftedEvolvent(parameters.Dimension, parameters.m);
+      else if (parameters.MapType == mpSmooth)
+          evolvent = new SmoothEvolvent(parameters.Dimension, parameters.m);
     else
-      throw EXCEPTION("Unknown type of evolvent");
+      throw EXCEPTION("Unknown type of evolvent");*/
   }
   if (calculation == 0)
-    calculation = CalculationFactory::CreateCalculation(*pTask, evolvent);
+    calculation = CalculationFactory::CreateCalculation(*pTask, pEvolvent);
   else
     calculation->SetTask(pTask);
 
   if (pMethod != 0)
     delete pMethod;
-  pMethod = MethodFactory::CreateMethod(*pTask, *pData, *calculation, *evolvent);
+  pMethod = MethodFactory::CreateMethod(*pTask, *pData, *calculation, *pEvolvent);
 
   functionCalculationCount.clear();
   functionCalculationCount.resize(pTask->GetNumOfFunc());
@@ -741,6 +768,7 @@ void Process::DoIteration()
       }
 
       pMethod->CalculateFunctionals();
+
 
       for (int j = 0; j < pTask->GetNumOfFunc(); j++)
       {

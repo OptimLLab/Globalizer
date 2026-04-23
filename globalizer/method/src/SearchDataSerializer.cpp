@@ -435,7 +435,7 @@ std::string SearchDataSerializer::TrialToJson(Trial* trial)
 
   // Многомерная точка
   json << "\"y\":[";
-  int dim = std::max(parameters.startPoint.GetSize(), parameters.Dimension.GetData());
+  int dim = std::max(parameters.StartPoint.GetSize(), parameters.Dimension.GetData());
   double* point = new double[dim];
   pTask->TransformPoint(point, trial->y);
   for (int i = 0; i < dim; ++i)
@@ -1467,7 +1467,7 @@ std::string SearchDataSerializer::SerializeFullState()
   for (int i = 0; i < parameters.Dimension; ++i)
   {
     if (i > 0) json << ",";
-    json << FormatDouble(parameters.startPoint[i]);
+    json << FormatDouble(parameters.StartPoint[i]);
   }
   json << "]\n";
   json << "  },\n";

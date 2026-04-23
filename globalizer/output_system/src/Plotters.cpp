@@ -260,7 +260,7 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
     std::filesystem::path build_path = std::filesystem::absolute("./");
     std::filesystem::path script_path = std::filesystem::absolute("../lib/plotters/start_cpp.py");
 
-    std::string solver_output_file = parameters.iterPointsSavePath.ToString();
+    std::string solver_output_file = parameters.IterPointsSavePath.ToString();
     std::string problem_info_file = "_problem_info.txt";
 
     std::wstring _params = L"[";

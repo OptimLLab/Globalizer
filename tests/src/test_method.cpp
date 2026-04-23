@@ -62,8 +62,8 @@ protected:
     reserv = 0.001;
 
     IProblem* problem;
-    std::string libPath = std::string(TESTDATA_BIN_PATH) + libName;
-    if (ProblemManager::OK_ == manager.LoadProblemLibrary(libPath))
+    std::string LibPath = std::string(TESTDATA_BIN_PATH) + libName;
+    if (ProblemManager::OK_ == manager.LoadProblemLibrary(LibPath))
     {
       int argc = 1;
       char* argv[1];
@@ -72,7 +72,7 @@ protected:
       parameters->Init(argc, argv);
       problem = manager.GetProblem();
       problem->SetDimension(n);
-      problem->SetConfigPath(parameters->libConfigPath);
+      problem->SetConfigPath(parameters->LibConfigPath);
       problem->Initialize();
       pTask = new Task( problem, 0);
 

@@ -19,15 +19,15 @@ void HDSolver::SetDimentions(std::vector<int> _dimentions)
 // ------------------------------------------------------------------------------------------------
 void HDSolver::CreateStartPoint()
 {
-  if (parameters.startPoint.GetIsChange() == false)
+  if (parameters.StartPoint.GetIsChange() == false)
   {
     double* A = new double[parameters.Dimension];
     double* B = new double[parameters.Dimension];
     problem->GetBounds(A, B);
-    parameters.startPoint.SetSize(parameters.Dimension);
+    parameters.StartPoint.SetSize(parameters.Dimension);
     for (int i = 0; i < parameters.Dimension; i++)
     {
-      parameters.startPoint[i] = A[i] + (B[i] - A[i]) / 2.0;
+      parameters.StartPoint[i] = A[i] + (B[i] - A[i]) / 2.0;
     }
   }
   parameters.IsUseStartPoint = true;
@@ -105,7 +105,7 @@ void HDSolver::AddPoint(Solver* solver, int curDimensions, std::vector<Trial*>& 
     }
     for (int j = 0; j < originalDimension; j++)
     {
-      point->y[j] = parameters.startPoint[j];
+      point->y[j] = parameters.StartPoint[j];
     }
     for (int j = 0; j < curDimensions; j++)
     {
@@ -133,7 +133,7 @@ void HDSolver::UpdateStartPoint(SolutionResult* solution, double& bestValue, int
         bestValue = solution->BestTrial->GetValue();
         for (int j = 0; j < curDimensions; j++)
         {
-          parameters.startPoint[j + startParameterNumber] = solution->BestTrial->y[j];
+          parameters.StartPoint[j + startParameterNumber] = solution->BestTrial->y[j];
         }
 
         print << "\t Iteration " << points.size() << "\t" << "bestValue =\t" << bestValue << "\n";
@@ -199,7 +199,7 @@ void HDSolver::LoadPoint()
         {
             parameters.M_constant[j] = fd.searchData.M[j];
         }
-        parameters.startPoint.SetSize(parameters.Dimension);
+        parameters.StartPoint.SetSize(parameters.Dimension);
         parameters.startParameterNumber = (fd.methodParams.start_parameter_number + 1) % parameters.Dimension;
 
         Trial* best = fd.trials[0];
@@ -213,10 +213,10 @@ void HDSolver::LoadPoint()
             }
         }
 
-        parameters.startPoint.SetSize(parameters.Dimension);
+        parameters.StartPoint.SetSize(parameters.Dimension);
         for (int i = 0; i < parameters.Dimension; i++)
         {
-            parameters.startPoint[i] = best->y[i];
+            parameters.StartPoint[i] = best->y[i];
         }
     }
   }
@@ -227,8 +227,8 @@ int HDSolver::Solve()
 {
   try
   {
-    auto doLV = parameters.localRefineSolution;
-    auto isPrint = parameters.isPrintResultToConsole;
+    auto doLV = parameters.LocalRefineSolution;
+    auto isPrint = parameters.IsPrintResultToConsole;
 
     parameters.M_constant.SetSize(problem->GetNumberOfFunctions());
     for (int j = 0; j < problem->GetNumberOfFunctions(); j++)
@@ -242,7 +242,7 @@ int HDSolver::Solve()
     alternativeStartingPoint.resize(originalDimension);
     for (int j = 0; j < originalDimension; j++)
     {
-      alternativeStartingPoint[j] = parameters.startPoint[j];
+      alternativeStartingPoint[j] = parameters.StartPoint[j];
     }
 
     std::vector<Trial*> points;
@@ -252,8 +252,8 @@ int HDSolver::Solve()
 
     for (int iteration = 0; iteration < iterationCount; iteration++)
     {
-      parameters.localRefineSolution = None;
-      parameters.isPrintResultToConsole = false;
+      parameters.LocalRefineSolution = None;
+      parameters.IsPrintResultToConsole = false;
       int startParameterNumber = parameters.startParameterNumber;
 
       for (int i = startParameterNumber; i < solvers.size(); i++)
@@ -290,7 +290,7 @@ int HDSolver::Solve()
           }
         }
 
-        if ((points.size() - countIterationsWithoutImprovement > parameters.MaxIterationsWithoutImprovement) && (parameters.stopCondition == MaxIterWithoutImprovement))
+        if ((points.size() - countIterationsWithoutImprovement > parameters.MaxIterationsWithoutImprovement) && (parameters.StopCondition == MaxIterWithoutImprovement))
         {
           break;
         }
@@ -299,21 +299,21 @@ int HDSolver::Solve()
         {
           for (int j = 0; j < originalDimension; j++)
           {
-            parameters.startPoint[j] = alternativeStartingPoint[j];
+            parameters.StartPoint[j] = alternativeStartingPoint[j];
           }
         }
       }
 
       if (iteration == iterationCount - 1)
       {
-        parameters.localRefineSolution = doLV;
-        parameters.isPrintResultToConsole = isPrint;
+        parameters.LocalRefineSolution = doLV;
+        parameters.IsPrintResultToConsole = isPrint;
       }
 
-      if ((parameters.localRefineSolution != None) || (iteration == iterationCount - 1)) //Если нужно локальное улучшение
+      if ((parameters.LocalRefineSolution != None) || (iteration == iterationCount - 1)) //Если нужно локальное улучшение
       {
-        std::string fileSerializer = parameters.fileSerializer.ToString();
-        parameters.fileSerializer = "";
+        std::string FileSerializer = parameters.FileSerializer.ToString();
+        parameters.FileSerializer = "";
 
         if (finalSolver == nullptr)
           finalSolver = new Solver(problem);
@@ -335,7 +335,7 @@ int HDSolver::Solve()
 
         UpdateStartPoint(solutionResult, bestValue, originalDimension, startParameterNumber, points, dynamic_cast<HDTask*>(finalSolver->GetTask()));
 
-        parameters.fileSerializer = fileSerializer;
+        parameters.FileSerializer = FileSerializer;
       }
 
 
@@ -343,7 +343,7 @@ int HDSolver::Solve()
       {
         for (int j = 0; j < originalDimension; j++)
         {
-          parameters.startPoint[j] = alternativeStartingPoint[j];
+          parameters.StartPoint[j] = alternativeStartingPoint[j];
         }
       }
 
@@ -414,7 +414,7 @@ std::vector<Trial*>& HDSolver::GetAllPoint()
 void HDSolver::AutoConfig()
 {
   parameters.TypeSolver = HDSearch;
-  parameters.automaticParametersSetting = true;
+  parameters.AutomaticParametersSetting = true;
 
   if (parameters.NumThread.GetIsChange() == false && parameters.NumPoints.GetIsChange() == false
     && parameters.TypeCalculation == OMP)
@@ -424,44 +424,44 @@ void HDSolver::AutoConfig()
   }
 
   if (!parameters.MaxIterationsWithoutImprovement.GetIsChange())
-    parameters.MaxIterationsWithoutImprovement = parameters.iterationsCount / 10;
+    parameters.MaxIterationsWithoutImprovement = parameters.IterationsCount / 10;
 
   if (parameters.HDSolverIterationCount.GetIsChange() == false)
   {
-    if (parameters.MaxNumOfPoints.GetIsChange() == true && parameters.iterationsCount.GetIsChange() == true)
+    if (parameters.MaxNumOfPoints.GetIsChange() == true && parameters.IterationsCount.GetIsChange() == true)
     {
-      parameters.HDSolverIterationCount = parameters.iterationsCount / parameters.MaxNumOfPoints / parameters.Dimension;
+      parameters.HDSolverIterationCount = parameters.IterationsCount / parameters.MaxNumOfPoints / parameters.Dimension;
     }
-    else if (parameters.MaxNumOfPoints.GetIsChange() == true && parameters.iterationsCount.GetIsChange() == false) // если задачно только число итераций на размерность
+    else if (parameters.MaxNumOfPoints.GetIsChange() == true && parameters.IterationsCount.GetIsChange() == false) // если задачно только число итераций на размерность
     {
-      parameters.iterationsCount = parameters.MaxNumOfPoints * parameters.Dimension * parameters.HDSolverIterationCount;
+      parameters.IterationsCount = parameters.MaxNumOfPoints * parameters.Dimension * parameters.HDSolverIterationCount;
     }
     else if (parameters.MaxNumOfPoints.GetIsChange() == false) // если задачно только общее число итераций
     {
-      int trialsPerDimention = parameters.iterationsCount / parameters.Dimension;
+      int trialsPerDimention = parameters.IterationsCount / parameters.Dimension;
       if (trialsPerDimention < 100)
       {
         //Если небольшой ресурс и большая размерность - запускаем координатный решатель один раз 
         parameters.HDSolverIterationCount = 1;
-        parameters.MaxNumOfPoints = parameters.iterationsCount / parameters.Dimension + 3;
+        parameters.MaxNumOfPoints = parameters.IterationsCount / parameters.Dimension + 3;
       }
       else
       {
         //Если большой ресурс и большая размерность - запускаем координатный решатель несколько раз 
         parameters.MaxNumOfPoints = 100;
-        parameters.HDSolverIterationCount = parameters.iterationsCount / parameters.MaxNumOfPoints / parameters.Dimension;
+        parameters.HDSolverIterationCount = parameters.IterationsCount / parameters.MaxNumOfPoints / parameters.Dimension;
       }
     }
   }
   else // если задачно число итераций HDSolver
   {
-    if (parameters.MaxNumOfPoints.GetIsChange() == false && parameters.iterationsCount.GetIsChange() == false) // в случае значений по умолчанию
+    if (parameters.MaxNumOfPoints.GetIsChange() == false && parameters.IterationsCount.GetIsChange() == false) // в случае значений по умолчанию
     {
-      parameters.MaxNumOfPoints = parameters.iterationsCount / parameters.HDSolverIterationCount / parameters.Dimension;
+      parameters.MaxNumOfPoints = parameters.IterationsCount / parameters.HDSolverIterationCount / parameters.Dimension;
     }
     else if (parameters.MaxNumOfPoints.GetIsChange() == true)
     {
-      parameters.iterationsCount = parameters.MaxNumOfPoints * parameters.Dimension * parameters.HDSolverIterationCount;
+      parameters.IterationsCount = parameters.MaxNumOfPoints * parameters.Dimension * parameters.HDSolverIterationCount;
     }
   }
 

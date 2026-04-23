@@ -81,11 +81,11 @@ Calculation* CalculationFactory::CreateCalculation2(Task& _pTask, IEvolvent* evo
         {
             if (Calculation::leafCalculation == 0)
             {
-                if (parameters.calculationsArray.GetSize() < _pTask.GetProcLevel())
+                if (parameters.CalculationsArray.GetSize() < _pTask.GetProcLevel())
                     calculation = new CUDACalculation(_pTask);
                 else
                 {
-                    if (parameters.calculationsArray[_pTask.GetProcLevel()] == OMP)
+                    if (parameters.CalculationsArray[_pTask.GetProcLevel()] == OMP)
                         calculation = new OMPCalculation(_pTask);
                     else
                         calculation = new CUDACalculation(_pTask);
@@ -170,11 +170,11 @@ Calculation* CalculationFactory::CreateCalculation(Task& _pTask, IEvolvent* evol
         {
             if (Calculation::leafCalculation == 0)
             {
-                if (parameters.calculationsArray.GetSize() < _pTask.GetProcLevel())
+                if (parameters.CalculationsArray.GetSize() < _pTask.GetProcLevel())
                     calculation = new CUDACalculation(_pTask);
                 else
                 {
-                    if (parameters.calculationsArray[_pTask.GetProcLevel()] == OMP)
+                    if (parameters.CalculationsArray[_pTask.GetProcLevel()] == OMP)
                         calculation = new OMPCalculation(_pTask);
                     else
                         calculation = new CUDACalculation(_pTask);
@@ -215,11 +215,11 @@ Calculation* CalculationFactory::CreateNewCalculation(Task& _pTask, IEvolvent* e
         }
         else
         {
-            if (parameters.calculationsArray.GetSize() < _pTask.GetProcLevel())
+            if (parameters.CalculationsArray.GetSize() < _pTask.GetProcLevel())
                 calculation = new CUDACalculation(_pTask);
             else
             {
-                if (parameters.calculationsArray[_pTask.GetProcLevel()] == OMP)
+                if (parameters.CalculationsArray[_pTask.GetProcLevel()] == OMP)
                     calculation = new OMPCalculation(_pTask);
                 else
                     calculation = new CUDACalculation(_pTask);

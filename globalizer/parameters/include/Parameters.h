@@ -124,7 +124,7 @@ public:
   /// плотность построения развертки (точность 1/2^m по к-те)
   TInt<Parameters> m;
   ///кол-во используемых ускорителей
-  TInt<Parameters> deviceCount;
+  TInt<Parameters> DeviceCount;
   /// тип развертки (сдвиговая, вращаемая)
   TEMapType<Parameters> MapType;
   /// Флаг для проверки работы асинхронной схемы, если не 0, то вычисления проводятся в строго заданном порядке
@@ -190,68 +190,68 @@ public:
   TFlag<Parameters> IsCalculateNumPoint;
   ///Назначать каждому процессу свое устройство (ускоритель)
   TBool<Parameters> IsSetDevice;
-  ///Индекс используемого устройства (ускорителей), если -1 используется первые deviceCount устройств
-  TInt<Parameters> deviceIndex;
+  ///Индекс используемого устройства (ускорителей), если -1 используется первые DeviceCount устройств
+  TInt<Parameters> DeviceIndex;
 
   TInt<Parameters> ProcRank;
   ///cпособ использования локального метода(только для синхронного типа процесса)
-  TELocalMethodScheme<Parameters> localRefineSolution;
+  TELocalMethodScheme<Parameters> LocalRefineSolution;
 
   /// Количество итераций локального метода
-  TInt<Parameters> localIteration;
+  TInt<Parameters> LocalIteration;
   /// Точность локального метода
-  TDouble<Parameters> localVerificationEpsilon;
+  TDouble<Parameters> LocalVerificationEpsilon;
   /// Количество точек точек параллельно вычисляемых локальным методом
-  TInt<Parameters> localVerificationNumPoint;
+  TInt<Parameters> LocalVerificationNumPoint;
 
   /// Количество итераций решателя задач большой размерности
   TInt<Parameters> HDSolverIterationCount;
 
   ///параметр смешивания в локально-глобальном алгоритме
-  TInt<Parameters> localMix;
+  TInt<Parameters> LocalMix;
   ///степень локальной адаптации в локально-глобальном алгоритме
-  TDouble<Parameters> localAlpha;
+  TDouble<Parameters> LocalAlpha;
   ///Распределение типов вычислений по
-  TInts<Parameters> calculationsArray;
+  TInts<Parameters> CalculationsArray;
   ///флаг сепарабельного поиска на первой итерации
-  TESeparableMethodType<Parameters> sepS;
+  TESeparableMethodType<Parameters> SepS;
   ///флаг случайного поиска на первой итерации
-  TBool<Parameters> rndS;
+  TBool<Parameters> RndS;
   ///путь к библиотеке с задачей
-  TString<Parameters> libPath;
+  TString<Parameters> LibPath;
   ///путь конфигарационному файлу задачи
-  TString<Parameters> libConfigPath;
+  TString<Parameters> LibConfigPath;
   /// тип критерия остановки
-  TEStopCondition<Parameters> stopCondition;
+  TEStopCondition<Parameters> StopCondition;
   /// Критерий применим только к верхнему уровню или к любому (для адаптивной схемы)
-  TBool<Parameters> isStopByAnyLevel;
+  TBool<Parameters> IsStopByAnyLevel;
   /// Печатать ли результаты работы алгоритма в консоль
-  TBool<Parameters> isPrintResultToConsole;
+  TBool<Parameters> IsPrintResultToConsole;
   ///путь, по которому будут сохранены многомерные точки, поставленные методом корневого процесса
-  TString<Parameters> iterPointsSavePath;
+  TString<Parameters> IterPointsSavePath;
   ///флаг, включающий печать дополнительной статистики: оценки констант Гёльдера и значения функций в точке оптимума
-  TFlag<Parameters> printAdvancedInfo;
+  TFlag<Parameters> PrintAdvancedInfo;
   ///флаг, выключающий печать параметров при запуске системы
-  TFlag<Parameters> disablePrintParameters;
+  TFlag<Parameters> DisablePrintParameters;
   ///префикс в имени лог-файла
-  TString<Parameters> logFileNamePrefix;
+  TString<Parameters> LogFileNamePrefix;
 
   TETypeSolver<Parameters> TypeSolver;
   /// размерности каждой из подзадач в режиме сепарабильного или сикуенсального поиска
   TInts<Parameters> DimInTask;
 
   /// Размер блока, отправляемого в MPI другим процессам
-  TInt<Parameters> mpiBlockSize;
+  TInt<Parameters> MpiBlockSize;
   /// Использовать ли специальное вычисление R как характеристики задачи
-  TBool<Parameters> isUseTaskR;
+  TBool<Parameters> IsUseTaskR;
   /// Использовать глобальный пересчет характеристик при изменение M или Z
-  TBool<Parameters> isUseFullRecount;
+  TBool<Parameters> IsUseFullRecount;
   /// Использовать ли специальное вычисление R как характеристики интервалов
-  TBool<Parameters> isUseIntervalR;
+  TBool<Parameters> IsUseIntervalR;
   /// Использовать ли глобальное Z
-  TBool<Parameters> isUseGlobalZ;
+  TBool<Parameters> IsUseGlobalZ;
   /// Не использовать Z
-  TBool<Parameters> isNotUseZ;
+  TBool<Parameters> IsNotUseZ;
 
   /// Тип локального метода (0 - Хука-Дживас)
   TETypeLocalMethod<Parameters> TypeLocalMethod;
@@ -259,29 +259,29 @@ public:
   /// Тип добавления точек локального уточнения (0 - как обычные точки, 1 - точки локального метода не учитываются в критерии остановки по точности)
   TETypeAddLocalPoint<Parameters> TypeAddLocalPoint;
   /// Максимальное Кол-во точек устанавлиемых локальным методом
-  TInt<Parameters> maxCountLocalPoint;
+  TInt<Parameters> MaxCountLocalPoint;
   /// Вычислять ли значения функции в крайних точках интервала
-  TBool<Parameters> isCalculationInBorderPoint;
+  TBool<Parameters> IsCalculationInBorderPoint;
   /// Тип локального уточнения: 0 - без него; 1 - минимаксное; 2 - адаптивное; 3 - адаптивно-минимаксное
   TELocalTuningType<Parameters> LocalTuningType;
   /// Параметр кси, используемый в локальном уточении
-  TDouble<Parameters> ltXi;
+  TDouble<Parameters> LtXi;
 
   /// Загружать начальныеточки из файла или распределять их равномерно
-  TBool<Parameters> isLoadFirstPointFromFile;
+  TBool<Parameters> IsLoadFirstPointFromFile;
   /// Путь откуда будут считаны начальные точки испытания
   TString<Parameters> FirstPointFilePath;
   /// Тип распределения начальных точек
   TETypeDistributionStartingPoints<Parameters> TypeDistributionStartingPoints;
 
   /// Множитель перед функцие определяющий минимизируем или максимизируем функцию
-  TDoubles<Parameters> functionSignMultiplier;
+  TDoubles<Parameters> FunctionSignMultiplier;
 
   /// Начальная точка для решения задачи оптимизации
-  TDoubles<Parameters> startPoint;
+  TDoubles<Parameters> StartPoint;
 
   /// Значения функций в начальная точка для решения задачи оптимизации
-  TDoubles<Parameters> startPointValues;
+  TDoubles<Parameters> StartPointValues;
 
   /// Использовать  стартовую точку из задачи 
   TBool<Parameters> IsUseStartPoint;
@@ -290,10 +290,10 @@ public:
   TBool<Parameters> IsUseExtendedConsole;
 
   /// Включить автоматическую настройку параметров алгоритма оптимизации, если выключено - используются значения по умолчанию
-  TBool<Parameters> automaticParametersSetting;
+  TBool<Parameters> AutomaticParametersSetting;
 
   /// Путь для сохранения и загрузки
-  TString<Parameters> fileSerializer;
+  TString<Parameters> FileSerializer;
 
   /// Сохранение в файл
   SearchDataSerializer* serializer;
@@ -302,7 +302,7 @@ public:
   TInt<Parameters> MaxIterationsWithoutImprovement;
 
   /// Максимальное количество итераций алгоритма оптимизации, используется в автоматическом режиме работы.
-  TInt<Parameters> iterationsCount; 
+  TInt<Parameters> IterationsCount; 
 
   /// Проверка правильности при изменение параметров
   virtual int CheckValueParameters(int index = 0);

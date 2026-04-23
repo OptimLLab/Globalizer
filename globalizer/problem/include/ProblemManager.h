@@ -90,10 +90,10 @@ public:
   Метод загружает библиотеку, пытается импортировать из неё функции,
   создающие и уничтожающие задачу, а затем создаёт задачу
 
-  \param[in] libPath Путь к загружаемой библиотеке
+  \param[in] LibPath Путь к загружаемой библиотеке
   \return Код ошибки
   */
-  int LoadProblemLibrary(const std::string& libPath);
+  int LoadProblemLibrary(const std::string& LibPath);
 
   /** Метод возвращает указатель #mProblem
   */

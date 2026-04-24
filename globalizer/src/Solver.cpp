@@ -72,7 +72,7 @@ int Solver::CheckParameters()
 {
   double optimumValue;
   if (mProblem->GetOptimumValue(optimumValue) == IProblem::UNDEFINED &&
-    parameters.stopCondition == OptimumValue)
+    parameters.StopCondition == OptimumValue)
   {
     print << "Stop by reaching optimum value is unsupported by this problem\n";
     return 1;
@@ -83,20 +83,20 @@ int Solver::CheckParameters()
 
   if (mProblem->GetOptimumPoint(optimumPoint) == IProblem::OK)
   {
-    if (parameters.stopCondition.GetIsChange() == false)
+    if (parameters.StopCondition.GetIsChange() == false)
     {
-      parameters.stopCondition = OptimumVicinity2;
+      parameters.StopCondition = OptimumVicinity2;
     }
   }
   else
   {
     if (mProblem->GetAllOptimumPoint(optimumPoint, n) == IProblem::UNDEFINED)
     {
-      if (parameters.stopCondition != Accuracy)
+      if (parameters.StopCondition != Accuracy)
       {
         print << "Stop by reaching optimum vicinity is unsupported by this problem\n";
         print << "Stop Condition change to Accuracy!!!\n";
-        parameters.stopCondition = Accuracy;
+        parameters.StopCondition = Accuracy;
       }
     }
   }
@@ -117,9 +117,9 @@ int Solver::CheckParameters()
 
   if (parameters.IsPlot)
   {
-    if (parameters.iterPointsSavePath.GetIsChange() == false)
+    if (parameters.IterPointsSavePath.GetIsChange() == false)
     {
-      parameters.iterPointsSavePath = "Globalizer_iterPointsSavePath.txt";
+      parameters.IterPointsSavePath = "Globalizer_IterPointsSavePath.txt";
     }
   }
 
@@ -147,10 +147,10 @@ void Solver::MpiCalculation()
 
     Trial* trail = TrialFactory::CreateTrial();
 
-    inputSet.Resize(parameters.mpiBlockSize);
-    outputSet.Resize(parameters.mpiBlockSize);
+    inputSet.Resize(parameters.MpiBlockSize);
+    outputSet.Resize(parameters.MpiBlockSize);
 
-    for (unsigned int j = 0; j < parameters.mpiBlockSize; j++)
+    for (unsigned int j = 0; j < parameters.MpiBlockSize; j++)
     {
       inputSet.trials[j] = TrialFactory::CreateTrial();
       // Получаем координаты точки
@@ -165,16 +165,16 @@ void Solver::MpiCalculation()
     IProblem* _problem = mProblem;
     Task* _pTask = TaskFactory::CreateTask(_problem, 0);;
     Calculation* calculation;
-    if (parameters.calculationsArray[1] == OMP) {
+    if (parameters.CalculationsArray[1] == OMP) {
       calculation = new OMPCalculation(*_pTask);
     }
-    else if (parameters.calculationsArray[1] == CUDA) {
+    else if (parameters.CalculationsArray[1] == CUDA) {
       calculation = new CUDACalculation(*_pTask);
     }
 
     calculation->Calculate(inputSet, outputSet);
 
-    for (unsigned int j = 0; j < parameters.mpiBlockSize; j++) {
+    for (unsigned int j = 0; j < parameters.MpiBlockSize; j++) {
       // Отправляем обратно значение функции
       MPI_Send(inputSet.trials[j]->FuncValues, MaxNumOfFunc, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD);
     }
@@ -262,7 +262,7 @@ int Solver::Solve()
     if (CheckParameters())
       return 1;
 
-    if ((parameters.calculationsArray[0] == MPI_calc) && (parameters.GetProcNum() > 1) && (parameters.GetProcRank() > 0))
+    if ((parameters.CalculationsArray[0] == MPI_calc) && (parameters.GetProcNum() > 1) && (parameters.GetProcRank() > 0))
     {
       MpiCalculation();
     }
@@ -502,28 +502,28 @@ SearchData* Solver::GetData()
 // ------------------------------------------------------------------------------------------------
 void Solver::AutoConfig()
 {
-  if (parameters.iterationsCount.GetIsChange() == true)
+  if (parameters.IterationsCount.GetIsChange() == true)
   {
     if (parameters.MaxNumOfPoints.GetIsChange() == false)
     {
-      parameters.MaxNumOfPoints = parameters.iterationsCount;
+      parameters.MaxNumOfPoints = parameters.IterationsCount;
     }
   }
   else
   {
-    if (parameters.iterationsCount.GetIsChange() == false)
+    if (parameters.IterationsCount.GetIsChange() == false)
     {
-      parameters.iterationsCount = parameters.MaxNumOfPoints;
+      parameters.IterationsCount = parameters.MaxNumOfPoints;
     }
   }
 
-  if (parameters.automaticParametersSetting)
+  if (parameters.AutomaticParametersSetting)
   {
     if (parameters.MaxNumOfPoints > 100
       && parameters.NumThread.GetIsChange() == false && parameters.NumPoints.GetIsChange() == false
       && parameters.TypeCalculation == OMP)
     {
-      if (parameters.Dimension > 2 && parameters.Dimension < 10 && parameters.startPoint.GetIsChange() == false)
+      if (parameters.Dimension > 2 && parameters.Dimension < 10 && parameters.StartPoint.GetIsChange() == false)
       {
         parameters.NumThread = std::max(int(parameters.GetMaxNumOMP() / 2), 1);
         parameters.NumPoints = parameters.NumThread;

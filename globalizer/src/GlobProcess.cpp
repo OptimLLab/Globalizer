@@ -93,7 +93,7 @@ void Process::Solve()
 
     if (!pTask->IsLeaf())
     {
-      if (!(pMethod->GetIterationCount() % parameters.StepPrintMessages) && parameters.isPrintResultToConsole)
+      if (!(pMethod->GetIterationCount() % parameters.StepPrintMessages) && parameters.IsPrintResultToConsole)
       {
         print << "process 0, iteration " << pMethod->GetIterationCount() << "\t point count = " << pData->GetCount() << "\n";
         Trial* p = (pMethod->GetOptimEstimation());
@@ -107,11 +107,11 @@ void Process::Solve()
         }
       }
       
-      if (static_cast<std::string>(parameters.iterPointsSavePath).size())
+      if (static_cast<std::string>(parameters.IterPointsSavePath).size())
       {
         if (!(pMethod->GetIterationCount() % parameters.StepSavePoint))
         {
-          pMethod->PrintPoints(std::to_string(pMethod->GetIterationCount()) + "_" + parameters.iterPointsSavePath.ToString());
+          pMethod->PrintPoints(std::to_string(pMethod->GetIterationCount()) + "_" + parameters.IterPointsSavePath.ToString());
         }
       }
     }
@@ -378,7 +378,7 @@ void Process::OldPrintOptimEstimationToConsole(Trial OptimEstimation)
 // ------------------------------------------------------------------------------------------------
 void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
 {
-  if (parameters.isPrintResultToConsole)
+  if (parameters.IsPrintResultToConsole)
   {
     int NumberOfTrials;
     double ValueDifference = HUGE_VAL;
@@ -449,7 +449,7 @@ void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
     bool res = false;
     double AchievedAccuracy = 0.0;
 
-    switch (parameters.stopCondition)
+    switch (parameters.StopCondition)
     {
     case Accuracy:
       if (pMethod->GetAchievedAccuracy() < parameters.Epsilon)
@@ -805,10 +805,10 @@ void Process::EndIterations()
   ////Локальное уточнение найденного решения
   pMethod->LocalSearch();
   //Запись в файл точек испытаний
-  //if (ProcLevel == 0 && static_cast<std::string>(parameters.iterPointsSavePath).size())
-  //  pMethod->PrintPoints(parameters.iterPointsSavePath);
-  if (pTask->GetProcLevel() == 0 && static_cast<std::string>(parameters.iterPointsSavePath).size())
-    pMethod->PrintPoints(parameters.iterPointsSavePath);
+  //if (ProcLevel == 0 && static_cast<std::string>(parameters.IterPointsSavePath).size())
+  //  pMethod->PrintPoints(parameters.IterPointsSavePath);
+  if (pTask->GetProcLevel() == 0 && static_cast<std::string>(parameters.IterPointsSavePath).size())
+    pMethod->PrintPoints(parameters.IterPointsSavePath);
   else
     pMethod->SavePoints();
 }

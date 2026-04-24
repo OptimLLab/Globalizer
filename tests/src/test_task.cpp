@@ -145,13 +145,13 @@ TEST_F(TaskTest, CalculateFuncsAppliesMultiplier)
     double y[n] = { 1.0, 1.0, 1.0, 1.0, 1.0 };
     double baseValue = 5.0; // f(y) = 5 * (1 - 10*cos(2pi) + 10) = 5
 
-    parameters.functionSignMultiplier[0] = 1.0;
+    parameters.FunctionSignMultiplier[0] = 1.0;
     EXPECT_DOUBLE_EQ(task->CalculateFuncs(y, 0), baseValue);
 
-    parameters.functionSignMultiplier[0] = -2.0;
+    parameters.FunctionSignMultiplier[0] = -2.0;
     EXPECT_DOUBLE_EQ(task->CalculateFuncs(y, 0), baseValue * -2.0);
 
-    parameters.functionSignMultiplier[0] = 1.0;
+    parameters.FunctionSignMultiplier[0] = 1.0;
 }
 
 /**

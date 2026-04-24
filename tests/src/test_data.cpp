@@ -276,7 +276,7 @@ TEST_F(TSearchDataTest, can_return_interval_with_max_R_when_queue_empty)
  */
 TEST_F(TSearchDataTest, can_return_interval_with_max_local_R)
 {
-  parameters.localMix = 1;
+  parameters.LocalMix = 1;
   SearchData *pData = new SearchData(MaxNumOfFunc, DefaultSearchDataSize);
 
   double actualXl = 2.0;

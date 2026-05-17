@@ -257,7 +257,7 @@ void Method::LoadPoint()
 
       while (!input.eof()) {
         size_t nextPosition = 0;
-        std::vector<double> currentPoint(pTask.GetNumberOfContinuousVariable());
+        std::vector<double> currentPoint(pTask.GetN());
         double curVal;
         int s = currentLine.size();
         input.getline(&currentLine[0], currentLine.size());
@@ -277,7 +277,7 @@ void Method::LoadPoint()
 
         currentPoint[0] = std::stod(curStr, &nextPosition);
 
-        for (int iDim = 1; iDim < pTask.GetNumberOfContinuousVariable(); iDim++)
+        for (int iDim = 1; iDim < pTask.GetN(); iDim++)
         {
           curStr = curStr.substr(nextPosition);
           currentPoint[iDim] = std::stod(curStr, &nextPosition);
@@ -310,7 +310,7 @@ void Method::LoadPoint()
       for (int i = 0; i < numberLoadedPoints; i++)
       {
         newPoint[i] = TrialFactory::CreateTrial();
-        for (int iDim = 0; iDim < pTask.GetNumberOfContinuousVariable(); iDim++)
+        for (int iDim = 0; iDim < pTask.GetN(); iDim++)
         {
           newPoint[i]->y[iDim] = points[i][iDim];
         }
@@ -668,7 +668,7 @@ bool Method::CheckStopCondition()
       if (pTask.getProblem()->GetAllOptimumPoint(allOptimumPoints, numOfOptima) ==
         IProblem::UNDEFINED)
       {
-        for (int i = 0; i < pTask.GetNumberOfContinuousVariable(); i++)
+        for (int i = 0; i < pTask.GetN(); i++)
         {
           double fabsx = fabs(pData->GetBestTrial()->y[i] - pTask.GetOptimumPoint()[i]);
           double fm = parameters.Epsilon * (pTask.GetB()[i] - pTask.GetA()[i]);
@@ -683,16 +683,16 @@ bool Method::CheckStopCondition()
       {
         for (int j = 0; j < numOfOptima; j++)
         {
-          for (int i = 0; i < pTask.GetNumberOfContinuousVariable(); i++)
+          for (int i = 0; i < pTask.GetN(); i++)
           {
-            double fabsx = fabs(pData->GetBestTrial()->y[i] - allOptimumPoints[pTask.GetNumberOfContinuousVariable() * j + i]);
+            double fabsx = fabs(pData->GetBestTrial()->y[i] - allOptimumPoints[pTask.GetN() * j + i]);
             double fm = parameters.Epsilon * (pTask.GetB()[i] - pTask.GetA()[i]);
             if (fabsx > fm)
             {
               res = false;
               break;
             }
-            if (i == pTask.GetNumberOfContinuousVariable() - 1)
+            if (i == pTask.GetN() - 1)
             {
               res = true;
             }

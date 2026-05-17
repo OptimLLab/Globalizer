@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   GlobalizerInitialization(argc, argv);
 
   parameters.Dimension = 2; // Размерность задачи
-  ProblemName problemName = RASTRIGIN_INT; // Задача Стронгина задается как указатель на функцию
+  ProblemName problemName = STRONGINC3_FUNCTION_POINTER; // Задача Стронгина задается как указатель на функцию
   IProblem* problem = nullptr;
   parameters.IsPlot = true; // Включаем рисование графика функции с точками испытаний (сохраняются в файл)
 
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     
           for (int j = 2; j < 4; j++) 
           {
-            double rounded = round(y[j]);
+            double rounded = round(y[j]) / 2.0;
             sum += 0.01 * (y[j] - rounded) * (y[j] - rounded); 
           }
           return sum;

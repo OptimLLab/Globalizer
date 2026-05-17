@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     
           for (int j = 2; j < 4; j++) 
           {
-            double rounded = round(y[j]);
+            double rounded = round(y[j]) / 2.0;
             sum += 0.01 * (y[j] - rounded) * (y[j] - rounded); 
           }
           return sum;

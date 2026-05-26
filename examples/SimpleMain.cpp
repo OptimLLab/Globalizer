@@ -16,7 +16,14 @@
 
 #include "Globalizer.h"
 
-enum ProblemName { RASTRIGIN, STRONGINC3_LAMBDA_EXPRESSION, STRONGINC3_FUNCTION_POINTER, RASTRIGIN_INT};
+enum ProblemName {
+    RASTRIGIN,
+    STRONGINC3_LAMBDA_EXPRESSION,
+    STRONGINC3_FUNCTION_POINTER,
+    RASTRIGIN_INT,
+    STRONGINC3_UNCACLC,
+    RASTRIGIN_INT_UNCALC
+};
 
 double StronginC3Functionals(const double* y, int fNumber)
 {
@@ -55,7 +62,7 @@ int main(int argc, char* argv[])
   GlobalizerInitialization(argc, argv);
 
   parameters.Dimension = 2; // Размерность задачи
-  ProblemName problemName = STRONGINC3_FUNCTION_POINTER; // Задача Стронгина задается как указатель на функцию
+  ProblemName problemName = RASTRIGIN_INT_UNCALC; // Задача Стронгина задается как указатель на функцию
   IProblem* problem = nullptr;
   parameters.IsPlot = true; // Включаем рисование графика функции с точками испытаний (сохраняются в файл)
 
@@ -114,6 +121,9 @@ int main(int argc, char* argv[])
       StronginC3Functionals, // задача
       4 // количество функций (3 ограничения + 1 критерий)
     );
+
+    parameters.ConstraintsGridSize = 300;
+    parameters.FillFeasibleRegion = true;
     parameters.CalcsType = Interpolation;
   }
   else if (problemName == RASTRIGIN_INT)
@@ -148,6 +158,86 @@ int main(int argc, char* argv[])
       0,
       std::vector<double>(parameters.Dimension, 0)
       );
+  }
+  else if (problemName == STRONGINC3_UNCACLC)
+  {
+      parameters.Dimension = 2;
+      problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
+          { 0.0, -1.0 }, // нижняя граница
+          { 4.0, 3.0 }, // верхняя граница
+          std::vector<std::function<double(const double*)>>({
+            [](const double* y) { return 0.01 * ((y[0] - 2.2) * (y[0] - 2.2) + (y[1] - 1.2) * (y[1] - 1.2) - 2.25); }, // ограничение 0
+            [](const double* y) { return 100.0 * (1.0 - ((y[0] - 2.0) / 1.2) * ((y[0] - 2.0) / 1.2) - (y[1] / 2.0) * (y[1] / 2.0)); }, // ограничение 1
+            [](const double* y) { return 10.0 * (y[1] - 1.5 - 1.5 * sin(6.283 * (y[0] - 1.75))); }, // ограничение 2
+            [](const double* y)
+            {
+              double t1 = pow(0.5 * y[0] - 0.5, 4.0);
+              double t2 = pow(y[1] - 1.0, 4.0);
+              if (std::fabs(y[0] - 3.001953125) < 0.1 && std::fabs(y[1] - 2.001953125) < 0.1)
+                  if (rand() % 2)
+                     return DBL_MAX;
+                  else
+                      throw std::logic_error("Error of calculations");
+              return -((1.5 * y[0] * y[0] * exp(1.0 - y[0] * y[0] - 20.25 * (y[0] - y[1]) * (y[0] - y[1]))) + t1 * t2 * exp(2.0 - t1 - t2));
+            } // критерий
+              }
+          )
+      );
+
+      parameters.ConstraintsGridSize = 300;
+      parameters.FillFeasibleRegion = true;
+      parameters.CalcsType = Interpolation;
+
+  } else if (problemName == RASTRIGIN_INT_UNCALC) {
+      parameters.Dimension = 4;
+      int numberOfDiscreteVariables = 3;
+      std::vector<int> discreteValues = { 3, 3, 3 };
+
+      problem = new ProblemFromFunctionPointers(
+          parameters.Dimension,
+          numberOfDiscreteVariables,
+          std::vector<double>(parameters.Dimension, -2.2), // нижняя граница
+          std::vector<double>(parameters.Dimension, 1.8),  // верхняя граница
+          discreteValues,                 // количество значений для целочисленных переменных
+          std::vector<std::function<double(const double*)>>(1, [](const double* y)
+              {
+                  double pi_ = 3.14159265358979323846;
+                  double sum = 0.;
+
+                  for (int j = 0; j < 1; j++)
+                  {
+                      if (std::fabs(y[0] - 1.55) < 0.01|| std::fabs(y[0] - 1.07766) < 0.01) {  // невычислимые точки
+                          if (rand() % 2)
+                              sum = DBL_MAX;
+                          else
+                              throw std::logic_error("Error of calculations");
+                      }
+                      sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
+                  }
+
+                  for (int j = 1; j < 4; j++)
+                  {
+                      
+                      double rounded = round(y[j]) / 2.0;
+                      sum += 0.01 * (y[j] - rounded) * (y[j] - rounded);
+                  }
+
+                  if (y[1] == -1 && y[3] == 0) {  // недопустимое сочетание параметров
+                      if (rand() % 2)
+                          sum = DBL_MAX;
+                      else
+                          throw std::logic_error("Error of calculations");
+                  }
+                  return sum;
+              }),
+          true,
+          0,
+          std::vector<double>(parameters.Dimension, 0)
+      );
+
+      parameters.CalcsType = Interpolation;
+      parameters.MoveTrialPointsUnderGraph = true;
+      parameters.ShowFigure = true;
   }
 
   problem->Initialize();

@@ -176,7 +176,7 @@ double Task::CalculateFuncs(const double* y, int fNumber)
     result = multInLevel * pProblem->CalculateFunctionals(y, fNumber);
   }
   catch (...) {
-    result = DBL_MAX;
+    result = MaxDouble;
   }
   return result;
 }

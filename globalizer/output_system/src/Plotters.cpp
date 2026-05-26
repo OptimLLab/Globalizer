@@ -82,7 +82,7 @@ void calculate_z_matrix(
                 z_matrix[i][j] = problem->CalculateFunctionals(optim_point, func_i);
             }
             catch (...) {
-                z_matrix[i][j] = DBL_MAX;
+                z_matrix[i][j] = MaxDouble;
             }
         }
     }
@@ -196,7 +196,7 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
                         z[k] = problem->CalculateFunctionals(x_val, k);
                     }
                     catch (...) {
-                        z[k] = DBL_MAX;
+                        z[k] = MaxDouble;
                     }
                     fprintf(pf, "| %lf ", z[k]);
                 }

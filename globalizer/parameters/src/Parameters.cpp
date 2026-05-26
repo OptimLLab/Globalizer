@@ -94,8 +94,6 @@ void Parameters::SetDefaultParameters()
 
   InitOption(r, 4.0, "-r", "r", 1);
 
-  InitOption(alpha, 0.08, "-alpha", "Quality of research into non-computable domains of a problem", 1);
-
   InitOption(rDynamic, 0, "-rd", "Additive when dynamics change r, r = r + rDynamic / (Iteration ^ (1 / N))", 1);
   InitOption(rEps, 0.01, "-rE", "eps-reserv", 1);
   InitOption(Comment, 000, "-Comment", "Comment", 1);//ResulLog

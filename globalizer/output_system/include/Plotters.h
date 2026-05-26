@@ -70,7 +70,6 @@ namespace Plotter
     */
     void draw_plot(IProblem* problem, SolutionResult* result,
         std::initializer_list<int> params = {}, std::initializer_list<double[2]> bounds = {},
-        int continuous_params_num = 2,
         wchar_t* output_file_name = L"globalizer_output.png", FigureTypes figure_type = LevelLayers,
         CalcsTypes calcs_type = ObjectiveFunction, CalcsTypes calcs_type_c = ObjectiveFunction,
         int levels = 25, int objective_grid_size = 100, int constraints_grid_size = 200,

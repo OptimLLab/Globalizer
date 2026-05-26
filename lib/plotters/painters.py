@@ -40,7 +40,6 @@ class StaticPainter(Painter):
                  c,
                  x_nc,
                  z_nc,
-                 x_nce,
                  cc,
                  plotter_type,
                  object_function_plotter_type,
@@ -68,7 +67,6 @@ class StaticPainter(Painter):
         self.c = c
         self.x_nc = x_nc
         self.z_nc = z_nc
-        self.x_nce = x_nce
         self.cc = cc
         self.plotter_type = plotter_type
         self.object_function_plotter_type = object_function_plotter_type
@@ -105,21 +103,7 @@ class StaticPainter(Painter):
             self.points = self.section_points
             self.values = self.section_values
 
-            section_x_nce = []
-
-            for x in self.x_nce:
-                is_section_of_best_point = True
-                for index in self.section_indexes:
-                    if abs(x[index] - self.sol_point[index]) > self.eps:
-                        is_section_of_best_point = False
-                        break
-                if is_section_of_best_point:
-                    section_x_nce.append(x)
-
-            self.x_nce = section_x_nce
-
-
-        if self.dim == 1 or len(self.parameters_numbers) == 1:
+        if len(self.parameters_numbers) == 1:
             self.plotter = Plotter2D(self.parameters_numbers[0],
                                      self.lb[0],
                                      self.rb[0])
@@ -136,7 +120,7 @@ class StaticPainter(Painter):
         #print(self.points, self.values)
         if len(self.parameters_numbers) == 1:
             if self.object_function_plotter_type == 'objective function':
-                self.plotter.plot_by_grid(self.x, self.z, transparency=0.9)
+                self.plotter.plot_by_grid(self.x, self.z, linecolor='blue', transparency=0.9)
             elif self.object_function_plotter_type == 'interpolation':
                 self.plotter.plot_interpolation(self.points, self.values, points_count=self.grid_obj, transparency=0.9)
             elif self.object_function_plotter_type == 'approximation':
@@ -189,56 +173,34 @@ class StaticPainter(Painter):
                     self.plotter.plot_hatch_by_interpolate(x1, x2, z, points_count=self.grid_c)
 
     def paint_points(self):
-        flag1 = True
-        flag2 = True
+        flag = True
         color = 'blue'
-        mrkr = 'o'
-
         points = self.points
         values = self.values
-        diff = max(values) - min(values)
 
         while 1:
-            if len(self.parameters_numbers) == 1:
+            if len(self.parameters_numbers) == 1 and self.is_points_at_bottom:
+                values = [self.sol_value - (max(values) - min(values)) * 0.3] * len(values)
                 points = [x[self.parameters_numbers[0]] for x in points]
 
-            if self.is_points_at_bottom:
-                values = [self.sol_value - diff * 0.3] * len(values)
-
-            self.plotter.plot_points(points, values, color, mrkr, mrkrs=2)
+            self.plotter.plot_points(points, values, color, mrkrs=2)
 
             if self.is_need_hide_no_feasible_points:
                 break
-            if len(self.x_nc) > 0 and flag1:
+            if len(self.x_nc) > 0 and flag:
                 points = self.x_nc
-                values = [self.sol_value - diff * 0.3] * len(self.x_nc)
+                values = [self.sol_value - (max(values) - min(values)) * 0.3] * len(self.x_nc)
                 color = 'slategray'
-                mrkr = '.'
-                flag1 = False
-            elif len(self.x_nce) > 0 and flag2:
-                points = self.x_nce
-                values = [self.sol_value - diff * 0.3] * len(self.x_nce)
-                color = 'black'
-                mrkr = '.'
-                flag2 = False
+                flag = False
             else:
                 break
 
-
-            '''
-
-            '''
-
     def paint_optimum(self):
         value = self.sol_value
-        diff = max(self.values) - min(self.values)
         point = self.sol_point
-
-        if self.is_points_at_bottom:
-            value = value - diff * 0.3
-        if len(self.parameters_numbers) == 1:
+        if len(self.parameters_numbers) == 1 and self.is_points_at_bottom:
+            value = value - (max(self.values) - min(self.values)) * 0.3
             point = [self.sol_point[self.parameters_numbers[0]]]
-
         self.plotter.plot_points([point], [value], clr='red', mrkrs=6, mrkr='*')
 
     def save_image(self, path, filename, is_need_show_figure):

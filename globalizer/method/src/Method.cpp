@@ -971,9 +971,9 @@ double Method::CalculateGlobalR(SearchInterval* p)
 
     }
   }
-  else if ((p->izl() == -3) && (p->izr() == -3) || (p->izl() == -3) && (p->izr() == -2) || (p->izl() == -2) && (p->izr() == -3))
+  else if ((p->izl() == -3) || (p->izr() == -3))
   {
-    return parameters.alpha * (1 - 1 / parameters.r) * (1 - 1 / parameters.r) * deltax;
+    return MinDouble;
   }
   else if (p->izl() == p->izr())
   {

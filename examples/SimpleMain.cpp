@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
                 double t2 = pow(y[1] - 1.0, 4.0);
                 if (std::fabs(y[0] - 3.001953125) < 0.1 && std::fabs(y[1] - 2.001953125) < 0.1)
                     if (rand() % 2)
-                       return DBL_MAX;
+                       return MaxDouble;
                     else
                         throw std::logic_error("Error of calculations");
                 return -((1.5 * y[0] * y[0] * exp(1.0 - y[0] * y[0] - 20.25 * (y[0] - y[1]) * (y[0] - y[1]))) + t1 * t2 * exp(2.0 - t1 - t2));
@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
                     {
                         if (std::fabs(y[0] - 1.55) < 0.01 || std::fabs(y[0] - 1.07766) < 0.01) {  // невычислимые точки
                             if (rand() % 2)
-                                sum = DBL_MAX;
+                                sum = MaxDouble;
                             else
                                 throw std::logic_error("Error of calculations");
                         }
@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 
                     if (y[1] == -1 && y[3] == 0) {  // недопустимое сочетание параметров
                         if (rand() % 2)
-                            sum = DBL_MAX;
+                            sum = MaxDouble;
                         else
                             throw std::logic_error("Error of calculations");
                     }

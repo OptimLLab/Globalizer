@@ -171,7 +171,13 @@ int Task::GetNumOfFuncAtProblem() const
 double Task::CalculateFuncs(const double* y, int fNumber)
 {
   double multInLevel = parameters.FunctionSignMultiplier[GetProcLevel()];
-  double result = multInLevel * pProblem->CalculateFunctionals(y, fNumber);
+  double result;
+  try {
+    result = multInLevel * pProblem->CalculateFunctionals(y, fNumber);
+  }
+  catch (...) {
+    result = DBL_MAX;
+  }
   return result;
 }
 

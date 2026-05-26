@@ -62,6 +62,8 @@ void meshgrid(
 // аналог вычисления матрицы значений по np.meshgrid
 void calculate_z_matrix(
     IProblem* problem,
+    double* optim_point,
+    int indx1, int indx2,
     const std::vector<std::vector<double>>& xgrid,
     const std::vector<std::vector<double>>& ygrid,
     std::vector<std::vector<double>>& z_matrix, int func_i) {
@@ -71,15 +73,19 @@ void calculate_z_matrix(
 
     z_matrix.resize(rows, std::vector<double>(cols));
 
-    double* x = new double[2];
     for (size_t i = 0; i < rows; ++i) {
         for (size_t j = 0; j < cols; ++j) {
-            x[0] = xgrid[i][j];
-            x[1] = ygrid[i][j];
-            z_matrix[i][j] = problem->CalculateFunctionals(x, func_i);
+            optim_point[indx1] = xgrid[i][j];
+            optim_point[indx2] = ygrid[i][j];
+
+            try {
+                z_matrix[i][j] = problem->CalculateFunctionals(optim_point, func_i);
+            }
+            catch (...) {
+                z_matrix[i][j] = DBL_MAX;
+            }
         }
     }
-    delete[] x;
 }
 
 #endif
@@ -102,7 +108,7 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
     problem->GetBounds(left_bound, right_bound);
 
     if (params.size() == bounds.size())
-    { 
+    {
         if (params.size() == 1) {
             int p = *(params.begin() + 0);
             left_bound[p] = *(bounds.begin() + 0)[0];
@@ -118,75 +124,95 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
         }
     }
 
-  for (int i = 0; i < problem->GetDimension() - 1; i++) {
-    fprintf(pf, "%lf_", left_bound[i]);
-  }
-  fprintf(pf, "%lf ", left_bound[problem->GetDimension() - 1]);
-  for (int i = 0; i < problem->GetDimension() - 1; i++) {
-    fprintf(pf, "%lf_", right_bound[i]);
-  }
-  fprintf(pf, "%lf\n", right_bound[problem->GetDimension() - 1]);
-
-  fprintf(pf, "%d %d\n", calcs_type == ObjectiveFunction, calcs_type_c == ObjectiveFunction);
-
-  if (calcs_type == ObjectiveFunction || calcs_type_c == ObjectiveFunction) {
-    int points_count = (calcs_type == ObjectiveFunction) ? objective_grid_size : constraints_grid_size;
-
-    double* dx = new double[params.size()];
-    for (int i = 0; i < params.size(); i++) {
-      dx[i] = fabs(right_bound[*(params.begin() + i)] - left_bound[*(params.begin() + i)]) / objective_grid_size;
+    for (int i = 0; i < problem->GetDimension() - 1; i++) {
+        fprintf(pf, "%lf_", left_bound[i]);
     }
-
-    std::vector<std::vector<double>> x(params.size());
-    for (int i = 0; i < params.size(); i++) {
-        x[i] = arange(left_bound[*(params.begin() + i)], right_bound[*(params.begin() + i)], dx[i]);
+    fprintf(pf, "%lf ", left_bound[problem->GetDimension() - 1]);
+    for (int i = 0; i < problem->GetDimension() - 1; i++) {
+        fprintf(pf, "%lf_", right_bound[i]);
     }
+    fprintf(pf, "%lf\n", right_bound[problem->GetDimension() - 1]);
 
-    int NumOfFunctionalsForCalc = problem->GetNumberOfFunctions() - 1 + (calcs_type == ObjectiveFunction);
+    fprintf(pf, "%d %d\n", calcs_type == ObjectiveFunction, problem->GetNumberOfConstraints() && calcs_type_c == ObjectiveFunction);
 
-    if (params.size() == 2) {
-        std::vector<std::vector<double>> xgrid;
-        std::vector<std::vector<double>> ygrid;
-        meshgrid(x[0], x[1], xgrid, ygrid);
-        
-        std::vector <std::vector<std::vector<double>>> z(NumOfFunctionalsForCalc);
-        for (int i = 0; i < NumOfFunctionalsForCalc; i++)
-            calculate_z_matrix(problem, xgrid, ygrid, z[i], i);
+    if (calcs_type == ObjectiveFunction || problem->GetNumberOfConstraints() && calcs_type_c == ObjectiveFunction) {
+        int points_count = (calcs_type == ObjectiveFunction) ? objective_grid_size : constraints_grid_size;
 
-        size_t rows = xgrid.size();
-        size_t cols = xgrid[0].size();
+        double* dx = new double[params.size()];
+        for (int i = 0; i < params.size(); i++) {
+            dx[i] = fabs(right_bound[*(params.begin() + i)] - left_bound[*(params.begin() + i)]) / points_count;
+        }
 
-        for (size_t i = 0; i < rows; ++i) {
-            for (size_t j = 0; j < cols; ++j) {
-                fprintf(pf, "%lf %lf ", xgrid[i][j], ygrid[i][j]);
-                for (int k = 0; k < NumOfFunctionalsForCalc; k++) {
-                    fprintf(pf, "| %lf ", z[k][i][j]);
+        std::vector<std::vector<double>> x(params.size());
+        for (int i = 0; i < params.size(); i++) {
+            x[i] = arange(left_bound[*(params.begin() + i)], right_bound[*(params.begin() + i)], dx[i]);
+        }
+
+        int NumOfFunctionalsForCalc = problem->GetNumberOfFunctions() - 1 + (calcs_type == ObjectiveFunction);
+
+        if (params.size() == 2) {
+            std::vector<std::vector<double>> xgrid;
+            std::vector<std::vector<double>> ygrid;
+            meshgrid(x[0], x[1], xgrid, ygrid);
+
+            double* optim_point = new double[problem->GetDimension()];
+            for (int j = 0; j < problem->GetDimension(); j++) {
+                optim_point[j] = result->BestTrial->y[j];
+            }
+
+            std::vector <std::vector<std::vector<double>>> z(NumOfFunctionalsForCalc);
+            for (int i = 0; i < NumOfFunctionalsForCalc; i++)
+                calculate_z_matrix(problem, optim_point, *(params.begin() + 0), *(params.begin() + 1), xgrid, ygrid, z[i], i);
+
+            size_t rows = xgrid.size();
+            size_t cols = xgrid[0].size();
+
+            for (size_t i = 0; i < rows; ++i) {
+                for (size_t j = 0; j < cols; ++j) {
+                    fprintf(pf, "%lf %lf ", xgrid[i][j], ygrid[i][j]);
+                    for (int k = 0; k < NumOfFunctionalsForCalc; k++) {
+                        fprintf(pf, "| %lf ", z[k][i][j]);
+                    }
+                    fprintf(pf, "\n");
                 }
+            }
+
+            delete[] optim_point;
+        }
+        else if (params.size() == 1) {
+
+            double* x_val = new double[problem->GetDimension()];
+            for (int j = 0; j < problem->GetDimension(); j++) {
+                x_val[j] = result->BestTrial->y[j];
+            }
+
+            for (int j = 0; j < objective_grid_size; j++) {
+                std::vector<double> z(NumOfFunctionalsForCalc);
+                x_val[*(params.begin())] = x[0][j];
+                fprintf(pf, "%lf ", x_val[0]);
+
+                for (int k = 0; k < NumOfFunctionalsForCalc; k++) {
+                    try {
+                        z[k] = problem->CalculateFunctionals(x_val, k);
+                    }
+                    catch (...) {
+                        z[k] = DBL_MAX;
+                    }
+                    fprintf(pf, "| %lf ", z[k]);
+                }
+
                 fprintf(pf, "\n");
             }
+            delete[] x_val;
         }
-    } else if (params.size() == 1) {
-          std::vector <std::vector<double>> z(NumOfFunctionalsForCalc);
-          for (int i = 0; i < NumOfFunctionalsForCalc; i++) {
-              z[i].resize(x.size());
-              double* x1 = new double[1];
-              for (int k = 0; k < x.size(); k++) {
-                  x1[0] = x[0][k];
-                  z[i][k] = problem->CalculateFunctionals(x1, i);
-              }
-              delete[] x1;
-              fprintf(pf, "| %lf ", z);
-           }
-           fprintf(pf, "\n");
-      }
 
-    delete[] dx;
-  }
+        delete[] dx;
+    }
 
-  delete[] left_bound;
-  delete[] right_bound;
+    delete[] left_bound;
+    delete[] right_bound;
 
-  fclose(pf);
+    fclose(pf);
 }
 #endif
 
@@ -194,6 +220,7 @@ void make_problem_info_file(IProblem* problem, SolutionResult* result, const cha
 
 void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
     std::initializer_list<int> params, std::initializer_list<double[2]> bounds,
+    int continuous_params_num, 
     wchar_t* output_file_name, FigureTypes figure_type, CalcsTypes calcs_type,
     CalcsTypes calcs_type_c, int levels, int objective_grid_size, int constraints_grid_size,
     bool fill_feasible_region, bool hide_trials_points, bool hide_no_feasible_points,
@@ -212,6 +239,14 @@ void Plotter::draw_plot(IProblem* problem, SolutionResult* result,
     if (params.size() == 0 && problem->GetDimension() == 1)
     {
         params = { 0 };
+    }
+    else if (params.size() > 1 && problem->GetDimension() == 1)
+    {
+        params = { *(params.begin()) };
+    }
+    else if (params.size() > 1 && continuous_params_num == 1)
+    {
+        params = { *(params.begin()) };
     }
     else if (params.size() == 0 && problem->GetDimension() >= 2)
     {

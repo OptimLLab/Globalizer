@@ -111,6 +111,8 @@ public:
   TInt<Parameters> Dimension;
   /// надежность метода (> 1)
   TDouble<Parameters> r;
+  /// качество исследования невычислимых областей задачи (0 < alpha <= 1, 1 - максимальное исследование)
+  TDouble<Parameters> alpha;
   ///Добавка при динамичеки изменяемом r, r = r + rDynamic / (Iteration ^ (1/N))
   TDouble<Parameters> rDynamic;
   ///параметр eps-резервирования

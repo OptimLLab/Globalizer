@@ -164,8 +164,9 @@ class Plotter2D(Plotter):
         self.plot_line(x, z, linecolor, linewidth, transparency)
 
     def plot_interpolation(self, points, values, points_count=100, linecolor='black', linewidth=1, transparency=0.7):
-        x = np.linspace(min(np.array(points)), max(np.array(points)), points_count)
-        z = interpolate.interp1d(np.array(points).flatten(), np.array(values).flatten(), kind=3)(x)
+        continous_points = np.array(points)[:, 0]
+        x = np.linspace(min(continous_points), max(continous_points), points_count)
+        z = interpolate.interp1d(continous_points.flatten(), np.array(values).flatten(), kind=3)(x)
         self.plot_line(x, z, linecolor, linewidth, transparency)
 
     def plot_by_points(self, points, values, linecolor='black', linewidth=1, transparency=0.7):
@@ -204,7 +205,7 @@ class Plotter3D(Plotter):
         self.ax.tick_params(axis='both', labelsize=8)
         self.ax.set_facecolor('white')
 
-    def plot_by_grid(self, x, z, colormap=plt.cm.viridis, linewidths=1, levels=25, transparency=1):
+    def plot_by_grid(self, x, z, colormap=plt.cm.viridis, linewidths=1, levels=25, transparency=0.6):
         x1 = [xi[0] for xi in x]
         x2 = [xi[1] for xi in x]
 
@@ -251,7 +252,7 @@ class Plotter3D(Plotter):
         z = z.reshape(points_count, points_count)
 
         if self.plotterType == 'lines layers':
-            self.plot_contour(x1, x2, z, colormap=colormap, linewidths=linewidths, levels=levels)
+            self.plot_contour(x1, x2, z, colormap=colormap, linewidths=linewidths, levels=levels, zorder=1)
         elif self.plotterType == 'surface':
             self.plot_surface(x1, x2, z, colormap=colormap, transparency=transparency)
 
@@ -289,7 +290,7 @@ Original error text of scipy.interpolate.Rbf:\n\
 
     def plot_points(self, points, values, clr='blue', mrkr='o', mrkrs=3):
         if self.plotterType == 'lines layers':
-            self.ax.scatter(np.array(points)[:, self.indexes[0]], np.array(points)[:, self.indexes[1]], color=clr, marker=mrkr, s=mrkrs)
+            self.ax.scatter(np.array(points)[:, self.indexes[0]], np.array(points)[:, self.indexes[1]], color=clr, marker=mrkr, s=mrkrs, zorder=2)
         elif self.plotterType == 'surface':
             if self.objective_function_type == 'by points':
                 self.ax.scatter(np.array(points)[:, self.indexes[0]], np.array(points)[:, self.indexes[1]], values,

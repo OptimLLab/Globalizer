@@ -310,8 +310,9 @@ int Solver_RSA::Solve()
                 int levels = parameters.Levels;
                 int objective_grid_size = parameters.ObjectiveGridSize;
                 int constraints_grid_size = parameters.ConstraintsGridSize;
+                int continuous_params_num = this->pTask->GetNumberOfContinuousVariable();
 
-                Plotter::draw_plot(this->mProblem, GetSolutionResult(), { 0, 1 }, {}, output_file_name, figure_type, calcs_type, calcs_type_c, levels, objective_grid_size, constraints_grid_size, fill_feasible_region, hide_trials_points, hide_no_feasible_points, move_points_under_graph, show_figure);
+                Plotter::draw_plot(this->mProblem, GetSolutionResult(), { 0, 1 }, {}, continuous_params_num, output_file_name, figure_type, calcs_type, calcs_type_c, levels, objective_grid_size, constraints_grid_size, fill_feasible_region, hide_trials_points, hide_no_feasible_points, move_points_under_graph, show_figure);
 #else
                 print << "Plotter is not work!!!\nPython libraries doesn't find!!!\n";
 #endif

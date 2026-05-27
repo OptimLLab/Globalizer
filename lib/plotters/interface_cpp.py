@@ -10,7 +10,7 @@ class DrawingProcess:
         self.path = build_path
         self.eps = eps
         self.dim, self.lb, self.rb, self.x, self.z, self.c = ReadProblemFile(build_path, problem_file_name)
-        self.points, self.values, self.sol_point, self.sol_value, self.x_nc, self.z_nc, self.cc = ReadTrialsFile(build_path, trials_file_name)
+        self.points, self.values, self.sol_point, self.sol_value, self.x_nc, self.z_nc, self.cc, self.x_nce = ReadTrialsFile(build_path, trials_file_name)
 
     def draw_plot(self,
                   plotter_type=None,
@@ -47,6 +47,7 @@ class DrawingProcess:
                                 self.c,
                                 self.x_nc,
                                 self.z_nc,
+                                self.x_nce,
                                 self.cc,
                                 plotter_type,
                                 object_function_plotter_type,

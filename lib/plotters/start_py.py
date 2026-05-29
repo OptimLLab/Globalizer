@@ -146,6 +146,12 @@ def parse_args():
         action="store_true",
         help="A flag indicating the need to fill feasible region with color."
     )
+    ap.add_argument(
+        "-1D",
+        "--1D",
+        action="store_true",
+        help="A flag indicating the need to paint 1-D figure by x1."
+    )
 
     return ap
 
@@ -182,7 +188,6 @@ def read_args():
         obj_func_type = str(args["CalcsType"])
         obj_func_type = types_names_map.get(obj_func_type)
 
-        params = list({int(args["x1"]), int(args["x2"])})
         levels = int(args["Levels"])
 
         grid_obj = int(args["ObjectiveGridSize"])
@@ -194,6 +199,14 @@ def read_args():
         figure_show = bool(args["ShowFigure"])
         hide_trials_points = bool(args["HideTrialsPoints"])
         fill_feasible_region = bool(args["FillFeasibleRegion"])
+
+        is_1D = bool(args["1D"])
+
+        if is_1D:
+            params = list({int(args["x1"])})
+        else:
+            params = list({int(args["x1"]), int(args["x2"])})
+
 
     return (
         path,

@@ -285,6 +285,10 @@ public:
 /// <param name="resPoint"></param>
 /// <param name="y"></param>
   virtual void TransformPoint(double* resPoint, const double* y);
+
+  /// Возвращает индекс, с которого начинаются дискретные параметры
+  /// (для MixedIntegerMethod)
+  virtual int GetStartDiscreteVariable();
 };
 
 #endif

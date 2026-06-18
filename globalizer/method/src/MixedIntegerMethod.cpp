@@ -134,7 +134,7 @@ void MixedIntegerMethod::FirstIteration()
 
 
   std::vector< std::vector<double> > dvs(numberOfDiscreteVariable);
-  startDiscreteVariable = pTask.GetN() - numberOfDiscreteVariable;
+  startDiscreteVariable = pTask.GetStartDiscreteVariable();
   for (int e = 0; e < numberOfDiscreteVariable; e++)
   {
     dvs[e].resize(pTask.GetNumberOfValues(startDiscreteVariable + e));

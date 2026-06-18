@@ -279,4 +279,10 @@ void Task::TransformPoint(double* resPoint, const double* y)
   for (int i =0; i < parameters.Dimension; i++)
     resPoint[i] = y[i];
 }
+
+// ------------------------------------------------------------------------------------------------
+int Task::GetStartDiscreteVariable() {
+    return GetN() - GetNumberOfDiscreteVariable();
+}
+
 // - end of file ----------------------------------------------------------------------------------

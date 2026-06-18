@@ -1,15 +1,19 @@
 ﻿#include "HDTask.h"
 #include "Trial.h"
+
 // ------------------------------------------------------------------------------------------------
-HDTask::HDTask(IProblem* _problem, int _ProcLevel) : Task::Task(_problem, _ProcLevel)
+HDTask::HDTask(IProblem* _problem, int _ProcLevel, bool _isMixedInteger) : Task::Task(_problem, _ProcLevel)
 {
   startParameterNumber = 0;
+  startIndex = 0;
+  isMixedInteger = _isMixedInteger;
 }
 
 // ------------------------------------------------------------------------------------------------
-HDTask::HDTask() : Task::Task()
+HDTask::HDTask(bool _isMixedInteger) : Task::Task()
 {
   startParameterNumber = 0;
+  isMixedInteger = _isMixedInteger;
 }
 
 Task* HDTask::Clone()
@@ -64,7 +68,13 @@ double HDTask::CalculateFuncs(const double* y, int fNumber)
   TransformPoint(point, y);
 
   double multInLevel = parameters.FunctionSignMultiplier[GetProcLevel()];
-  double result = multInLevel * pProblem->CalculateFunctionals(point, fNumber);
+  double result;
+  try {
+    result = multInLevel * pProblem->CalculateFunctionals(point, fNumber);
+  }
+  catch (...) {
+      result = MaxDouble;
+  }
   return result;
 }
 
@@ -92,4 +102,42 @@ void HDTask::CopyPoint(double* y, Trial* point)
   {
     point->y[i] = y[i + startParameterNumber];
   }
+}
+
+// ------------------------------------------------------------------------------------------------
+int HDTask::GetNumberOfContinuousVariable()
+{
+    if (isMixedInteger)
+        return GetN() - GetNumberOfDiscreteVariable();
+    else
+        return GetN();
+}
+
+// ------------------------------------------------------------------------------------------------
+int HDTask::GetNumberOfDiscreteVariable()
+{
+    if (isMixedInteger)
+        return Task::GetNumberOfDiscreteVariable();
+    else
+        return 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+void HDTask::SetMixedInteger() {
+    isMixedInteger = true;
+}
+
+// ------------------------------------------------------------------------------------------------
+void HDTask::UnsetMixedInteger() {
+    isMixedInteger = false;
+}
+
+// ------------------------------------------------------------------------------------------------
+void HDTask::SetStartIndex(int _startIndex) {
+    startIndex = _startIndex;
+}
+
+// ------------------------------------------------------------------------------------------------
+int HDTask::GetStartDiscreteVariable() {
+    return Task::GetStartDiscreteVariable() + startIndex;
 }

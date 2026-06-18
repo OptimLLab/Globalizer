@@ -887,11 +887,12 @@ void Method::InsertPoints(const std::vector<Trial*>& points)
     currentPoint->SetX(x);
     SearchInterval* CoveringInterval = pData->FindCoveringInterval(currentPoint);
 
+    if (!CoveringInterval)
+        continue;
+
     if (AchievedAccuracy > CoveringInterval->delta)
       AchievedAccuracy = CoveringInterval->delta;
 
-    if (!CoveringInterval)
-      throw EXCEPTION("Covering interval does not exists");
     if (!(currentPoint->X() < CoveringInterval->xr() || currentPoint->X() > CoveringInterval->xl()))
       throw EXCEPTION("Wrong covering interval");
 

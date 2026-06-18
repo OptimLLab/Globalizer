@@ -68,7 +68,13 @@ double HDTask::CalculateFuncs(const double* y, int fNumber)
   TransformPoint(point, y);
 
   double multInLevel = parameters.FunctionSignMultiplier[GetProcLevel()];
-  double result = multInLevel * pProblem->CalculateFunctionals(point, fNumber);
+  double result;
+  try {
+    result = multInLevel * pProblem->CalculateFunctionals(point, fNumber);
+  }
+  catch (...) {
+      result = MaxDouble;
+  }
   return result;
 }
 

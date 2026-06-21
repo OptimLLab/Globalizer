@@ -180,6 +180,8 @@ void Parameters::SetDefaultParameters()
   InitOption(AutomaticParametersSetting, false, "-IsAPS", "Enable automatic adjustment of optimization algorithm parameters, if disabled, default values are used.", 1);
 
   InitOption(FileSerializer, \0, "-fs", "The path to save and upload", 1);
+  InitOption(IsSerializeToDashBoard, false, "-IsSTDB", "Enable saving to JSON for dashboard", 1);
+
   
   InitOption(MaxIterationsWithoutImprovement, 100, "-MIWI", "The maximum number of iterations without improvement, works only with the MaxIterWithoutImprovement stop criterion", 1);
 

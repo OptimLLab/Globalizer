@@ -297,6 +297,10 @@ public:
   /// Путь для сохранения и загрузки
   TString<Parameters> FileSerializer;
 
+  /// Включить сохранение в json для dashboard
+  TBool<Parameters> IsSerializeToDashBoard;
+
+
   /// Сохранение в файл
   SearchDataSerializer* serializer;
 

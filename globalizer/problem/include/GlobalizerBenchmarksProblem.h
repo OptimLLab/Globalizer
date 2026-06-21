@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifdef _GLOBALIZER_BENCHMARKS
+#pragma once
 
 #include "IGlobalOptimizationProblem.h"
 #include "Problem.h"
@@ -124,3 +125,4 @@ public:
   */
   virtual int GetNextDiscreteValues(int* mCurrentDiscreteValueIndex, double& value, int discreteVariable, int previousNumber = -2);
 };
+#endif

@@ -32,7 +32,7 @@ json SerializeToDashBoard::TrialToJson(Trial* trial, Task* pTask)
 
   if (numDiscr > 0) 
   {
-
+#ifdef _GLOBALIZER_BENCHMARKS
     GlobalizerBenchmarksProblem* problem2 = dynamic_cast<GlobalizerBenchmarksProblem*> (problem1);
     if (problem2 != nullptr)
     {
@@ -43,7 +43,9 @@ json SerializeToDashBoard::TrialToJson(Trial* trial, Task* pTask)
       jTrial["discrete_variables"] = u;
     }
     else
+#endif
     {
+
       // Значения дискретных параметров из массива y
       std::vector<double> discrVars(trial->y + numCont, trial->y + numCont + numDiscr);
       jTrial["discrete_variables"] = discrVars;
@@ -355,7 +357,7 @@ json SerializeToDashBoard::ProblemToJson(Task& task)
 
   if (numDiscr > 0)
   {
-
+#ifdef _GLOBALIZER_BENCHMARKS
     GlobalizerBenchmarksProblem* problem2 = dynamic_cast<GlobalizerBenchmarksProblem*> (task.getProblem());
     
     if (problem2 != nullptr)
@@ -370,6 +372,7 @@ json SerializeToDashBoard::ProblemToJson(Task& task)
       }
     }
     else
+#endif
     {
       // Дискретные переменные
       jProblem["discrete_variables"] = json::array();

@@ -1,9 +1,34 @@
 ﻿#include "PYProblem.h"
+#include "PYLogger.h"
 #include <chrono>
+#include <cmath>
+#include <limits>
+#include <algorithm>
+#include <stdexcept>
 
-/// Реализация конструктора
-PYProblem::PYProblem(py::object data) {
-  /// Задание параметров по умолчанию
+// ------------------------------------------------------------------------------------------------
+// Разбор строки дискретного значения в число ("-1" -> -1.0, "0.5" -> 0.5)
+static double ParseDiscreteValue(const std::string& s, int var, int j)
+{
+  try
+  {
+    size_t pos = 0;
+    double v = std::stod(s, &pos);
+    return v;
+  }
+  catch (...)
+  {
+    throw std::invalid_argument("discrete_variable_values[" + std::to_string(var) + "][" +
+      std::to_string(j) + "] = '" + s + "' is not a number");
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+PYProblem::PYProblem(py::object data)
+{
+  mIsInit = false;
+
+  /// Параметры по умолчанию
   this->mOwner = this;
   this->mMinDimension = 1;
   this->mMaxDimension = 50;
@@ -12,236 +37,335 @@ PYProblem::PYProblem(py::object data) {
   this->mRightBorder = 1.0;
   this->mNumberOfCriterions = 1;
 
-  /// Задание размерности из поля "_dimension" переданного Python-объекта
-  if (py::hasattr(data, "_dimension")) {
-    SetDimension(data.attr("_dimension").cast<int>());
-  }
+  // ---------------------------------------------------------------------------
+  // 1. Читаем ВСЁ из Python в собственные поля (они не затираются Init/CheckValue)
+  // ---------------------------------------------------------------------------
+  int dim = 0;
+  if (py::hasattr(data, "_dimension") && !data.attr("_dimension").is_none())
+    dim = data.attr("_dimension").cast<int>();
 
-  /// Задание количества дискретных параметров
-  if (py::hasattr(data, "number_of_discrete_variables")) {
-      this->NumberOfDiscreteVariable = data.attr("number_of_discrete_variables").cast<int>();
-  }
-
-  //if (py::hasattr(data, "discrete_variable_names")) {
-  //    //get here!!! их пока нет
-  //    this->
-  //}
-
-  if (py::hasattr(data, "discrete_variable_values")) {
-      py::list discrete_vals = data.attr("discrete_variable_values");
-
-      for (int i = 0; i < discrete_vals.size(); i++) {
-          py::list val = discrete_vals[i];
-
-          //std::vector<std::string> temp;
-          for (int j = 0; j < val.size(); j++) {
-              std::string value = val[j].cast<std::string>();
-              discreteValues.push_back(value);
-          }
-      }
-
-      std::cout << "DEBUG: discrete variable values: " << std::endl;
-      for (int i = 0; i < discreteValues.size(); i++) {
-          std::cout << discreteValues[i] << std::endl;
-      }
-
-      std::cout << std::endl;
-  }
-
-  /// Задание нижней границы из поля "_lower_bounds" переданного Python-объекта
-  if (py::hasattr(data, "_lower_bounds")) {
-    py::list lowerList = data.attr("_lower_bounds");
-    for (auto item : lowerList) {
-      lowerBounds.push_back(item.cast<double>());
-    }
-  }
-  /// Задание верхней границы из поля "_upper_bounds" переданного Python-объекта
-  if (py::hasattr(data, "_upper_bounds")) {
-    py::list upperList = data.attr("_upper_bounds");
-    for (auto item : upperList) {
-      upperBounds.push_back(item.cast<double>());
-    }
-  }
-
-  /// Задание вектора функций из поля "_functions" переданного Python-объекта
-  if (py::hasattr(data, "_functions")) {
-    py::list functionsList = data.attr("_functions");
-
-    for (auto item : functionsList) {
-      py::function py_func = py::reinterpret_borrow<py::function>(item);
-
-      functionsOfProblem.push_back(
-        [py_func, mDim = this->GetDimension()](const double* x) -> double {
-        py::gil_scoped_acquire gil;
-
-        py::list args;
-        for (int i = 0; i < mDim; ++i) {
-          args.append(x[i]);
-        }
-
-        return py_func(args).cast<double>();
-      }
-      );
-    }
-  }
-
-  if (py::hasattr(data, "_isSetOptimum")) {
-    isSetOptimum = data.attr("_isSetOptimum").cast<bool>();
-  }
-  else {
-    isSetOptimum = false;
-  }
-
-  if (py::hasattr(data, "_num_crit")) {
-    this->mNumberOfCriterions = data.attr("_num_crit").cast<int>();
-  }
-
-  this->mNumberOfConstraints = functionsOfProblem.size() - this->mNumberOfCriterions;
-  std::cout << "Number of constraints: " << this->mNumberOfConstraints << std::endl;
-  std::cout << "Number of criterions: " << this->mNumberOfCriterions << std::endl;
-
-  if (isSetOptimum && py::hasattr(data,"_optimumValue"))
+  if (py::hasattr(data, "discrete_variable_values"))
   {
-    optimumValue = data.attr("_optimumValue").cast<double>();
-    /*if (optimumCoordinate_.size() != 0)
+    py::list discrete_vals = data.attr("discrete_variable_values");
+    for (size_t i = 0; i < discrete_vals.size(); i++)
     {
-      optimumCoordinate.resize(mDim);
-      for (int i = 0; i < mDim; i++)
-        optimumCoordinate[i] = optimumCoordinate_[i];
-    }*/
+      py::list vals = discrete_vals[i];
+      std::vector<double> numeric;
+      for (size_t j = 0; j < vals.size(); j++)
+      {
+        std::string s = py::str(vals[j]).cast<std::string>();
+        discreteValues.push_back(s);
+        numeric.push_back(ParseDiscreteValue(s, (int)i, (int)j));
+      }
+      if (numeric.empty())
+        throw std::invalid_argument("discrete variable " + std::to_string(i) + " has no values");
+      mDiscreteNumeric.push_back(numeric);
+    }
+  }
+  mNumDiscrete = (int)mDiscreteNumeric.size();
+
+  if (py::hasattr(data, "number_of_discrete_variables"))
+  {
+    int n = data.attr("number_of_discrete_variables").cast<int>();
+    if (n != mNumDiscrete)
+      throw std::invalid_argument("number_of_discrete_variables (" + std::to_string(n) +
+        ") != len(discrete_variable_values) (" + std::to_string(mNumDiscrete) + ")");
+  }
+
+  if (py::hasattr(data, "_lower_bounds"))
+    for (auto item : py::list(data.attr("_lower_bounds")))
+      lowerBounds.push_back(item.cast<double>());
+  if (py::hasattr(data, "_upper_bounds"))
+    for (auto item : py::list(data.attr("_upper_bounds")))
+      upperBounds.push_back(item.cast<double>());
+
+  if (lowerBounds.size() != upperBounds.size())
+    throw std::invalid_argument("_lower_bounds and _upper_bounds have different sizes");
+
+  if (dim <= 0)
+    dim = (int)lowerBounds.size() + mNumDiscrete;
+
+  mNumContinuous = dim - mNumDiscrete;
+  if (mNumContinuous < 0)
+    throw std::invalid_argument("dimension < number of discrete variables");
+  // Допускаем, что границы заданы для всех dim координат — берём только непрерывные
+  if ((int)lowerBounds.size() < mNumContinuous)
+    throw std::invalid_argument("bounds are given for " + std::to_string(lowerBounds.size()) +
+      " variables, but problem has " + std::to_string(mNumContinuous) + " continuous variables");
+  lowerBounds.resize(mNumContinuous);
+  upperBounds.resize(mNumContinuous);
+
+  if (py::hasattr(data, "_functions"))
+  {
+    py::list functionsList = data.attr("_functions");
+    for (auto item : functionsList)
+    {
+      py::function py_func = py::reinterpret_borrow<py::function>(item);
+      functionsOfProblem.push_back(
+        [py_func, dim](const double* x) -> double
+        {
+          py::gil_scoped_acquire gil;
+          py::list args;
+          for (int i = 0; i < dim; ++i)
+            args.append(x[i]);
+          return py_func(args).cast<double>();
+        });
+    }
+  }
+
+  isSetOptimum = py::hasattr(data, "_isSetOptimum") ? data.attr("_isSetOptimum").cast<bool>() : false;
+  if (isSetOptimum && py::hasattr(data, "_optimumValue"))
+    optimumValue = data.attr("_optimumValue").cast<double>();
+  if (isSetOptimum && py::hasattr(data, "_optimumPoint"))
+    for (auto item : py::list(data.attr("_optimumPoint")))
+      optimumCoordinate.push_back(item.cast<double>());
+
+  if (py::hasattr(data, "_num_crit"))
+    this->mNumberOfCriterions = data.attr("_num_crit").cast<int>();
+  this->mNumberOfConstraints = (int)functionsOfProblem.size() - this->mNumberOfCriterions;
+
+  // ---------------------------------------------------------------------------
+  // 2. Инициализация базового класса — в том же порядке, что и в
+  //    ProblemFromFunctionPointers (Init -> NumberOfDiscreteVariable -> CheckValue)
+  // ---------------------------------------------------------------------------
+  this->mDim = dim;                                   // как в ProblemFromFunctionPointers
+  BaseProblem<PYProblem>::Init(0, 0, false);          // создаёт параметры (NDV = 0 по умолч.)
+  this->NumberOfDiscreteVariable = mNumDiscrete;      // только ПОСЛЕ Init
+  this->CheckValue();                                 // выделит/заполнит mNumberOfValues
+
+  mIsInit = true;
+
+  PY_LOG_INFO("[PYProblem] dim=" << GetDimension() << " continuous=" << mNumContinuous
+    << " discrete=" << mNumDiscrete << " constraints=" << mNumberOfConstraints
+    << " criterions=" << mNumberOfCriterions);
+}
+
+// ------------------------------------------------------------------------------------------------
+PYProblem::~PYProblem()
+{
+  if (mNumberOfValues != nullptr)
+  {
+    delete[] mNumberOfValues;
+    mNumberOfValues = nullptr;
   }
 }
 
-/// Реализация метода получения границ поиска
-void PYProblem::GetBounds(double* lower, double* upper) {
-  for (int i = 0; i < Dimension; i++)
+// ------------------------------------------------------------------------------------------------
+/// Решатель вызывает problem->Initialize() -> Init(). Базовый Init заново
+/// создаёт параметры и сбрасывает NumberOfDiscreteVariable в 0 — поэтому
+/// (как в ProblemFromFunctionPointers) здесь ничего не переинициализируем.
+void PYProblem::Init(int argc, char* argv[], bool isMPIInit)
+{
+  mIsInit = true;
+}
+
+// ------------------------------------------------------------------------------------------------
+void PYProblem::SyncNumberOfValues()
+{
+  if (mNumDiscrete <= 0)
+    return;
+  if (mNumberOfValues != nullptr)
+    delete[] mNumberOfValues;
+  mNumberOfValues = new int[mNumDiscrete];
+  for (int i = 0; i < mNumDiscrete; i++)
+    mNumberOfValues[i] = (int)mDiscreteNumeric[i].size();
+}
+
+// ------------------------------------------------------------------------------------------------
+int PYProblem::CheckValue(int index)
+{
+  // Базовая проверка параметров (без BaseProblem::CheckValue, который заполняет
+  // mNumberOfValues значением mDefNumberOfValues = -1)
+  BaseParameters<PYProblem>::CheckValue(index);
+
+  if ((Dimension < mMinDimension) || (Dimension > mMaxDimension))
+    Dimension = mMinDimension;
+
+  // NumberOfDiscreteVariable здесь НЕ присваиваем (CheckValue — callback свойства,
+  // присваивание внутри него может вызвать рекурсию). Источник истины — mNumDiscrete.
+  SyncNumberOfValues();
+  return 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+int PYProblem::DiscreteIndex(int variable) const
+{
+  int di = variable - (mDim - mNumDiscrete);
+  if (di < 0 || di >= mNumDiscrete)
+    return -1;
+  return di;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool PYProblem::FindInCache(const double* y, int fNumber, double& result) const
+{
+  CacheKey key;
+  key.fNumber = fNumber;
+  key.point.assign(y, y + this->GetDimension());
+
+  std::lock_guard<std::mutex> lock(cache_mutex_);
+  auto it = function_cache_.find(key);
+  if (it == function_cache_.end())
+    return false;
+  result = it->second;
+  return true;
+}
+
+// ------------------------------------------------------------------------------------------------
+void PYProblem::AddToCache(const double* y, int fNumber, double value) const
+{
+  CacheKey key;
+  key.fNumber = fNumber;
+  key.point.assign(y, y + this->GetDimension());
+
+  std::lock_guard<std::mutex> lock(cache_mutex_);
+  if (function_cache_.size() >= MAX_CACHE_SIZE)
+    function_cache_.clear();
+  function_cache_.emplace(std::move(key), value);
+}
+
+// ------------------------------------------------------------------------------------------------
+/// Заполняет ВСЕ GetDimension() координат: непрерывные — из _lower/_upper_bounds,
+/// дискретные — [min, max] их допустимых значений.
+void PYProblem::GetBounds(double* lower, double* upper)
+{
+  for (int i = 0; i < mNumContinuous; i++)
   {
     lower[i] = lowerBounds[i];
     upper[i] = upperBounds[i];
   }
+  for (int d = 0; d < mNumDiscrete; d++)
+  {
+    const auto& v = mDiscreteNumeric[d];
+    lower[mNumContinuous + d] = *std::min_element(v.begin(), v.end());
+    upper[mNumContinuous + d] = *std::max_element(v.begin(), v.end());
+  }
 }
 
-/// Реализация метода, вычисляющего значение функции y из вектора функций с номером fNumber
-double PYProblem::CalculateFunctionals(const double* y, int fNumber) {
-  py::gil_scoped_acquire gil;
-  if (fNumber >= functionsOfProblem.size())
+// ------------------------------------------------------------------------------------------------
+/// В y дискретные координаты уже содержат РЕАЛЬНЫЕ значения (их выдаёт
+/// GetNextDiscreteValues), поэтому никакой трансляции не нужно — y передаётся
+/// в Python как есть.
+double PYProblem::CalculateFunctionals(const double* y, int fNumber)
+{
+  if (fNumber < 0 || fNumber >= static_cast<int>(functionsOfProblem.size()))
     throw EXCEPTION("Error function number");
 
+  double cached = 0.0;
+  if (FindInCache(y, fNumber, cached))
+    return cached;
+
   double temp = 0.0;
-
-  /// Дополнительная проверка на корректность получения функций
-  try {
-    /*std::cout << "fNumber: " << fNumber << std::endl;
-    std::cout << "functionsOfProblem.size() = " << functionsOfProblem.size() << std::endl;
-    std::cout << "Calculate in point: " << *y << std::endl;
-    auto start = std::chrono::steady_clock::now();*/
+  try
+  {
+    py::gil_scoped_acquire gil;
     temp = functionsOfProblem[fNumber](y);
-    /*auto finish = std::chrono::steady_clock::now();
-    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    std::cout << "Time took: " << elapsedTime.count() << std::endl;*/
   }
-  catch (const py::error_already_set& e) {
-    std::cerr << "PYTHON ERROR: " << e.what() << std::endl;
-    PyErr_Print();
+  catch (const py::error_already_set& e)
+  {
+    PY_LOG_ERROR("PYTHON ERROR: " << e.what());
     throw;
   }
-  catch (const std::exception& e) {
-    std::cerr << "C++ EXCEPTION: " << e.what() << std::endl;
-    throw;
-  }
-  catch (...) {
-    std::cerr << "UNKNOWN EXCEPTION occurred while calling Python function" << std::endl;
+  catch (const std::exception& e)
+  {
+    PY_LOG_ERROR("C++ EXCEPTION: " << e.what());
     throw;
   }
 
-  /*std::cout << "CalculateFunctionals() finished" << std::endl;
-  std::cout << "Result = " << temp << std::endl;*/
-
+  AddToCache(y, fNumber, temp);
   return temp;
 }
 
-int PYProblem::GetNumberOfDiscreteVariable() {
-    return NumberOfDiscreteVariable;
+// ------------------------------------------------------------------------------------------------
+int PYProblem::GetOptimumValue(double& value) const
+{
+  if (!isSetOptimum)
+    return IProblem::UNDEFINED;
+  value = optimumValue;
+  return IProblem::OK;
 }
 
-int PYProblem::GetNumberOfValues(int discreteVariable) {
-    //взято из Problem.h 357!!!
-    if ((discreteVariable > GetDimension()) ||
-        (discreteVariable < (GetDimension() - GetNumberOfDiscreteVariable())))
-        return -1;
-    if (mNumberOfValues == 0)
-        return -1;
-    return mNumberOfValues[discreteVariable - (GetDimension() - GetNumberOfDiscreteVariable())];
+// ------------------------------------------------------------------------------------------------
+int PYProblem::GetOptimumPoint(double* point) const
+{
+  if (!isSetOptimum || (int)optimumCoordinate.size() != mDim)
+    return IProblem::UNDEFINED;
+  for (int i = 0; i < mDim; i++)
+    point[i] = optimumCoordinate[i];
+  return IProblem::OK;
 }
 
-int PYProblem::GetAllDiscreteValues(int discreteVariable, double* values) {
-    if ((discreteVariable > GetDimension()) ||
-        (discreteVariable < (GetDimension() - GetNumberOfDiscreteVariable())))
-        return IIntegerProgrammingProblem::ERROR_DISCRETE_VALUE;
-    int* mCurrentDiscreteValueIndex = 0;
-    ClearCurrentDiscreteValueIndex(&mCurrentDiscreteValueIndex);
-
-    // сбрасываем значение индекса текущего значения и задаем левую границу
-    GetNextDiscreteValues(mCurrentDiscreteValueIndex, values[0], discreteVariable, -1);
-    int numVal = GetNumberOfValues(discreteVariable);
-    // определяем все остальные значения
-    for (int i = 1; i < numVal; i++)
-    {
-        GetNextDiscreteValues(mCurrentDiscreteValueIndex, values[i], discreteVariable);
-    }
-    return IProblem::OK;
+// ------------------------------------------------------------------------------------------------
+int PYProblem::GetNumberOfDiscreteVariable()
+{
+  return mNumDiscrete;
 }
 
-int PYProblem::GetNextDiscreteValues(int* mCurrentDiscreteValueIndex, double& value, int discreteVariable, int previousNumber) {
-    if ((discreteVariable > GetDimension()) ||
-        (discreteVariable < (GetDimension() - GetNumberOfDiscreteVariable())) ||
-        (mCurrentDiscreteValueIndex == 0) ||
-        (mNumberOfValues == 0))
-        return IIntegerProgrammingProblem::ERROR_DISCRETE_VALUE;
-    // если -1 то сбрасываем значение текущего номера
-    if (previousNumber == -1)
-    {
-        mCurrentDiscreteValueIndex[discreteVariable - GetNumberOfDiscreteVariable()] = 0;
-        value = mLeftBorder;
-        return IProblem::OK;
-    }
-    else if (previousNumber == -2)
-    {
-        double d = (mRightBorder - mLeftBorder) /
-            (mNumberOfValues[discreteVariable - (GetDimension() - GetNumberOfDiscreteVariable())] - 1);
-        mCurrentDiscreteValueIndex[discreteVariable - GetNumberOfDiscreteVariable()]++;
-        value = mLeftBorder + d *
-            mCurrentDiscreteValueIndex[discreteVariable - GetNumberOfDiscreteVariable()];
-        return IProblem::OK;
-    }
-    else
-    {
-        double d = (mRightBorder - mLeftBorder) /
-            (mNumberOfValues[discreteVariable - (GetDimension() - GetNumberOfDiscreteVariable())] - 1);
-        mCurrentDiscreteValueIndex[discreteVariable - GetNumberOfDiscreteVariable()] =
-            previousNumber;
-        mCurrentDiscreteValueIndex[discreteVariable - GetNumberOfDiscreteVariable()]++;
-        value = mLeftBorder + d * mCurrentDiscreteValueIndex[discreteVariable -
-            GetNumberOfDiscreteVariable()];
-        return IProblem::OK;
-    }
+// ------------------------------------------------------------------------------------------------
+int PYProblem::GetNumberOfValues(int discreteVariable)
+{
+  int di = DiscreteIndex(discreteVariable);
+  if (di < 0)
+    return -1;
+  return (int)mDiscreteNumeric[di].size();
 }
 
-bool PYProblem::IsPermissibleValue(double value, int discreteVariable) {
-    if ((discreteVariable > GetDimension()) ||
-        (discreteVariable < (GetDimension() - GetNumberOfDiscreteVariable())) ||
-        (mNumberOfValues == 0))
-        return false;
-    double d = (mRightBorder - mLeftBorder) /
-        (mNumberOfValues[discreteVariable - (GetDimension() - GetNumberOfDiscreteVariable())] - 1);
-    double v = 0;
-    for (int i = 0; i < mNumberOfValues[discreteVariable - (GetDimension() - GetNumberOfDiscreteVariable())]; i++)
-    {
-        v = mLeftBorder + d * i;
-        if (fabs(v - value) < AccuracyDouble)
-        {
-            return true;
-        }
-    }
+// ------------------------------------------------------------------------------------------------
+int PYProblem::GetAllDiscreteValues(int discreteVariable, double* values)
+{
+  int di = DiscreteIndex(discreteVariable);
+  if (di < 0 || values == nullptr)
+    return IIntegerProgrammingProblem::ERROR_DISCRETE_VALUE;
+
+  const auto& v = mDiscreteNumeric[di];
+  for (size_t i = 0; i < v.size(); i++)
+    values[i] = v[i];
+  return IProblem::OK;
+}
+
+// ------------------------------------------------------------------------------------------------
+/// Семантика как в BaseProblem::GetNextDiscreteValues:
+///   previousNumber == -1 : сброс, value = значение №0
+///   previousNumber == -2 : следующее за текущим
+///   previousNumber >= 0  : значение №(previousNumber + 1)
+/// mCurrentDiscreteValueIndex — массив размера NumberOfDiscreteVariable,
+/// индексируется номером ДИСКРЕТНОЙ переменной di (в старой версии было
+/// discreteVariable - NumberOfDiscreteVariable -> выход за границы массива).
+int PYProblem::GetNextDiscreteValues(int* mCurrentDiscreteValueIndex, double& value,
+  int discreteVariable, int previousNumber)
+{
+  int di = DiscreteIndex(discreteVariable);
+  if (di < 0 || mCurrentDiscreteValueIndex == nullptr)
+    return IIntegerProgrammingProblem::ERROR_DISCRETE_VALUE;
+
+  const auto& v = mDiscreteNumeric[di];
+  const int n = (int)v.size();
+
+  int idx;
+  if (previousNumber == -1)
+    idx = 0;
+  else if (previousNumber == -2)
+    idx = mCurrentDiscreteValueIndex[di] + 1;
+  else
+    idx = previousNumber + 1;
+
+  if (idx < 0 || idx >= n)
+    return IIntegerProgrammingProblem::ERROR_DISCRETE_VALUE;
+
+  mCurrentDiscreteValueIndex[di] = idx;
+  value = v[idx];
+  return IProblem::OK;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool PYProblem::IsPermissibleValue(double value, int discreteVariable)
+{
+  int di = DiscreteIndex(discreteVariable);
+  if (di < 0)
     return false;
+  for (double v : mDiscreteNumeric[di])
+    if (std::fabs(v - value) < AccuracyDouble)
+      return true;
+  return false;
 }
+// - end of file ----------------------------------------------------------------------------------

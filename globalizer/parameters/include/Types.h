@@ -1295,6 +1295,8 @@ void TEStopCondition<Owner>::operator = (std::string data)
     *this = MaxIterWithoutImprovement;
   if (data == "InLocalArea" || data == "5")
     *this = InLocalArea;
+  if (data == "IterationOnly" || data == "6")
+    *this = IterationOnly;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1315,6 +1317,8 @@ TEStopCondition<Owner>::operator std::string()
     s = "AccuracyWithCheck";
   if (this->mValue == InLocalArea)
     s = "InLocalArea";
+  if (this->mValue == IterationOnly)
+    s = "IterationOnly";
 
   return s;
 }

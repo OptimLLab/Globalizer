@@ -44,7 +44,7 @@ protected:
   /// Наш таймер
   Performance Timer;
   /// время решения задачи
-  double duration;
+  double duration = 0;
 
   /// Решилась ли задача
   bool IsOptimumFound;
@@ -124,6 +124,9 @@ public:
   \param[in] points точки испытаний, которые будут добавлены
   */
   void InsertPoints(std::vector<Trial*>& points);
+  
+  /// печать текущего минимума на экран
+  void PrintResultToConsole();
 };
 
 void ShowIterResults(Process *pProcess);

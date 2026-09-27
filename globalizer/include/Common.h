@@ -126,7 +126,8 @@ enum EStopCondition
   OptimumVicinity2,
   OptimumValue,
   MaxIterWithoutImprovement,
-  InLocalArea
+  InLocalArea,
+  IterationOnly
 };
 
 enum ETypeCalculation

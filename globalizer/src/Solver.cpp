@@ -232,6 +232,15 @@ int Solver::DoIteration(bool& finished)
 }
 
 // ------------------------------------------------------------------------------------------------
+void Solver::PrintResultToConsole()
+{
+  if (mProcess != nullptr)
+  {
+    mProcess->PrintResultToConsole();
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
 int Solver::CheckParameters()
 {
   double optimumValue;
@@ -256,7 +265,7 @@ int Solver::CheckParameters()
   {
     if (mProblem->GetAllOptimumPoint(optimumPoint, n) == IProblem::UNDEFINED)
     {
-      if (parameters.StopCondition != Accuracy)
+      if (parameters.StopCondition != Accuracy && parameters.StopCondition != IterationOnly)
       {
         print << "Stop by reaching optimum vicinity is unsupported by this problem\n";
         print << "Stop Condition change to Accuracy!!!\n";

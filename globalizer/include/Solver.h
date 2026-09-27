@@ -115,6 +115,9 @@ public:
 
   /// Выполнение очередного шага оптимизации
   int DoIteration(bool& finished);
+
+  /// Печать текущего минимума на экран
+  virtual void PrintResultToConsole();
 };
 
 #endif //solver.h

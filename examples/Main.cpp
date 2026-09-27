@@ -66,6 +66,7 @@ int main(int argc, char* argv[])
   if (solver->Solve() != SYSTEM_OK)
     throw EXCEPTION("Error: solver.Solve crash!!!");
 
+#ifdef _GLOBALIZER_BENCHMARKS
   GlobalizerBenchmarksProblem* gbp = dynamic_cast<GlobalizerBenchmarksProblem*> (problem);
   auto result = solver->GetSolutionResult();
   double* bestTrialY = result->BestTrial->y;
@@ -86,7 +87,7 @@ int main(int argc, char* argv[])
   }
   
   globalizerBenchmarksProblem->Finalize(y, u);
-
+#endif
 
   if (parameters.IsMPIInit())
     MPI_Finalize();

@@ -47,8 +47,8 @@ public:
   bool IsEmpty() const;
   bool IsFull() const;
 
-  QueueElement* Push(double globalKey, double localKey, void *value);
-  QueueElement* PushWithPriority(double globalKey, double localKey, void *value);
+  QueueElement* Push(double globalKey, double localKey, void *value, bool is_calc = true);
+  QueueElement* PushWithPriority(double globalKey, double localKey, void *value, bool is_calc = true);
   void Pop(double *key, void **value);
   void DeleteByValue(void *value);
   /// Удаляет элемент

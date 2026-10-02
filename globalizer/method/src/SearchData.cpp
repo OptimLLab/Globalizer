@@ -536,7 +536,8 @@ void SearchData::RefillQueue()
 
   for (SearcDataIterator it = GetBeginIterator(); it; ++it)
   {
-    queueElementa = pQueue->Push(it->R, it->locR, *it);
+    bool is_calc_interval = !((it->izl() == -3) && (it->izr() == -3) || (it->izl() == -3) && (it->izr() == -2) || (it->izl() == -2) && (it->izr() == -3));
+    queueElementa = pQueue->Push(it->R, it->locR, *it, is_calc_interval);
     if (queueElementa != 0)
     {
       it->SetQueueElementa(queueElementa);
@@ -606,10 +607,11 @@ void SearchData::PushToQueue(SearchInterval *pInterval)
   }
   //На начальном этапе в очередь записываем все данные
   QueueElement* queueElementa = 0;
+  bool is_calc_interval = !((pInterval->izl() == -3) && (pInterval->izr() == -3) || (pInterval->izl() == -3) && (pInterval->izr() == -2) || (pInterval->izl() == -2) && (pInterval->izr() == -3));
   if (Count <= pQueue->GetMaxSize())
-    queueElementa = pQueue->Push(pInterval->R, pInterval->locR, pInterval);
+    queueElementa = pQueue->Push(pInterval->R, pInterval->locR, pInterval, is_calc_interval);
   else
-    queueElementa = pQueue->PushWithPriority(pInterval->R, pInterval->locR, pInterval);
+    queueElementa = pQueue->PushWithPriority(pInterval->R, pInterval->locR, pInterval, is_calc_interval);
 
   if (queueElementa != 0)
   {

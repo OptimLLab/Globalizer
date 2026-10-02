@@ -22,7 +22,8 @@ enum ProblemName {
   STRONGINC3_FUNCTION_POINTER,
   RASTRIGIN_INT,
   STRONGINC3_UNCACLC,
-  RASTRIGIN_INT_UNCALC
+  RASTRIGIN_INT_UNCALC,
+  STRONGINC3_HC
 };
 
 double StronginC3Functionals(const double* y, int fNumber)
@@ -241,6 +242,45 @@ int main(int argc, char* argv[])
     parameters.CalcsType = Interpolation;
     parameters.MoveTrialPointsUnderGraph = true;
     //parameters.ShowFigure = true;
+  }
+  else if (problemName == STRONGINC3_HC) {
+      parameters.Dimension = 2;
+      parameters.r = 3.5;
+      parameters.Epsilon = 0.002;
+      parameters.alpha = 0.1;
+      parameters.IsCalculationInBorderPoint = true;
+      
+      problem = new ProblemFromFunctionPointers(parameters.Dimension,
+        { 0.0, -1.0 },
+        { 4.0, 3.0 },
+        std::vector<std::function<double(const double*)>>({
+        [](const double* y)
+        {
+            if (0.01 * ((y[0] - 2.2) * (y[0] - 2.2) + (y[1] - 1.2) * (y[1] - 1.2) - 2.25) > 0 ||
+                100.0 * (1.0 - ((y[0] - 2.0) / 1.2) * ((y[0] - 2.0) / 1.2) - (y[1] / 2.0) * (y[1] / 2.0)) > 0 ||
+                10.0 * (y[1] - 1.5 - 1.5 * sin(6.283 * (y[0] - 1.75))) > 0)
+            if (rand() % 2)
+                return MaxDouble;
+            else
+                throw std::logic_error("Error of calculations");
+
+            double t1 = pow(0.5 * y[0] - 0.5, 4.0);
+            double t2 = pow(y[1] - 1.0, 4.0);
+
+            return -((1.5 * y[0] * y[0] * exp(1.0 - y[0] * y[0] - 20.25 * (y[0] - y[1]) * (y[0] - y[1]))) + t1 * t2 * exp(2.0 - t1 - t2));
+        }
+        })
+      );
+
+
+      parameters.FigureType = Surface;
+      parameters.FillFeasibleRegion = true;
+
+      parameters.CalcsType = ObjectiveFunction;
+      parameters.ObjectiveGridSize = 400;
+      parameters.ConstraintsGridSize = 800;
+
+      parameters.ShowFigure = true;
   }
 
   problem->Initialize();

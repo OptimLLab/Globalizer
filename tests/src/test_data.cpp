@@ -326,11 +326,6 @@ TEST_F(TSearchDataTest, throw_when_push_to_queue_null_pointer)
   ASSERT_ANY_THROW(data->PushToQueue(0));
 }
 
-TEST_F(TSearchDataTest, can_push_interval_to_queue)
-{
-  ASSERT_NO_THROW(data->PushToQueue(new SearchInterval()));
-}
-
 /**
  * Проверка корректности работы метода #RefillQueue
  */

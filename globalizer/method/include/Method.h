@@ -143,6 +143,9 @@ protected:
   /// Последняя итерация  обновления лучшей точки
   int LastIterationBestUpdate = 0;
 
+  // Тип последней новой точки (-1 - невычислимая, 0 - вычислимая)
+  int LastIterationPointType = -1;
+
   /// Метод сохраняющий точки в статический массив
   virtual void  SavePoints();
 

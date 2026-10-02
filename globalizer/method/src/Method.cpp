@@ -775,6 +775,10 @@ bool Method::CheckStopCondition()
     }
   }
 
+  if (res == true)
+      if (LastIterationPointType == -1)
+          res = false;
+
   if (iteration.IterationCount >= MaxNumOfTrials)
     res = true;
 
@@ -1005,6 +1009,7 @@ double Method::CalculateGlobalR(SearchInterval* p)
 
     }
   }
+  // обработка интервала с невычислимыми точками
   else if ((p->izl() == -3) && (p->izr() == -3) || (p->izl() == -3) && (p->izr() == -2) || (p->izl() == -2) && (p->izr() == -3))
   {
     return parameters.alpha * (1 - 1 / parameters.r) * (1 - 1 / parameters.r) * deltax;
@@ -1306,6 +1311,10 @@ bool Method::EstimateOptimum()
     if (iteration.pCurTrials[j] == 0)
       continue;
     isOptimumUpdated = UpdateOptimumEstimation(*iteration.pCurTrials[j]);
+    if (iteration.pCurTrials[0]->index < 0)
+        LastIterationPointType = -1;
+    else
+        LastIterationPointType = 0;
   }
   return isOptimumUpdated;
 }

@@ -57,12 +57,12 @@ bool PriorityQueue::IsFull() const
 }
 
 // ------------------------------------------------------------------------------------------------
-QueueElement* PriorityQueue::Push(double globalKey, double localKey, void *value)
+QueueElement* PriorityQueue::Push(double globalKey, double localKey, void *value, bool is_calc)
 {
   QueueElement* a = 0;
   if (!IsFull()) {
     CurSize++;
-    a = pMem->push(QueueElement(globalKey, value));
+    a = pMem->push(QueueElement(globalKey, value, is_calc));
   }
   else {
     if (globalKey > pMem->findMin().Key)
@@ -70,13 +70,13 @@ QueueElement* PriorityQueue::Push(double globalKey, double localKey, void *value
     else
       return a;
     CurSize++;
-    a = pMem->push(QueueElement(globalKey, value));
+    a = pMem->push(QueueElement(globalKey, value, is_calc));
   }
   return a;
 }
 
 // ------------------------------------------------------------------------------------------------
-QueueElement* PriorityQueue::PushWithPriority(double globalKey, double localKey, void *value)
+QueueElement* PriorityQueue::PushWithPriority(double globalKey, double localKey, void *value, bool is_calc)
 {
   QueueElement* a = 0;
   if (!IsEmpty()) {
@@ -84,12 +84,12 @@ QueueElement* PriorityQueue::PushWithPriority(double globalKey, double localKey,
       if (IsFull())
         DeleteMinElem();
       CurSize++;
-      a = pMem->push(QueueElement(globalKey, value));
+      a = pMem->push(QueueElement(globalKey, value, is_calc));
     }
   }
   else {
     CurSize++;
-    a = pMem->push(QueueElement(globalKey, value));
+    a = pMem->push(QueueElement(globalKey, value, is_calc));
   }
   return a;
 }

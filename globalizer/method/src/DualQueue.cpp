@@ -100,31 +100,31 @@ bool PriorityDualQueue::IsFull() const
 }
 
 // ------------------------------------------------------------------------------------------------
-QueueElement* PriorityDualQueue::Push(double globalKey, double localKey, void * value)
+QueueElement* PriorityDualQueue::Push(double globalKey, double localKey, void * value, bool is_calc)
 {
   QueueElement* pGlobalElem = NULL, *pLocalElem = NULL;
   //push to a global queue
   if (!IsFull()) {
     CurGlobalSize++;
-    pGlobalElem = pGlobalHeap->push(QueueElement(globalKey, value));
+    pGlobalElem = pGlobalHeap->push(QueueElement(globalKey, value, is_calc));
   }
   else {
     if (globalKey > pGlobalHeap->findMin().Key) {
       DeleteMinGlobalElem();
       CurGlobalSize++;
-      pGlobalElem = pGlobalHeap->push(QueueElement(globalKey, value));
+      pGlobalElem = pGlobalHeap->push(QueueElement(globalKey, value, is_calc));
     }
   }
   //push to a local queue
   if (!IsLocalFull()) {
     CurLocalSize++;
-    pLocalElem = pLocalHeap->push(QueueElement(localKey, value));
+    pLocalElem = pLocalHeap->push(QueueElement(localKey, value, is_calc));
   }
   else {
     if (localKey > pLocalHeap->findMin().Key) {
       DeleteMinLocalElem();
       CurLocalSize++;
-      pLocalElem = pLocalHeap->push(QueueElement(localKey, value));
+      pLocalElem = pLocalHeap->push(QueueElement(localKey, value, is_calc));
     }
   }
   //link elements
@@ -137,7 +137,7 @@ QueueElement* PriorityDualQueue::Push(double globalKey, double localKey, void * 
 }
 
 // ------------------------------------------------------------------------------------------------
-QueueElement* PriorityDualQueue::PushWithPriority(double globalKey, double localKey, void * value)
+QueueElement* PriorityDualQueue::PushWithPriority(double globalKey, double localKey, void* value, bool is_calc)
 {
   QueueElement* pGlobalElem = NULL, *pLocalElem = NULL;
   //push to a global queue
@@ -146,12 +146,12 @@ QueueElement* PriorityDualQueue::PushWithPriority(double globalKey, double local
       if (IsFull())
         DeleteMinGlobalElem();
       CurGlobalSize++;
-      pGlobalElem = pGlobalHeap->push(QueueElement(globalKey, value));
+      pGlobalElem = pGlobalHeap->push(QueueElement(globalKey, value, is_calc));
     }
   }
   else {
     CurGlobalSize++;
-    pGlobalElem = pGlobalHeap->push(QueueElement(globalKey, value));
+    pGlobalElem = pGlobalHeap->push(QueueElement(globalKey, value, is_calc));
   }
   //push to a local queue
   if (!IsLocalEmpty()) {
@@ -159,12 +159,12 @@ QueueElement* PriorityDualQueue::PushWithPriority(double globalKey, double local
       if (IsLocalFull())
         DeleteMinLocalElem();
       CurLocalSize++;
-      pLocalElem = pLocalHeap->push(QueueElement(localKey, value));
+      pLocalElem = pLocalHeap->push(QueueElement(localKey, value, is_calc));
     }
   }
   else {
     CurLocalSize++;
-    pLocalElem = pLocalHeap->push(QueueElement(localKey, value));
+    pLocalElem = pLocalHeap->push(QueueElement(localKey, value, is_calc));
   }
   //link elements
   if (pGlobalElem != NULL && pLocalElem != NULL) {

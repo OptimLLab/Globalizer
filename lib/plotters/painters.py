@@ -162,6 +162,7 @@ class StaticPainter(Painter):
         parameter_count = len(self.parameters_numbers)
         constraint_count = len(self.c)
         interpolated_constraint_count = len(self.cc) // 2
+        is_uncalc = False
 
         has_second_parameter = parameter_count > 1
         has_interpolated_constraints = interpolated_constraint_count > 0
@@ -200,6 +201,7 @@ class StaticPainter(Painter):
                 self.plotter.plot_interpolation(
                     constraint_points,
                     constraint_values,
+                    is_uncalc, 
                     points_count=self.grid_c,
                     colormap='twilight',
                     linewidths=1,

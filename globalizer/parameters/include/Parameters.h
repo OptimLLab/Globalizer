@@ -63,22 +63,22 @@ protected:
   virtual void SetDefaultParameters();
 
   /// Индекс процесса
-  int mProcRank;
+  int mProcRank = 0;
   /// Кол-во процессов
-  int mProcNum;
+  int mProcNum = 0;
   /// Необходимое число процессов
-  int mNeedMPIProcessorCount;
+  int mNeedMPIProcessorCount = 0;
 
 public:
   /// Уровень текущего процесса
-  int MyLevel;
+  int MyLevel = 0;
   /// Номер
-  int MyMap;
+  int MyMap = 0;
   /// последний сохраненный номер итерации
-  int iterationNumber;
+  int iterationNumber = 0;
   
   /// Суммарное время решения
-  double timeSolve;
+  double timeSolve = 0;
 
   /// Текущая версия
   std::string version = "0.1.7";

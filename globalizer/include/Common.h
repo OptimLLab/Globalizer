@@ -141,7 +141,9 @@ enum ETypeCalculation
   /// Параллельный АГП - MPI Вычислитель, ассинхронный
   AsyncMPI,
   /// MPI Вычислитель - Intel oneAPI вычислитель
-  OneApi
+  OneApi,
+  /// Вычислитель на центральном процессоре с групповой обработкой точек
+  CPUMultiPoint
 };
 
 enum ETypeProcess

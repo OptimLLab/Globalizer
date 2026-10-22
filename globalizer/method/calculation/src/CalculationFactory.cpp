@@ -19,6 +19,7 @@
 #include "MPICalculationAsync.h"
 #include "MPICalculation.h"
 #include "CudaCalculation.h"
+#include "CPUMultiPointCalculation.h"
 
 
 // ------------------------------------------------------------------------------------------------
@@ -51,6 +52,19 @@ Calculation* CalculationFactory::CreateCalculation2(Task& _pTask, IEvolvent* evo
             {
                 calculation = Calculation::leafCalculation;
             }
+        }
+
+        else if (parameters.TypeCalculation == CPUMultiPoint)
+        {
+          if (Calculation::leafCalculation == 0)
+          {
+            calculation = new CPUMultiPointCalculation(_pTask);
+            Calculation::leafCalculation = calculation;
+          }
+          else
+          {
+            calculation = Calculation::leafCalculation;
+          }
         }
 
         else if (parameters.TypeCalculation == MPI_calc)
@@ -130,7 +144,20 @@ Calculation* CalculationFactory::CreateCalculation(Task& _pTask, IEvolvent* evol
             }
         }
 
-        if (parameters.TypeCalculation == CUDA)
+        else if ((parameters.TypeCalculation == CPUMultiPoint))
+        {
+          if (Calculation::leafCalculation == 0)
+          {
+            calculation = new CPUMultiPointCalculation(_pTask);
+            Calculation::leafCalculation = calculation;
+          }
+          else
+          {
+            calculation = Calculation::leafCalculation;
+          }
+        }
+
+        else if (parameters.TypeCalculation == CUDA)
         {
             if (Calculation::leafCalculation == 0)
             {
@@ -204,6 +231,10 @@ Calculation* CalculationFactory::CreateNewCalculation(Task& _pTask, IEvolvent* e
         else if (parameters.TypeCalculation == CUDA)
         {
             calculation = new CUDACalculation(_pTask);
+        }
+        else if (parameters.TypeCalculation == CPUMultiPoint)
+        {
+          calculation = new CPUMultiPointCalculation(_pTask);
         }
         else if (parameters.TypeCalculation == MPI_calc)
         {

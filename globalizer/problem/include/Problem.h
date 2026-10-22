@@ -73,13 +73,14 @@ protected:
   /// Очищает номер текущего значения для дискретного параметра
   virtual void ClearCurrentDiscreteValueIndex(int** mCurrentDiscreteValueIndex)
   {
-    if (NumberOfDiscreteVariable > 0)
+    const int discreteCount = NumberOfDiscreteVariable;
+    if (discreteCount > 0)
     {
       if (*mCurrentDiscreteValueIndex != 0)
         delete[] * mCurrentDiscreteValueIndex;
 
-      *mCurrentDiscreteValueIndex = new int[NumberOfDiscreteVariable];
-      for (int i = 0; i < NumberOfDiscreteVariable; i++)
+      *mCurrentDiscreteValueIndex = new int[discreteCount];
+      for (int i = 0; i < discreteCount; i++)
         (*mCurrentDiscreteValueIndex)[i] = 0;
     }
   }
@@ -94,7 +95,8 @@ protected:
       Dimension = mMinDimension;
     }
 
-    if (NumberOfDiscreteVariable > 0)
+    const int discreteCount = NumberOfDiscreteVariable;
+    if (discreteCount > 0)
     {
       if (mNumberOfValues != nullptr)
       {
@@ -102,8 +104,8 @@ protected:
         mNumberOfValues = nullptr;
       }
 
-      mNumberOfValues = new int[NumberOfDiscreteVariable];
-      for (int i = 0; i < NumberOfDiscreteVariable; i++)
+      mNumberOfValues = new int[discreteCount];
+      for (int i = 0; i < discreteCount; i++)
       {
         mNumberOfValues[i] = mDefNumberOfValues;
       }
@@ -513,3 +515,5 @@ public:
 
 #endif
 // - end of file ----------------------------------------------------------------------------------
+
+

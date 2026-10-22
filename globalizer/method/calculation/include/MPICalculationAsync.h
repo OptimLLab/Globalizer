@@ -45,10 +45,10 @@ protected:
     std::vector<Trial*> vecTrials;
 
     /// MPI-номер потомка, закончившего решение выделенной задачи
-    int ChildNumRecv;
+    int ChildNumRecv = 0;
 
     /// "Внутренний" номер потомка среди всех потомков данного процесса
-    int ChildNum;
+    int ChildNum = 0;
 
     /**
      * \brief Первоначальная рассылка задач всем рабочим процессам.

@@ -12,7 +12,7 @@
 //  Author(s): Sysoyev A., Barkalov K.                                     //
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
-#include <mpi.h>
+#include "MpiSupport.h"
 #include <cmath>
 #include <algorithm>
 #include <cstring>

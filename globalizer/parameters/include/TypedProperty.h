@@ -346,7 +346,7 @@ bool TypedProperty<Type, Owner>::GetIsChange()
 
 // ------------------------------------------------------------------------------------------------
 template <class Type, class Owner>
-TypedProperty<Type, Owner>::TypedProperty() : BaseProperty<Owner>(0), mGetter(0), mSetter(0), mCheckValue(0)
+TypedProperty<Type, Owner>::TypedProperty() : BaseProperty<Owner>(0), mGetter(0), mSetter(0), mCheckValue(0), mValue()
 {
   mIsHaveValue = true;
   mIndex = 0;
@@ -357,7 +357,7 @@ TypedProperty<Type, Owner>::TypedProperty() : BaseProperty<Owner>(0), mGetter(0)
 
 // ------------------------------------------------------------------------------------------------
 template <class Type, class Owner>
-TypedProperty<Type, Owner>::TypedProperty(Type value) : BaseProperty<Owner>(0), mGetter(0), mSetter(0), mCheckValue(0)
+TypedProperty<Type, Owner>::TypedProperty(Type value) : BaseProperty<Owner>(0), mGetter(0), mSetter(0), mCheckValue(0), mValue()
 {
   CopyValue(value);
   mIsHaveValue = true;
@@ -370,7 +370,7 @@ TypedProperty<Type, Owner>::TypedProperty(Type value) : BaseProperty<Owner>(0), 
 // ------------------------------------------------------------------------------------------------
 template <class Type, class Owner>
 TypedProperty<Type, Owner>::TypedProperty(Owner* owner, tGetter getMethod, tSetter setMethod, tCheckValue checkMethod, Type value) :
-  BaseProperty<Owner>(owner), mGetter(getMethod), mSetter(setMethod), mCheckValue(checkMethod)
+  BaseProperty<Owner>(owner), mGetter(getMethod), mSetter(setMethod), mCheckValue(checkMethod), mValue()
 {
   CopyValue(value);
   if ((getMethod != 0) || (setMethod != 0))
@@ -390,3 +390,5 @@ TypedProperty<Type, Owner>::~TypedProperty()
 
 #endif //__TYPED_PROPERTY_H__
 // - end of file ----------------------------------------------------------------------------------
+
+

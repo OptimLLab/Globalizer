@@ -1342,6 +1342,8 @@ void TETypeCalculation<Owner>::operator = (std::string data)
     *this = AsyncMPI;
   if ((data == "OneApi") || (data == "4"))
     *this = OneApi;
+  if ((data == "CPUMultiPoint") || (data == "5"))
+    *this = CPUMultiPoint;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1360,6 +1362,8 @@ TETypeCalculation<Owner>::operator std::string()
     s = "AsyncMPI";
   if (this->mValue == OneApi)
     s = "OneApi";
+  if (this->mValue == CPUMultiPoint)
+    s = "CPUMultiPoint";
   return s;
 }
 

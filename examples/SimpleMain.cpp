@@ -56,6 +56,7 @@ double StronginC3Functionals(const double* y, int fNumber)
   return res;
 }
 
+
 // ------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {

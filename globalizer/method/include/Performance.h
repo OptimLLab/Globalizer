@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -41,6 +41,7 @@ public:
   {
 #ifdef WIN32
     s_freq.QuadPart = 0;
+    startCount.QuadPart = 0;
 #else
 // TODO: add Linux specific things
 #endif

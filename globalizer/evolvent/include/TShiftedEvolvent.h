@@ -27,7 +27,7 @@
 */
 
 #ifndef __SHIFTEDEVOLVENT_H__
-#define __SHIFTEDEEVOLVENT_H__
+#define __SHIFTEDEVOLVENT_H__
 
 #include "Evolvent.h"
 #include "Common.h"

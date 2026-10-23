@@ -16,7 +16,7 @@
 #ifndef __MESSAGES_H__
 #define __MESSAGES_H__
 
-#include <mpi.h>
+#include "MpiSupport.h"
 
 #include <stdio.h>
 #include <string>

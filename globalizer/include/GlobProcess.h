@@ -37,9 +37,9 @@ class Process
 
 protected:
   /// Печатать ли выходную информацию
-  bool isPrintOptimEstimation;
+  bool isPrintOptimEstimation = false;
   /// Общие данные для всех процессов
-  bool isFirstRun;
+  bool isFirstRun = false;
 
   /// Наш таймер
   Performance Timer;
@@ -47,14 +47,14 @@ protected:
   double duration = 0;
 
   /// Решилась ли задача
-  bool IsOptimumFound;
+  bool IsOptimumFound = false;
   /// Задача
-  Task* pTask;
+  Task* pTask = nullptr;
   /// Поисковая информация
-  SearchData* pData;
+  SearchData* pData = nullptr;
 
   /// Методы для одной итерации
-  IMethod* pMethod;
+  IMethod* pMethod = nullptr;
   /** Указатель на развертку
 
   В зависимости от вида отображения это может быть:
@@ -62,9 +62,9 @@ protected:
   - множественная сдвиговая развертка
   - множественная вращаемая развертка
   */
-  IEvolvent* pEvolvent;
+  IEvolvent* pEvolvent = nullptr;
   /// Вычислитель
-  Calculation* calculation;
+  Calculation* calculation = nullptr;
 
   std::vector<int> Neighbours;
 
@@ -92,7 +92,7 @@ protected:
   bool CheckIsStop(bool IsStop);
 
   /// Точки которые будут добавлены после первой итерации
-  std::vector<Trial*>* addPoints;
+  std::vector<Trial*>* addPoints = nullptr;
 public:
   Process(SearchData& data, Task& task);
   virtual ~Process();

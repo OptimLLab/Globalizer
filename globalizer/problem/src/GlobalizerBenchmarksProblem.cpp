@@ -21,9 +21,10 @@ GlobalizerBenchmarksProblem::GlobalizerBenchmarksProblem(IGlobalOptimizationProb
   if (NumberOfDiscreteVariable > 0)
     mDefNumberOfValues = DiscreteVariableValues[0].size();
 
-  mNumberOfValues = new int[GetNumberOfDiscreteVariable()];
-  discreteValues.resize(GetNumberOfDiscreteVariable());
-  for (int i = 0; i < GetNumberOfDiscreteVariable(); i++)
+  const int numDiscreteVariable = GetNumberOfDiscreteVariable();
+  mNumberOfValues = new int[numDiscreteVariable];
+  discreteValues.resize(numDiscreteVariable);
+  for (int i = 0; i < numDiscreteVariable; i++)
   {
     mNumberOfValues[i] = DiscreteVariableValues[i].size();
     discreteValues[i].resize(mNumberOfValues[i]);
@@ -190,13 +191,14 @@ int GlobalizerBenchmarksProblem::GetNumberOfValues(int discreteVariable)
 /// Очищает номер текущего значения для дискретного параметра
 void GlobalizerBenchmarksProblem::ClearCurrentDiscreteValueIndex(int** mCurrentDiscreteValueIndex)
 {
-  if (NumberOfDiscreteVariable > 0)
+  const int discreteCount = NumberOfDiscreteVariable;
+  if (discreteCount > 0)
   {
     if (*mCurrentDiscreteValueIndex != 0)
       delete[] * mCurrentDiscreteValueIndex;
 
-    *mCurrentDiscreteValueIndex = new int[NumberOfDiscreteVariable];
-    for (int i = 0; i < NumberOfDiscreteVariable; i++)
+    *mCurrentDiscreteValueIndex = new int[discreteCount];
+    for (int i = 0; i < discreteCount; i++)
       (*mCurrentDiscreteValueIndex)[i] = 0;
   }
 }

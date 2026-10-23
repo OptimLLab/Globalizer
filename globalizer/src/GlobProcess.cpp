@@ -12,7 +12,7 @@
 //  Author(s): Sysoyev A., Barkalov K.                                     //
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
-#include <mpi.h>
+#include "MpiSupport.h"
 #include <cmath>
 #include <algorithm>
 #include <cstring>
@@ -504,6 +504,7 @@ void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
         res = true;
       AchievedAccuracy = OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue();
       break;
+    default: break;
     }
     delete[] allOptimumPoints;
 
@@ -802,13 +803,13 @@ void Process::InsertPoints(std::vector<Trial*>& points)
 // ------------------------------------------------------------------------------------------------
 void Process::PrintResultToConsole()
 {
-  auto OptimEstimation = *(pMethod->GetOptimEstimation());
-  PrintOptimEstimationToFile(OptimEstimation);
-  if (parameters.IsUseExtendedConsole)
-    OldPrintOptimEstimationToConsole(OptimEstimation);
-  else
-    PrintOptimEstimationToConsole(OptimEstimation);
-  PrintResultToFile(OptimEstimation);
+    auto OptimEstimation = *(pMethod->GetOptimEstimation());
+    PrintOptimEstimationToFile(OptimEstimation);
+    if (parameters.IsUseExtendedConsole)
+      OldPrintOptimEstimationToConsole(OptimEstimation);
+    else
+      PrintOptimEstimationToConsole(OptimEstimation);
+    PrintResultToFile(OptimEstimation);
 }
 
 // - end of file ----------------------------------------------------------------------------------

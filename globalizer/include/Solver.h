@@ -5,7 +5,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <mpi.h>
+#include "MpiSupport.h"
 #include <exception>
 
 #include "Common.h"

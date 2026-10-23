@@ -82,6 +82,8 @@ Extended::Extended(double val)
 #endif
   case etDouble:
     dValue = val;
+    break;
+  default: break;
   }
 }
 
@@ -101,6 +103,7 @@ Extended::Extended(const char* str)
   case etDouble:
     dValue = atof(str);
     break;
+  default: break;
   }
 }
 
@@ -119,6 +122,8 @@ Extended::Extended(const Extended& e)
 #endif
   case etDouble:
     dValue = e.dValue;
+    break;
+  default: break;
   }
 }
 
@@ -139,11 +144,11 @@ double Extended::GetPrecision()
 
 void Extended::SetPrecision(double prec)
 {
-  maxNumbers = ::ceil(1.0/prec+1);
+  maxNumbers = ::ceil(1.0 / prec + 1);
   precisionSet = true;
   precision = prec;
   // transform human like precision to precision of mpfr and mapm
-  mpfrPrecision = (int)(::ceil(precisionReserveFactor*log(maxNumbers)/log(2.0)));
+  mpfrPrecision = (int)(::ceil(precisionReserveFactor * log(maxNumbers) / log(2.0)));
   if (type == etDouble)
     digitsNumber = 20;
   else
@@ -163,14 +168,15 @@ int Extended::GetPackedSize()
     switch (type)
     {
 #ifndef NO_MPREAL
-  case etMPFR:
-    // size = size of struct + precision rounded to 4 bytes (sizeof(mp_limb_t) = 4)
-    packedSize = sizeof(__mpfr_struct) + ((mpfrPrecision-1)/sizeof(mp_limb_t)/8+1)*sizeof(mp_limb_t);
-    break;
+    case etMPFR:
+      // size = size of struct + precision rounded to 4 bytes (sizeof(mp_limb_t) = 4)
+      packedSize = sizeof(__mpfr_struct) + ((mpfrPrecision - 1) / sizeof(mp_limb_t) / 8 + 1) * sizeof(mp_limb_t);
+      break;
 #endif
-  case etDouble:
-    packedSize = sizeof(double);
-    break;
+    case etDouble:
+      packedSize = sizeof(double);
+      break;
+    default: break;
     }
   }
   return packedSize;
@@ -196,11 +202,12 @@ void Extended::Pack(void* result) const
 #endif
     //TODO
   }
-    break;
+  break;
 #endif
   case etDouble:
     memcpy(result, &dValue, sizeof(double));
     break;
+  default: break;
   }
 }
 
@@ -231,11 +238,12 @@ void Extended::Unpack(void* packed)
     dValue = mpfrValue->toDouble();
 #endif
   }
-    break;
+  break;
 #endif
   case etDouble:
     memcpy(&dValue, packed, sizeof(double));
     break;
+  default: break;
   }
 }
 
@@ -252,7 +260,7 @@ void Extended::SetTypeID(ExtendedTypeID typeID)
 
 int Extended::GetStringSize()
 {
-  int result=(digitsNumber)+10;
+  int result = (digitsNumber)+10;
   //            |           |
   //            |           +- sign + . + e + e sign +
   //            |                   + exp + reserve
@@ -271,21 +279,22 @@ int Extended::GetStringSize()
 
 void Extended::toString(char* s) const
 {
+  int rsh = 0;
   switch (type)
   {
 
 #ifndef NO_MPREAL
   case etMPFR:
-    {
+  {
 #ifdef WIN32
-      std::string mpfrStr = mpfrValue->toString((size_t)digitsNumber);
-      strcpy_s(s, GetStringSize(), mpfrStr.c_str());
+    std::string mpfrStr = mpfrValue->toString((size_t)digitsNumber);
+    strcpy_s(s, GetStringSize(), mpfrStr.c_str());
 #else
-      std::string mpfrStr = mpfrValue->toString((size_t)digitsNumber);
-      strcpy(s,mpfrStr.c_str());
+    std::string mpfrStr = mpfrValue->toString((size_t)digitsNumber);
+    strcpy(s, mpfrStr.c_str());
 #endif
-    }
-    break;
+  }
+  break;
 #endif
   case etDouble:
     //errno_t res = _gcvt_s(s, GetStringSize(), dValue, GetStringSize() - 2);
@@ -293,13 +302,14 @@ void Extended::toString(char* s) const
     //  s[0] = '\0';
 #ifdef WIN32
     sprintf_s(s, GetStringSize() - 1, "%.15lf", dValue);
-    _heapchk();
+    rsh = _heapchk();
 #else
-    sprintf(s,"%.15lf", dValue);
+    sprintf(s, "%.15lf", dValue);
 #endif
     //TODO
     //heapchk();
     break;
+  default: break;
   }
 
   // change '.' -> ',' don't know why, but do that more neatly
@@ -326,6 +336,7 @@ double Extended::toDouble() const
   case etDouble:
     return dValue;
     break;
+  default: break;
   }
   return -1;
 }
@@ -350,6 +361,8 @@ const Extended& Extended::operator=(const Extended& e)
 #endif
   case etDouble:
     dValue = e.dValue;
+    break;
+  default: break;
   }
 
   return *this;
@@ -370,6 +383,8 @@ const Extended& Extended::operator=(const double& e)
 #endif
   case etDouble:
     dValue = e;
+    break;
+  default: break;
   }
 
   return *this;
@@ -390,6 +405,8 @@ const Extended& Extended::operator=(const char* e)
 #endif
   case etDouble:
     dValue = atof(e);
+    break;
+  default: break;
   }
 
   return *this;
@@ -411,6 +428,7 @@ Extended Extended::operator+(const Extended& e) const
   case etDouble:
     tmp.dValue += e.dValue;
     break;
+  default: break;
   }
 
   return tmp;
@@ -439,6 +457,7 @@ Extended Extended::operator+(const double& e) const
   case etDouble:
     tmp.dValue += e;
     break;
+  default: break;
   }
 
   return tmp;
@@ -465,6 +484,7 @@ Extended Extended::operator-(const Extended& e) const
   case etDouble:
     tmp.dValue -= e.dValue;
     break;
+  default: break;
   }
 
   return tmp;
@@ -493,6 +513,7 @@ Extended Extended::operator-(const double& e) const
   case etDouble:
     tmp.dValue -= e;
     break;
+  default: break;
   }
 
   return tmp;
@@ -519,6 +540,7 @@ Extended Extended::operator*(const Extended& e) const
   case etDouble:
     tmp.dValue *= e.dValue;
     break;
+  default: break;
   }
 
   return tmp;
@@ -547,6 +569,7 @@ Extended Extended::operator*(const double& e) const
   case etDouble:
     tmp.dValue *= e;
     break;
+  default: break;
   }
 
   return tmp;
@@ -573,6 +596,7 @@ Extended Extended::operator/(const Extended& e) const
   case etDouble:
     tmp.dValue /= e.dValue;
     break;
+  default: break;
   }
 
   return tmp;
@@ -594,6 +618,7 @@ Extended Extended::operator/(const double& e) const
   case etDouble:
     tmp.dValue /= e;
     break;
+  default: break;
   }
 
   return tmp;
@@ -648,6 +673,7 @@ Extended fabs(const Extended& e)
   case etDouble:
     res.dValue = ::fabs(e.dValue);
     break;
+  default: break;
   }
 
   return res;
@@ -655,21 +681,21 @@ Extended fabs(const Extended& e)
 
 Extended ceil(const Extended& x, const Extended& extZero)
 {
-    Extended floor_val = floor(x);
-    Extended frac = x - floor_val;
-    if (frac == extZero)
-    {
-        return floor_val;
-    }
-    else
-    {
-        return floor_val + Extended(1);
-    }
+  Extended floor_val = floor(x);
+  Extended frac = x - floor_val;
+  if (frac == extZero)
+  {
+    return floor_val;
+  }
+  else
+  {
+    return floor_val + Extended(1);
+  }
 }
 
 double floor(const Extended& e)
 {
-    double e_tmp = e.toDouble();
+  double e_tmp = e.toDouble();
   double res = 0.0;
   switch (Extended::type)
   {
@@ -681,6 +707,7 @@ double floor(const Extended& e)
   case etDouble:
     res = floor(e.dValue);
     break;
+  default: break;
   }
 
   return res;
@@ -703,6 +730,7 @@ Extended pow(const Extended& e, double degree)
   case etDouble:
     res.dValue = ::pow(e.dValue, degree);
     break;
+  default: break;
   }
 
   return res;
@@ -718,13 +746,14 @@ double root(const Extended& e, int k)
     //*(tmp.mpfrValue) = mpfr::root(*(e.mpfrValue), k);
     //*(tmp.mpfrValue) = ::pow((double)*(e.mpfrValue), 1./k);
     //res = ::pow((double)*(e.mpfrValue), 1./k);
-    res = ::pow(e.mpfrValue->toDouble(), 1./k);
+    res = ::pow(e.mpfrValue->toDouble(), 1. / k);
     break;
 #endif
   case etDouble:
     //tmp.dValue = ::pow(e.dValue, 1./k);
-    res = ::pow(e.dValue, 1./k);
+    res = ::pow(e.dValue, 1. / k);
     break;
+  default: break;
   }
 
   return res;
@@ -747,6 +776,7 @@ bool operator==(const Extended& e1, const Extended& e2)
   case etDouble:
     result = (e1.dValue == e2.dValue);
     break;
+  default: break;
   }
 
   return result;
@@ -765,6 +795,7 @@ bool operator==(const Extended& e1, double d)
   case etDouble:
     result = (e1.dValue == d);
     break;
+  default: break;
   }
 
   return result;
@@ -783,6 +814,7 @@ bool operator==(double d, const Extended& e1)
   case etDouble:
     result = (e1.dValue == d);
     break;
+  default: break;
   }
 
   return result;
@@ -816,6 +848,7 @@ bool operator<(const Extended& e1, const Extended& e2)
   case etDouble:
     result = (e1.dValue < e2.dValue);
     break;
+  default: break;
   }
 
   return result;
@@ -831,6 +864,7 @@ bool operator<(const Extended& e, const double d)
 #endif
   case etDouble:
     return (e.dValue < d);
+  default: break;
   }
 
   return false;
@@ -842,11 +876,12 @@ bool operator<(const double d, const Extended& e)
   {
 #ifndef NO_MPREAL
   case etMPFR:
-    return (d < e.mpfrValue->toDouble() );
+    return (d < e.mpfrValue->toDouble());
 #endif
   case etDouble:
     return (d < e.dValue);
     break;
+  default: break;
   }
 
   return false;

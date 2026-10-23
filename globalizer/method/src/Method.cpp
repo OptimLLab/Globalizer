@@ -772,6 +772,7 @@ bool Method::CheckStopCondition()
       break;
     }
     break;
+    default: break;
     }
   }
 
@@ -1796,7 +1797,8 @@ void Method::PrintSection()
 // ------------------------------------------------------------------------------------------------
 void Method::SaveCurrentProgress()
 {
-  if (parameters.FileSerializer.ToString().empty()) return;
+  if (parameters.FileSerializer.ToString().empty() || parameters.IsSerializeToDashBoard == false) 
+    return;
 
   // Получаем новые точки и интервалы с последнего сохранения
   std::vector<Trial*> newTrials;

@@ -27,6 +27,7 @@ InformationForCalculation Calculation::inputCalculation;
 Calculation::Calculation(Task& _pTask) : pTask(&_pTask)
 {  }
 
+// ------------------------------------------------------------------------------------------------
 void Calculation::SetCountCalculation(int c)
 {
 	countCalculation = c;
@@ -34,16 +35,19 @@ void Calculation::SetCountCalculation(int c)
 }
 
 
+// ------------------------------------------------------------------------------------------------
 void Calculation::SetTask(Task* _pTask)
 {
 	pTask = _pTask;
 }
 
+// ------------------------------------------------------------------------------------------------
 void Calculation::SetSearchData(SearchData* _pData)
 {
 	pData = _pData;
 }
 
+// ------------------------------------------------------------------------------------------------
 void Calculation::Reset()
 {
 }

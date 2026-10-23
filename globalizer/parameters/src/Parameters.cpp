@@ -23,7 +23,7 @@
 
 */
 
-#include <mpi.h>
+#include "MpiSupport.h"
 
 #include <cstring>
 #include <cstdio>
@@ -573,10 +573,12 @@ void Parameters::SetDeviceIndex()
       //printf(" %d\t%s\n", i, allCompName[i]);
     }
 
-    int* DeviceIndex_ = new int[GetProcNum()];
-    bool* isProcessed = new bool[GetProcNum()];
+    const int procCount = GetProcNum();
 
-    for (int i = 0; i < GetProcNum(); i++)
+    int* DeviceIndex_ = new int[procCount];
+    bool* isProcessed = new bool[procCount];
+
+    for (int i = 0; i < procCount; i++)
     {
       DeviceIndex_[i] = -1;
       isProcessed[i] = false;
@@ -585,7 +587,7 @@ void Parameters::SetDeviceIndex()
     std::string curComp = "";
     int curCID = 0;
 
-    for (int i = 1; i < GetProcNum(); i++)
+    for (int i = 1; i < procCount; i++)
     {
       if (isProcessed[i])
         continue;
@@ -593,7 +595,7 @@ void Parameters::SetDeviceIndex()
       curCID = 0;
       DeviceIndex_[i] = curCID;
       isProcessed[i] = true;
-      for (int j = i + 1; j < GetProcNum(); j++)
+      for (int j = i + 1; j < procCount; j++)
       {
         if (isProcessed[j])
           continue;
@@ -607,7 +609,7 @@ void Parameters::SetDeviceIndex()
       }
     }
 
-    for (int i = 1; i < GetProcNum(); i++)
+    for (int i = 1; i < procCount; i++)
     {
       err = MPI_Send(&DeviceIndex_[i], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
     }

@@ -227,7 +227,7 @@ protected: std::string HelpParameter(name);
   virtual std::string ToString() {return operator std::string();}                           \
   virtual void FromString(std::string val) {operator = (val);}                           \
   virtual void operator = (BaseProperty<Owner>& data) { ParameterProperty<Type, Owner>::operator=((ParameterProperty<Type, Owner>*)(& data)); } \
-  virtual void operator=(char* data) {operator = (std::string(data));}
+  virtual void operator=(const char* data) {operator = (std::string(data));}
 
 
 

@@ -3,7 +3,7 @@
 #endif
 
 #include <gtest/gtest.h>
-#include <mpi.h>
+#include "MpiSupport.h"
 
 #include "Parameters.h"
 #include "Extended.h"

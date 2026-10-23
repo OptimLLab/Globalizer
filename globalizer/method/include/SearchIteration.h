@@ -45,7 +45,7 @@
 struct SearchIteration
 {
   /// номер выполненных итераций
-  int IterationCount;
+  int IterationCount = 0;
 
   /** Указатель на массив испытаний, выполняемых на данной итерации
 

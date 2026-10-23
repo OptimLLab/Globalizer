@@ -442,8 +442,9 @@ if(IS_CLANG_COMPILER)
         ${GLOBALIZER_MPI_LIB}
         ${GLOBALIZER_MP_LINK}
         ${DISLIN_LIB}
-        OpenMP::OpenMP_CXX
     )
+	
+	target_link_libraries(${GLOBALIZER_LIB_NAME} PUBLIC OpenMP::OpenMP_CXX)
 else()
     target_link_libraries(${GLOBALIZER_LIB_NAME} PRIVATE
         ${GLOBALIZER_MPI_LIB}
@@ -637,6 +638,7 @@ install(EXPORT GlobalizerTargets
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Globalizer)
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/GlobalizerConfig.cmake"
-     "include(\"\${CMAKE_CURRENT_LIST_DIR}/GlobalizerTargets.cmake\")\n")
+"include(CMakeFindDependencyMacro)\nfind_dependency(OpenMP)\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/GlobalizerTargets.cmake\")\n")
+
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GlobalizerConfig.cmake"
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Globalizer)

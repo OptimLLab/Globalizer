@@ -272,11 +272,16 @@ int main(int argc, char* argv[])
           if (0.01 * ((y[0] - 2.2) * (y[0] - 2.2) + (y[1] - 1.2) * (y[1] - 1.2) - 2.25) > 0 ||
               100.0 * (1.0 - ((y[0] - 2.0) / 1.2) * ((y[0] - 2.0) / 1.2) - (y[1] / 2.0) * (y[1] / 2.0)) > 0 ||
               10.0 * (y[1] - 1.5 - 1.5 * sin(6.283 * (y[0] - 1.75))) > 0)
-          if (rand() % 2)
+          {
+            if (rand() % 2)
+            {
               return MaxDouble;
-          else
+            }
+            else
+            {
               throw std::logic_error("Error of calculations");
-
+            }
+          }
           double t1 = pow(0.5 * y[0] - 0.5, 4.0);
           double t2 = pow(y[1] - 1.0, 4.0);
 

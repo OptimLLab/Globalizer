@@ -22,8 +22,10 @@
  * 
  * Целевая функция: f(x) = x² · data
  */
-class DynamicProblem : public BaseProblem<DynamicProblem>
+class DynamicProblem : public Problem<DynamicProblem>
 {
+#undef OWNER_NAME
+#define OWNER_NAME DynamicProblem
 private:
   /// Текущее значение изменяемого параметра
   double mData;
@@ -38,10 +40,6 @@ private:
   /// Число ограничений
   int mNumberOfConstraints;
   
-  /// Известное оптимальное значение (если задано)
-  bool mHasKnownOptimum;
-  double mOptimumValue;
-  std::vector<double> mOptimumPoint;
   
 public:
   /**
@@ -52,16 +50,13 @@ public:
    * @param initialData Начальное значение параметра data
    */
   DynamicProblem(int dimension, double leftBound, double rightBound, double initialData)
-    : BaseProblem<DynamicProblem>()
+    : Problem<DynamicProblem>()
     , mData(initialData)
     , mLowerBounds(dimension, leftBound)
     , mUpperBounds(dimension, rightBound)
     , mNumberOfFunctions(1)      // один критерий
     , mNumberOfConstraints(0)    // без ограничений
-    , mHasKnownOptimum(false)    // оптимум неизвестен
-    , mOptimumValue(0.0)
-    , mOptimumPoint(dimension, 0.0)
-  {
+   {
     // Устанавливаем размерность через TypedProperty
     this->Dimension = dimension;
     this->mDim = dimension;
@@ -73,14 +68,6 @@ public:
     // Без дискретных переменных
     this->NumberOfDiscreteVariable = 0;
     
-    // Для f(x) = x² · data минимум при x = 0 (если data > 0)
-    // Можно задать известный оптимум:
-    if (initialData > 0.0) {
-      mHasKnownOptimum = true;
-      mOptimumValue = 0.0;
-      mOptimumPoint[0] = 0.0;
-    }
-
     mMinDimension = 1;
   }
   
@@ -93,13 +80,6 @@ public:
   void SetData(double newData)
   {
     mData = newData;
-    
-    // Обновить известный оптимум (для f(x) = x² · data, минимум при x=0)
-    if (newData > 0.0) {
-      mHasKnownOptimum = true;
-      mOptimumValue = 0.0;
-      mOptimumPoint[0] = 0.0;
-    }
   }
   
   /**
@@ -161,11 +141,6 @@ public:
     // Вычисляем функционал: f(x) = x² · data
     double result = x * x * mData;
     
-    // Логирование (как в оригинальном коде)
-    std::cout << "\tx = " << x 
-              << "\tdata = " << mData 
-              << "\tvalue = " << result << std::endl;
-    
     return result;
   }
 
@@ -207,57 +182,7 @@ public:
       values[j] = x * x * mData;
     }
   }
-
-  /**
-   * @brief Получить известное оптимальное значение функции
-   * @param value Выходной параметр для значения оптимума
-   * @return 0 если оптимум известен, -1 иначе
-   * 
-   * Для f(x) = x² · data оптимум известен: f_min = 0 при x = 0
-   */
-  virtual int GetOptimumValue(double& value) const override
-  {
-    if (mHasKnownOptimum) {
-      value = mOptimumValue;
-      return 0;  // оптимум известен
-    }
-    return -1;   // оптимум неизвестен
-  }
-  
-  /**
-   * @brief Получить точку оптимума (из IProblem)
-   * @param point Массив размера Dimension для координат оптимума
-   * @return 0 если оптимум известен, -1 иначе
-   * 
-   * Для f(x) = x² · data оптимум в точке x = 0
-   */
-  virtual int GetOptimumPoint(double* point) const override
-  {
-    if (mHasKnownOptimum) {
-      int dim = (int)this->Dimension;
-      for (int i = 0; i < dim; ++i) {
-        point[i] = mOptimumPoint[i];
-      }
-      return 0;  // оптимум известен
-    }
-    return -1;   // оптимум неизвестен
-  }
-  
-  /**
-   * @brief Получить точку оптимума для ограничения (из ProblemPar)
-   * @param point Массив размера Dimension для координат оптимума
-   * @param constraintIndex Индекс ограничения
-   * @return -1 (ограничений нет, оптимум не определён)
-   * 
-   * Для задач без ограничений всегда возвращает -1
-   */
-  virtual int GetConstraintOptimumPoint(double* point, int constraintIndex) override
-  {
-    (void)point;            // unused
-    (void)constraintIndex;  // unused
-    return -1;  // нет ограничений, оптимум не определён
-  }
-  
+    
   /**
    * @brief Инициализация задачи (если нужна дополнительная настройка)
    */
@@ -265,17 +190,7 @@ public:
   {
     // Вызываем базовую инициализацию
     int result = BaseProblem<DynamicProblem>::Initialize();
-    
-    std::cout << "DynamicProblem initialized:" << std::endl;
-    std::cout << "  Dimension: " << (int)this->Dimension << std::endl;
-    std::cout << "  Bounds: [" << mLowerBounds[0] << ", " << mUpperBounds[0] << "]" << std::endl;
-    std::cout << "  Initial data: " << mData << std::endl;
-    std::cout << "  Number of functions: " << mNumberOfFunctions << std::endl;
-    std::cout << "  Has known optimum: " << (mHasKnownOptimum ? "yes" : "no") << std::endl;
-    if (mHasKnownOptimum) {
-      std::cout << "  Optimum: f(" << mOptimumPoint[0] << ") = " << mOptimumValue << std::endl;
-    }
-    
+
     return result;
   }
   

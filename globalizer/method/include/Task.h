@@ -57,21 +57,23 @@ protected:
   /// Правая граница области поиска
   double     B[MaxDim];
   /// Число функционалов (последний - критерий)
-  int        NumOfFunc;
+  int        NumOfFunc = 0;
   /// Указатель на саму задачу оптимизации
-  IProblem*  pProblem;
+  IProblem*  pProblem = nullptr;
   /// Оптимальное значение целевой функции (определено, если известно из задачи)
-  double     OptimumValue;
+  double     OptimumValue = 0.0;
   /// Координаты глобального минимума целевой функции (определено, если известно)
   double     OptimumPoint[MaxDim];
   /// true, если в задаче известно оптимальное значение критерия
-  bool       IsOptimumValueDefined;
+  bool       IsOptimumValueDefined = false;
   /// true, если в задаче известна точка глобального минимума
-  bool       IsOptimumPointDefined;
+  bool       IsOptimumPointDefined = false;
   /// Уровень процесса в дереве процессов
-  int ProcLevel;
+  int ProcLevel = 0;
   /// Флаг, указывающий, был ли класс инициализирован
-  bool isInit;
+  bool isInit = false;
+  /// Указатель на приведенную задачу
+  IGPUProblem* GPUProblem = nullptr;
 
 public:
   int num;

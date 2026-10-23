@@ -33,10 +33,10 @@ void CPUMultiPointCalculation::StartCalculate(InformationForCalculation& inputSe
 
     // --- Сборка координат всех точек в один непрерывный буфер -----------------
     // Раскладка: coordinates[i * dim + k] = trials[i]->y[k]
-    for (int i = 0; i < numPoints; i++)
+    for (size_t i = 0; i < numPoints; i++)
     {
       const double* src = inputSet.trials[i]->y;
-      double* dstRow = coordinates + static_cast<size_t>(i) * dim;
+      double* dstRow = coordinates + i * dim;
       for (int k = 0; k < dim; k++)
         dstRow[k] = src[k];
     }
@@ -92,15 +92,22 @@ void CPUMultiPointCalculation::StartCalculate(InformationForCalculation& inputSe
 
     if (inputSet.trials.size() > 0)
     {
-      outputSet.trials.clear();
-      outputSet.trials.resize(inputSet.trials.size());
+      if (outputSet.trials.size() != inputSet.trials.size())
+      {
+        outputSet.trials.clear();
+        outputSet.trials.resize(inputSet.trials.size());
+      }
       for (unsigned i = 0; i < outputSet.trials.size(); i++)
         outputSet.trials[i] = inputSet.trials[i];
 
-      outputSet.countCalcTrials.clear();
-      outputSet.countCalcTrials.resize(numOfFunc);
+      if (outputSet.countCalcTrials.size() != numOfFunc)
+      {
+        outputSet.countCalcTrials.clear();
+        outputSet.countCalcTrials.resize(numOfFunc);
+      }
       for (int i = 0; i < numOfFunc; i++)
         outputSet.countCalcTrials[i] = 0;
+
     }
 
     // Запускать вычисления, как только пришли данные

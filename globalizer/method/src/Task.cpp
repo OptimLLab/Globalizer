@@ -34,6 +34,7 @@ Task::Task(IProblem* _problem, int _ProcLevel)
 
   ProcLevel = _ProcLevel;
   isInit = true;
+  GPUProblem = dynamic_cast<IGPUProblem*>(pProblem);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -81,6 +82,7 @@ void Task::Init(IProblem * _problem, int _ProcLevel)
 
   ProcLevel = _ProcLevel;
   isInit = true;
+  GPUProblem = dynamic_cast<IGPUProblem*>(pProblem);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -184,10 +186,10 @@ double Task::CalculateFuncs(const double* y, int fNumber)
 // ------------------------------------------------------------------------------------------------
 void Task::CalculateFuncsInManyPoints(double* y, int fNumber, int numPoints, double* values)
 {
-  IGPUProblem* newProblem = dynamic_cast<IGPUProblem*>(pProblem);
-  if (newProblem != 0)
+
+  if (GPUProblem != 0)
   {
-	newProblem->CalculateFunctionals(y, fNumber, numPoints, values);  
+    GPUProblem->CalculateFunctionals(y, fNumber, numPoints, values);
   }
 }
 

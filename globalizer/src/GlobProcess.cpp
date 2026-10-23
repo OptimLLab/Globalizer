@@ -803,13 +803,13 @@ void Process::InsertPoints(std::vector<Trial*>& points)
 // ------------------------------------------------------------------------------------------------
 void Process::PrintResultToConsole()
 {
-  auto OptimEstimation = *(pMethod->GetOptimEstimation());
-  PrintOptimEstimationToFile(OptimEstimation);
-  if (parameters.IsUseExtendedConsole)
-    OldPrintOptimEstimationToConsole(OptimEstimation);
-  else
-    PrintOptimEstimationToConsole(OptimEstimation);
-  PrintResultToFile(OptimEstimation);
+    auto OptimEstimation = *(pMethod->GetOptimEstimation());
+    PrintOptimEstimationToFile(OptimEstimation);
+    if (parameters.IsUseExtendedConsole)
+      OldPrintOptimEstimationToConsole(OptimEstimation);
+    else
+      PrintOptimEstimationToConsole(OptimEstimation);
+    PrintResultToFile(OptimEstimation);
 }
 
 // - end of file ----------------------------------------------------------------------------------

@@ -236,7 +236,11 @@ void Solver::PrintResultToConsole()
 {
   if (mProcess != nullptr)
   {
+    auto oldVal = parameters.IsPrintResultToConsole;
+    parameters.IsPrintResultToConsole = true;
     mProcess->PrintResultToConsole();
+    parameters.IsPrintResultToConsole = oldVal;
+
   }
 }
 

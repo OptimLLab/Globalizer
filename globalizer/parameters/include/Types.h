@@ -925,14 +925,19 @@ void TInts<Owner>::SetSize(int size)
 {
   if (size > 0)
   {
+    int oldSize = this->mSize;
     this->mIsChange = true;
     int* buf = 0;
     if (this->mValue != 0)
     {
-      buf = new int[this->mSize];
-      for (int i = 0; i < this->mSize; i++)
+      
+      if (oldSize > 0)
       {
-        buf[i] = this->mValue[i];
+        buf = new int[oldSize];
+        for (int i = 0; i < oldSize; i++)
+        {
+          buf[i] = this->mValue[i];
+        }
       }
 
       delete[] this->mValue;
@@ -950,7 +955,7 @@ void TInts<Owner>::SetSize(int size)
 
     if (buf != 0)
     {
-      for (int i = 0; i < GLOBALIZER_MIN(this->mSize, size); i++)
+      for (int i = 0; i < GLOBALIZER_MIN(oldSize, size); i++)
         this->mValue[i] = buf[i];
       delete[] buf;
     }
@@ -1067,16 +1072,19 @@ void TDoubles<Owner>::SetSize(int size)
 {
   if (size > 0)
   {
+    int oldSize = this->mSize;
     this->mIsChange = true;
     double* buf = 0;
     if (this->mValue != 0)
     {
-      buf = new double[this->mSize];
-      for (int i = 0; i < this->mSize; i++)
+      if (oldSize > 0)
       {
-        buf[i] = this->mValue[i];
+        buf = new double[oldSize];
+        for (int i = 0; i < oldSize; i++)
+        {
+          buf[i] = this->mValue[i];
+        }
       }
-
       delete[] this->mValue;
       this->mValue = 0;
     }
@@ -1091,7 +1099,7 @@ void TDoubles<Owner>::SetSize(int size)
       this->mValue[i] = 0;
     if (buf != 0)
     {
-      for (int i = 0; i < GLOBALIZER_MIN(this->mSize, size); i++)
+      for (int i = 0; i < GLOBALIZER_MIN(oldSize, size); i++)
         this->mValue[i] = buf[i];
       delete[] buf;
     }

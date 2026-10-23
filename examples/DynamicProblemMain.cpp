@@ -11,54 +11,56 @@ int main(int argc, char* argv[])
   parameters.Dimension = 1;
   parameters.StopCondition = IterationOnly;
   parameters.TypeCalculation = CPUMultiPoint;
+  parameters.IterationsCount = 1000;
   parameters.NumPoints = 16;
-  //parameters.IsSerializeToDashBoard = true;
+  parameters.r = 10;
+  parameters.IsPrintResultToConsole = false;
 
-  double a = 0.0;
-  double b = pow(2.0, 64.0);
-  double initialData = 1.0;  // начальное значение data
 
-  // Создаём задачу с изменяемым параметром
-  DynamicProblem* problem = new DynamicProblem(
-    parameters.Dimension,  // размерность
-    a,                     // нижняя граница
-    b,                     // верхняя граница
-    initialData            // начальное значение data
-  );
+  int N = 8;
+  SolutionResult** results = new SolutionResult * [N];
+  Solver** solvers = new Solver * [N];
+  DynamicProblem** problems = new DynamicProblem * [N];
 
-  // Инициализация задачи
-  problem->Initialize();
-
-  // Решатель
-  Solver solver(problem);
-  solver.Initialize();
-
-  std::cout << std::endl << std::endl;
-
-  // Пошагово решаем задачу с изменением параметра data
-  bool finished = false;
-  Performance Timer;
-  Timer.Start();
-  for (int iter = 0; iter < 10000; ++iter)
+//#pragma omp parallel for num_threads((int)N)
+  for (int i = 0; i < N; i++)
   {
-    // Обновляем параметр задачи перед очередной итерацией
-    double newData = (double)(iter + 1);
-    problem->SetData(newData);
-    
-    // Выполняем итерацию оптимизации с новым значением data
-    solver.DoIteration(finished);
+    double h = pow(2.0, 64.0) / N;
+
+    double a = h * i;
+    double b = h * (i + 1);
+    double initialData = 1.0;  // начальное значение data
+    // Создаём задачу с изменяемым параметром
+    problems[i] = new DynamicProblem(
+      parameters.Dimension,  // размерность
+      a,                     // нижняя граница
+      b,                     // верхняя граница
+      initialData            // начальное значение data
+    );
+
+    // Инициализация задачи
+    problems[i]->Initialize();
+
+    // Решатель
+    solvers[i] = new Solver(problems[i]);
+
+    // Решаем задачу
+    if (solvers[i]->Solve() != SYSTEM_OK)
+      throw EXCEPTION("Error: solver.Solve crash!!!");
+
+    results[i] = solvers[i]->GetSolutionResult();
   }
-  double duration = Timer.GetTime();
-  std::cout <<"\nSolve time = " << duration << "\n";
 
-  std::cout << std::endl << std::endl;
+  for (int i = 0; i < N; i++)
+  {
+    double h = pow(2.0, 64.0) / N;
 
-  // Получаем и выводим результат
-  auto result = solver.GetSolutionResult();
-  solver.PrintResultToConsole();
-
-  // Очистка
-  delete problem;
+    double a = h * i;
+    double b = h * (i + 1);
+    std::cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n";
+    std::cout << "a = " << a << " b = " << b << std::endl;
+    solvers[i]->PrintResultToConsole();
+  }
 
   if (parameters.IsMPIInit())
     MPI_Finalize();

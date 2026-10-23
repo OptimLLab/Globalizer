@@ -123,7 +123,7 @@ TEST_F(TSearchDataTest, can_insert_interval)
 
 TEST_F(TSearchDataTest, throws_when_insert_interval_which_already_exist)
 {
-  (void*) data->InsertInterval(interval1);
+  data->InsertInterval(interval1);
 
   ASSERT_ANY_THROW(data->InsertInterval(interval1));
 }
@@ -187,7 +187,7 @@ TEST_F(TSearchDataTest, can_update_interval)
 TEST_F(TSearchDataTest, get_NULL_by_illegal_X)
 {
   SearchInterval insertInterval = SetUpInterval(1.0, 2.0);
-  (void *) data->InsertInterval(insertInterval);
+  data->InsertInterval(insertInterval);
   Trial* x = new Trial();
   x->SetX(3.0);
 

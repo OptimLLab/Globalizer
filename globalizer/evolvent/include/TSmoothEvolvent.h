@@ -84,7 +84,7 @@ public:
 	/**
 	\brief Преобразование y в x (y -> x)
 	*/
-	void GetInverseImage(double* _y, Extended& x);
+	void GetInverseImage(double* _y, Extended& x) override;
 };
 
 #endif

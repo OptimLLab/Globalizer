@@ -178,10 +178,16 @@ int main(int argc, char* argv[])
           double t1 = pow(0.5 * y[0] - 0.5, 4.0);
           double t2 = pow(y[1] - 1.0, 4.0);
           if (std::fabs(y[0] - 3.001953125) < 0.1 && std::fabs(y[1] - 2.001953125) < 0.1)
-              if (rand() % 2)
-                 return MaxDouble;
-              else
-                  throw std::logic_error("Error of calculations");
+          {
+            if (rand() % 2)
+            {
+              return MaxDouble;
+            }
+            else
+            {
+              throw std::logic_error("Error of calculations");
+            }
+          }
           return -((1.5 * y[0] * y[0] * exp(1.0 - y[0] * y[0] - 20.25 * (y[0] - y[1]) * (y[0] - y[1]))) + t1 * t2 * exp(2.0 - t1 - t2));
         } // критерий
         }
@@ -212,10 +218,16 @@ int main(int argc, char* argv[])
           for (int j = 0; j < 1; j++)
           {
             if (std::fabs(y[0] - 1.55) < 0.01 || std::fabs(y[0] - 1.07766) < 0.01) {  // невычислимые точки
-              if (rand() % 2)
-                sum = MaxDouble;
-              else
-                throw std::logic_error("Error of calculations");
+              {
+                if (rand() % 2)
+                {
+                  sum = MaxDouble;
+                }
+                else
+                {
+                  throw std::logic_error("Error of calculations");
+                }
+              }
             }
             sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
           }
@@ -245,43 +257,43 @@ int main(int argc, char* argv[])
     //parameters.ShowFigure = true;
   }
   else if (problemName == STRONGINC3_HC) {
-      parameters.Dimension = 2;
-      parameters.r = 3.5;
-      parameters.Epsilon = 0.002;
-      parameters.alpha = 0.1;
-      parameters.IsCalculationInBorderPoint = true;
-      
-      problem = new ProblemFromFunctionPointers(parameters.Dimension,
-        { 0.0, -1.0 },
-        { 4.0, 3.0 },
-        std::vector<std::function<double(const double*)>>({
-        [](const double* y)
-        {
-            if (0.01 * ((y[0] - 2.2) * (y[0] - 2.2) + (y[1] - 1.2) * (y[1] - 1.2) - 2.25) > 0 ||
-                100.0 * (1.0 - ((y[0] - 2.0) / 1.2) * ((y[0] - 2.0) / 1.2) - (y[1] / 2.0) * (y[1] / 2.0)) > 0 ||
-                10.0 * (y[1] - 1.5 - 1.5 * sin(6.283 * (y[0] - 1.75))) > 0)
-            if (rand() % 2)
-                return MaxDouble;
-            else
-                throw std::logic_error("Error of calculations");
+    parameters.Dimension = 2;
+    parameters.r = 3.5;
+    parameters.Epsilon = 0.002;
+    parameters.alpha = 0.1;
+    parameters.IsCalculationInBorderPoint = true;
 
-            double t1 = pow(0.5 * y[0] - 0.5, 4.0);
-            double t2 = pow(y[1] - 1.0, 4.0);
+    problem = new ProblemFromFunctionPointers(parameters.Dimension,
+      { 0.0, -1.0 },
+      { 4.0, 3.0 },
+      std::vector<std::function<double(const double*)>>({
+      [](const double* y)
+      {
+          if (0.01 * ((y[0] - 2.2) * (y[0] - 2.2) + (y[1] - 1.2) * (y[1] - 1.2) - 2.25) > 0 ||
+              100.0 * (1.0 - ((y[0] - 2.0) / 1.2) * ((y[0] - 2.0) / 1.2) - (y[1] / 2.0) * (y[1] / 2.0)) > 0 ||
+              10.0 * (y[1] - 1.5 - 1.5 * sin(6.283 * (y[0] - 1.75))) > 0)
+          if (rand() % 2)
+              return MaxDouble;
+          else
+              throw std::logic_error("Error of calculations");
 
-            return -((1.5 * y[0] * y[0] * exp(1.0 - y[0] * y[0] - 20.25 * (y[0] - y[1]) * (y[0] - y[1]))) + t1 * t2 * exp(2.0 - t1 - t2));
-        }
+          double t1 = pow(0.5 * y[0] - 0.5, 4.0);
+          double t2 = pow(y[1] - 1.0, 4.0);
+
+          return -((1.5 * y[0] * y[0] * exp(1.0 - y[0] * y[0] - 20.25 * (y[0] - y[1]) * (y[0] - y[1]))) + t1 * t2 * exp(2.0 - t1 - t2));
+      }
         })
-      );
+    );
 
 
-      parameters.FigureType = Surface;
-      parameters.FillFeasibleRegion = true;
+    parameters.FigureType = Surface;
+    parameters.FillFeasibleRegion = true;
 
-      parameters.CalcsType = ObjectiveFunction;
-      parameters.ObjectiveGridSize = 400;
-      parameters.ConstraintsGridSize = 800;
+    parameters.CalcsType = ObjectiveFunction;
+    parameters.ObjectiveGridSize = 400;
+    parameters.ConstraintsGridSize = 800;
 
-      parameters.ShowFigure = true;
+    parameters.ShowFigure = true;
   }
 
   problem->Initialize();

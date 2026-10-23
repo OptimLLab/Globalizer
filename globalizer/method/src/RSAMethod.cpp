@@ -84,8 +84,9 @@ Method_RSA::Method_RSA(Task& _pTask, SearchData& _pData,
     iteration.pCurTrials.resize(parameters.NumPoints);
 
     //===========================================================================================================================================
-    Xmax = new double[pTask.GetNumOfFunc()];
-    for (int i = 0; i < pTask.GetNumOfFunc(); i++)
+    const int numOfFunc = pTask.GetNumOfFunc();
+    Xmax = new double[numOfFunc];
+    for (int i = 0; i < numOfFunc; i++)
         Xmax[i] = 0;
     //===========================================================================================================================================
 
@@ -670,6 +671,7 @@ bool Method_RSA::CheckStopCondition()
             break;
         }
         break;
+        default: break;
         }
     }
 

@@ -772,6 +772,7 @@ bool Method::CheckStopCondition()
       break;
     }
     break;
+    default: break;
     }
   }
 

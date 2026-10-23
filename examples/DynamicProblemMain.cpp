@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
   bool finished = false;
   Performance Timer;
   Timer.Start();
-  for (int iter = 0; iter < 1000000; ++iter)
+  for (int iter = 0; iter < 10000; ++iter)
   {
     // Обновляем параметр задачи перед очередной итерацией
     double newData = (double)(iter + 1);

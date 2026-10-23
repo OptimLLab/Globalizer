@@ -504,6 +504,7 @@ void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
         res = true;
       AchievedAccuracy = OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue();
       break;
+    default: break;
     }
     delete[] allOptimumPoints;
 

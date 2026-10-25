@@ -135,11 +135,7 @@ protected:
   {
     // Вычислители создаются фабрикой через new и кэшируются в статике.
     // Их владелец — фабрика; безопасно удалить и обнулить указатели.
-    if (Calculation::leafCalculation)
-    {
-      delete Calculation::leafCalculation;
-      Calculation::leafCalculation = 0;
-    }
+
     if (Calculation::firstCalculation)
     {
       delete Calculation::firstCalculation;

@@ -48,24 +48,6 @@ public:
      * \return Указатель на объект #Calculation.
      */
     static Calculation* CreateCalculation(Task& _pTask, IEvolvent* evolvent = 0);
-    /**
-     * \brief Создает или возвращает существующий вычислитель (альтернативная логика).
-     *
-     * \param _pTask Задача, для которой создается вычислитель.
-     * \param evolvent Указатель на эвольвенту (опционально).
-     * \return Указатель на объект #Calculation.
-     */
-    static Calculation* CreateCalculation2(Task& _pTask, IEvolvent* evolvent = 0);
-
-    /**
-     * \brief Всегда создает новый экземпляр вычислителя.
-     *
-     * ВНИМАНИЕ: Не использовать в многошаговой схеме.
-     * \param _pTask Задача, для которой создается вычислитель.
-     * \param evolvent Указатель на эвольвенту (опционально).
-     * \return Указатель на новый объект #Calculation.
-     */
-    static Calculation* CreateNewCalculation(Task& _pTask, IEvolvent* evolvent = 0);
 
 };
 

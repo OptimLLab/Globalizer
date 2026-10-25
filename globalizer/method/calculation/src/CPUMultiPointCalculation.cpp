@@ -52,8 +52,30 @@ void CPUMultiPointCalculation::StartCalculate(InformationForCalculation& inputSe
     {
       outputSet.trials[i] = inputSet.trials[i];
       for (int k = 0; k < numOfFunc; k++)
+      {
         outputSet.trials[i]->FuncValues[k] = FuncValues[i + k * numOfFunc];
-      outputSet.trials[i]->index = 0;
+
+#ifdef WIN32
+        if (!_finite(outputSet.trials[i]->FuncValues[k]))
+#else
+        if (!std::isfinite(outputSet.trials[i]->FuncValues[k]))
+#endif
+        {
+          outputSet.trials[i]->index = -2;
+          //std::cout << " CalculateFuncs Error!!!\n";
+        }
+        else  if ((k == (pTask->GetNumOfFunc() - 1)) || (outputSet.trials[i]->FuncValues[k] > 0))
+        {
+          outputSet.trials[i]->index = k;
+          if (outputSet.trials[i]->FuncValues[k] >= 1.7e308)
+            outputSet.trials[i]->index = -3;
+        }
+      }
+
+      for (int k = 0; k < dim; k++)
+      {
+        outputSet.trials[i]->y[k] = coordinates[i * dim * k];
+      }
     }
 
     // --- Подсчёт количества вычислений ----------------------------------------

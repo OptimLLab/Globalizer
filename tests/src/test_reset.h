@@ -6,11 +6,6 @@
 // Полный сброс кэша вычислителей фабрики (владелец — фабрика).
 inline void ResetCalculationStatics()
 {
-  if (Calculation::leafCalculation)
-  {
-    delete Calculation::leafCalculation;
-    Calculation::leafCalculation = nullptr;
-  }
   if (Calculation::firstCalculation)
   {
     delete Calculation::firstCalculation;

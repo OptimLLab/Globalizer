@@ -45,7 +45,6 @@ void Solver::ClearData()
   // при следующем вызове solve().
   Calculation::firstCalculation = nullptr;
   Calculation::countCalculation = 0;
-  Calculation::leafCalculation = nullptr;
   Calculation::firstCalculation = 0;
   Calculation::isStartComputingAway = true;
 
@@ -672,7 +671,7 @@ SolutionResult* Solver::GetSolutionResult()  /// best point
   if (result != 0)
     delete result;
   result = new SolutionResult();
-  result->BestTrial = mProcess->GetOptimEstimation();
+  result->BestTrial = mProcess->GetOptimEstimation()->Clone();
   result->IterationCount = mProcess->GetIterationCount();
   result->TrialCount = mProcess->GetNumberOfTrials();
   result->SolvingTime = mProcess->GetSolveTime();

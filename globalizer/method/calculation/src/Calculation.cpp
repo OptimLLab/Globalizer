@@ -16,7 +16,6 @@
 #include "Calculation.h"
 
 int Calculation::countCalculation = 0;
-Calculation* Calculation::leafCalculation = 0;
 Calculation* Calculation::firstCalculation = 0;
 bool Calculation::isStartComputingAway = true;
 TResultForCalculation Calculation::resultCalculation;

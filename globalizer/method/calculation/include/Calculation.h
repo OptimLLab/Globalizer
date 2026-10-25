@@ -70,8 +70,6 @@ public:
 
     /// Указатель на единственный вычислитель для корневого процесса
     static Calculation* firstCalculation;
-    /// Указатель на единственный вычислитель для листовых процессов
-    static Calculation* leafCalculation;
 
     /**
      * \brief Конструктор.

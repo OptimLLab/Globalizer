@@ -25,7 +25,6 @@ protected:
     parameters.TypeCalculation = OMP;
 
     // Полный сброс статики Calculation (CalculationTest — friend).
-    if (Calculation::leafCalculation) { delete Calculation::leafCalculation; Calculation::leafCalculation = nullptr; }
     if (Calculation::firstCalculation) { delete Calculation::firstCalculation; Calculation::firstCalculation = nullptr; }
     Calculation::countCalculation = 0;
     Calculation::isStartComputingAway = true;
@@ -40,7 +39,6 @@ protected:
   void TearDown() override
   {
     // Сначала уничтожаем вычислители (держат Task*), потом задачи.
-    if (Calculation::leafCalculation) { delete Calculation::leafCalculation; Calculation::leafCalculation = nullptr; }
     if (Calculation::firstCalculation) { delete Calculation::firstCalculation; Calculation::firstCalculation = nullptr; }
     Calculation::countCalculation = 0;
     Calculation::isStartComputingAway = true;
@@ -66,66 +64,6 @@ protected:
 // --- Тесты для CalculationFactory ---
 // ================================================================
 
-/**
- * \brief Проверяет, что CreateNewCalculation корректно создает OMPCalculation для листовой задачи.
- */
-TEST_F(CalculationTest, Factory_CreateNewCalculation_CreatesOMP_ForLeafTask) 
-{
-  parameters.TypeCalculation = OMP;
-  Calculation* calc = CalculationFactory::CreateNewCalculation(*leafTask);
-
-  ASSERT_NE(calc, nullptr);
-  EXPECT_NE(dynamic_cast<OMPCalculation*>(calc), nullptr);
-
-  delete calc;
-}
-
-/**
- * \brief Проверяет, что CreateNewCalculation возвращает nullptr для не-листовой задачи.
- */
-TEST_F(CalculationTest, Factory_CreateNewCalculation_ReturnsNull_ForNonLeafTask) 
-{
-  parameters.TypeCalculation = OMP;
-  Calculation* calc = CalculationFactory::CreateNewCalculation(*nonLeafTask);
-  EXPECT_EQ(calc, nullptr);
-}
-
-/**
- * \brief Проверяет, что CreateNewCalculation всегда создаёт новый экземпляр.
- * \details В отличие от singleton-методов, два последовательных вызова должны
- * возвращать разные объекты.
- */
-TEST_F(CalculationTest, Factory_CreateNewCalculation_AlwaysCreatesNewInstance) 
-{
-  parameters.TypeCalculation = OMP;
-
-  Calculation* calc1 = CalculationFactory::CreateNewCalculation(*leafTask);
-  Calculation* calc2 = CalculationFactory::CreateNewCalculation(*leafTask);
-
-  ASSERT_NE(calc1, nullptr);
-  ASSERT_NE(calc2, nullptr);
-  EXPECT_NE(calc1, calc2);
-
-  delete calc1;
-  delete calc2;
-}
-
-/**
- * \brief Проверяет логику синглтона в методе CreateCalculation2.
- * \details Убеждается, что при повторном вызове для листовой задачи возвращается
- * тот же самый экземпляр вычислителя.
- */
-TEST_F(CalculationTest, Factory_CreateCalculation2_SingletonLogic) 
-{
-  parameters.TypeCalculation = OMP;
-
-  Calculation* calc1 = CalculationFactory::CreateCalculation2(*leafTask);
-  ASSERT_NE(calc1, nullptr);
-  EXPECT_NE(dynamic_cast<OMPCalculation*>(calc1), nullptr);
-
-  Calculation* calc2 = CalculationFactory::CreateCalculation2(*leafTask);
-  EXPECT_EQ(calc1, calc2);
-}
 
 /**
  * \brief Проверяет, что CreateCalculation возвращает nullptr для листовой задачи.
@@ -135,37 +73,6 @@ TEST_F(CalculationTest, Factory_CreateCalculation_ReturnsNull_ForLeafTask)
   parameters.TypeCalculation = OMP;
   Calculation* calc = CalculationFactory::CreateCalculation(*leafTask);
   EXPECT_EQ(calc, nullptr);
-}
-
-/**
- * \brief Проверяет singleton-логику CreateCalculation для не-листовой (корневой) задачи.
- * \details Согласно реализации фабрики, для OMP объект кэшируется в
- * Calculation::leafCalculation (не в firstCalculation). Повторный вызов
- * возвращает тот же самый экземпляр.
- */
-TEST_F(CalculationTest, Factory_CreateCalculation_SingletonLogic_ForNonLeafTask) 
-{
-  parameters.TypeCalculation = OMP;
-
-  Calculation* calc1 = CalculationFactory::CreateCalculation(*nonLeafTask);
-  ASSERT_NE(calc1, nullptr);
-  EXPECT_NE(dynamic_cast<OMPCalculation*>(calc1), nullptr);
-
-  Calculation* calc2 = CalculationFactory::CreateCalculation(*nonLeafTask);
-  EXPECT_EQ(calc1, calc2);
-  EXPECT_EQ(calc1, Calculation::leafCalculation);
-}
-
-/**
- * \brief Проверяет, что повторный вызов CreateCalculation2 сохраняет ссылку в leafCalculation.
- */
-TEST_F(CalculationTest, Factory_CreateCalculation2_StoresLeafCalculation) 
-{
-  parameters.TypeCalculation = OMP;
-
-  Calculation* calc = CalculationFactory::CreateCalculation2(*leafTask);
-  ASSERT_NE(calc, nullptr);
-  EXPECT_EQ(calc, Calculation::leafCalculation);
 }
 
 // ================================================================
@@ -272,23 +179,6 @@ TEST_F(CalculationTest, OMPCalculation_Calculate_DoesNotFillProcLevel)
   // При этом основные результаты заполнены.
   ASSERT_EQ(outputSet.trials.size(), 1);
   EXPECT_EQ(outputSet.trials[0]->index, 1);
-}
-
-/**
- * \brief Проверяет поведение CreateCalculation для не-листовой (корневой) задачи.
- * \details Не делаем предположений о singleton-кэшировании в firstCalculation.
- * Проверяем лишь, что повторные вызовы согласованы между собой: либо оба
- * возвращают nullptr, либо оба возвращают один и тот же закэшированный объект.
- */
-TEST_F(CalculationTest, Factory_CreateCalculation_NonLeafTask_ConsistentBehavior) 
-{
-  parameters.TypeCalculation = OMP;
-
-  Calculation* calc1 = CalculationFactory::CreateCalculation(*nonLeafTask);
-  Calculation* calc2 = CalculationFactory::CreateCalculation(*nonLeafTask);
-
-  // Поведение должно быть детерминированным и согласованным между вызовами.
-  EXPECT_EQ(calc1, calc2);
 }
 
 /**
@@ -457,7 +347,6 @@ TEST_F(CalculationTest, BaseCalculation_ContinueComputing_DoesNotCrash)
 TEST_F(CalculationTest, BaseCalculation_StaticPointers_ResetAfterSetUp) 
 {
   EXPECT_EQ(Calculation::firstCalculation, nullptr);
-  EXPECT_EQ(Calculation::leafCalculation, nullptr);
   EXPECT_EQ(GetCountCalculation(), 0);
   EXPECT_TRUE(IsStartComputingAway());
 }

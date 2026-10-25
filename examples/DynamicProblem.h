@@ -124,6 +124,21 @@ public:
   {
     return mNumberOfConstraints;
   }
+
+#define FunctionalParametersType double
+#define IntParametersType unsigned long long int
+
+  FunctionalParametersType Functional(FunctionalParametersType x)
+  {
+    return sin(x) * cos(FunctionalParametersType(1.0) / x) + FunctionalParametersType(1.0);
+  }
+
+  FunctionalParametersType IntToFunctionalParametersType(IntParametersType t)
+  {
+    FunctionalParametersType res = 0;
+    res = *((FunctionalParametersType*)((char*)(&t)));
+    return res;
+  }
   
   /**
    * @brief Вычисление значения целевой функции
@@ -135,14 +150,56 @@ public:
    */
   virtual double CalculateFunctionals(const double* y, int fNumber) override
   {
+    
+    IntParametersType t = (IntParametersType)(y[0]) * mData;
     // Для одномерной задачи берём первую координату
-    double x = y[0];
-    
-    // Вычисляем функционал: f(x) = x² · data
-    double result = x * x * mData;
-    
-    return result;
+    double minVal = 0;
+    double minX = 0;
+    FunctionalParametersType x = IntToFunctionalParametersType(t + 0);
+    double result = Functional(x);
+    minVal = result;
+    minX = (double)t / 100.0;
+    for (int i = 1; i < mData; i++)
+    {
+      x = IntToFunctionalParametersType(t + i);
+
+      result = Functional(x);
+      if (result < minVal)
+      {
+        minVal = result;
+        minX = (double)(t + i) / 100.0;
+      }
+    }
+
+    return minVal;
   }
+
+  double FinishCalculateFunctionals(double* y, int fNumber)
+  {
+
+    IntParametersType t = (IntParametersType)(y[0]) * mData;
+    // Для одномерной задачи берём первую координату
+    double minVal = 0;
+    double minX = 0;
+    FunctionalParametersType x = IntToFunctionalParametersType(t + 0);
+    double result = Functional(x);
+    minVal = result;
+    minX = (double)t / 100.0;
+    for (int i = 1; i < mData; i++)
+    {
+      x = IntToFunctionalParametersType(t + i);
+
+      result = Functional(x);
+      if (result < minVal)
+      {
+        minVal = result;
+        minX = (double)(t + i) / 100.0;
+      }
+    }
+    y[0] = minX;
+    return minVal;
+  }
+
 
   /**
    * @brief Вычисление функций задачи сразу в нескольких точках (векторизовано)
@@ -166,20 +223,31 @@ public:
   virtual void CalculateFunctionals(double* y, int fNumber, int& numPoints,
                                     double* values) override
   {
-    (void)fNumber; // единственный критерий — номер не влияет
-
-    const int dim = (int)this->Dimension;
     const int n = numPoints;
-    // Скалярный путь (общий случай: AVX недоступен или Dimension > 1)
-    for (int j = 0; j < n; ++j)
+
+    for (size_t j = 0; j < n; ++j)
     {
-       // первая координата j-й точки
+      IntParametersType t = (IntParametersType)(y[j]) * mData;
+      double minVal = 0;
+      double minX = 0;
+      FunctionalParametersType x = IntToFunctionalParametersType(t + 0);
+      double result = Functional(x);
+      minVal = result;
+      minX = (double)t / 100.0;
 
-      int t = (int) round(y[(size_t)j * dim]);
+      for (int i = 1; i < mData; i++)
+      {
+        x = IntToFunctionalParametersType(t + i);
 
-      float x = float(t);
-
-      values[j] = x * x * mData;
+        result = Functional(x);
+        if (result < minVal)
+        {
+          minVal = result;
+          minX = (double)(t + i) / 100.0;
+        }
+      }
+      values[j] = minVal;
+      y[j] = minX;
     }
   }
     

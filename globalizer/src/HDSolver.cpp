@@ -319,8 +319,6 @@ int HDSolver::Solve()
 
         parameters.Dimension = originalDimension;
 
-        Calculation::leafCalculation = 0;
-
         for (int j = 0; j < tasks[i]->GetNumOfFunc(); j++)
         {
           if (solver->GetData()->M[j] > parameters.M_constant[j])

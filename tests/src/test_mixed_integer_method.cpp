@@ -89,11 +89,6 @@ protected:
 /// ОБЯЗАТЕЛЬНО вызывать перед удалением Task, к которому привязан вычислитель.
   static void ResetCalculationCache()
   {
-    if (Calculation::leafCalculation)
-    {
-      delete Calculation::leafCalculation;
-      Calculation::leafCalculation = 0;
-    }
     if (Calculation::firstCalculation)
     {
       delete Calculation::firstCalculation;

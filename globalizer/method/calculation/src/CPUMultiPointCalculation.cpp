@@ -1,7 +1,9 @@
 
 
 #include "CPUMultiPointCalculation.h"
-
+#include <stdlib.h>
+#include <string.h>
+#include <cmath>
 
 // ------------------------------------------------------------------------------------------------
 void CPUMultiPointCalculation::StartCalculate(InformationForCalculation& inputSet,

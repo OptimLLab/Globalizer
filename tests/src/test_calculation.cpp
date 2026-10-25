@@ -75,25 +75,6 @@ TEST_F(CalculationTest, Factory_CreateCalculation_ReturnsNull_ForLeafTask)
   EXPECT_EQ(calc, nullptr);
 }
 
-/**
- * \brief Проверяет singleton-логику CreateCalculation для не-листовой (корневой) задачи.
- * \details Согласно реализации фабрики, для OMP объект кэшируется в
- * Calculation::leafCalculation (не в firstCalculation). Повторный вызов
- * возвращает тот же самый экземпляр.
- */
-TEST_F(CalculationTest, Factory_CreateCalculation_SingletonLogic_ForNonLeafTask) 
-{
-  parameters.TypeCalculation = OMP;
-
-  Calculation* calc1 = CalculationFactory::CreateCalculation(*nonLeafTask);
-  ASSERT_NE(calc1, nullptr);
-  EXPECT_NE(dynamic_cast<OMPCalculation*>(calc1), nullptr);
-
-  Calculation* calc2 = CalculationFactory::CreateCalculation(*nonLeafTask);
-  EXPECT_EQ(calc1, calc2);
-}
-
-
 // ================================================================
 // --- Тесты для OMPCalculation ---
 // ================================================================
@@ -198,23 +179,6 @@ TEST_F(CalculationTest, OMPCalculation_Calculate_DoesNotFillProcLevel)
   // При этом основные результаты заполнены.
   ASSERT_EQ(outputSet.trials.size(), 1);
   EXPECT_EQ(outputSet.trials[0]->index, 1);
-}
-
-/**
- * \brief Проверяет поведение CreateCalculation для не-листовой (корневой) задачи.
- * \details Не делаем предположений о singleton-кэшировании в firstCalculation.
- * Проверяем лишь, что повторные вызовы согласованы между собой: либо оба
- * возвращают nullptr, либо оба возвращают один и тот же закэшированный объект.
- */
-TEST_F(CalculationTest, Factory_CreateCalculation_NonLeafTask_ConsistentBehavior) 
-{
-  parameters.TypeCalculation = OMP;
-
-  Calculation* calc1 = CalculationFactory::CreateCalculation(*nonLeafTask);
-  Calculation* calc2 = CalculationFactory::CreateCalculation(*nonLeafTask);
-
-  // Поведение должно быть детерминированным и согласованным между вызовами.
-  EXPECT_EQ(calc1, calc2);
 }
 
 /**

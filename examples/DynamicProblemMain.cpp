@@ -16,8 +16,8 @@ int main(int argc, char* argv[])
   parameters.r = 10;
   parameters.IsPrintResultToConsole = false;
 
-  int iterationCount = 100;
-  double initialData = 100.0;  // начальное значение data
+  int iterationCount = 1;
+  double initialData = 1.0;  // начальное значение data
   double range = pow(2.0, 64.0) / initialData;
   int N = 8;
 
@@ -119,9 +119,11 @@ int main(int argc, char* argv[])
 
   double oldY = optimum->y[0];
 
-  double optVal = problem->FinishCalculateFunctionals(optimum->y, 0);
+  unsigned long long int t = 0;
 
-  std::cout << "optimum y = " << optimum->y[0] << " optimum value = " << optimum->GetValue() << std::endl;
+  double optVal = problem->FinishCalculateFunctionals(optimum->y, t);
+
+  std::cout << "optimum y = " << oldY << " t = " << t << " optimum value = " << optimum->GetValue() << std::endl;
 
   if (parameters.IsMPIInit())
     MPI_Finalize();

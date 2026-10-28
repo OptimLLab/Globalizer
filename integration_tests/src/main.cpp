@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <vector>
 #include <cmath>
 #include <iomanip>
@@ -9,7 +9,8 @@
 
 #include "json.hpp"
 
-#define _GLOBALIZER_BENCHMARKS
+// ПРИМЕЧАНИЕ: макрос _GLOBALIZER_BENCHMARKS задаётся в CMake (add_definitions),
+// поэтому здесь его повторно НЕ определяем — иначе предупреждение C4005.
 
 #include "Globalizer.h"
 #include "Solver.h"
@@ -20,9 +21,6 @@
 #include "IGlobalOptimizationProblem.h"
 #include "GlobalOptimizationProblemManager.h"
 #endif // _GLOBALIZER_BENCHMARKS
-
-#include "GlobalOptimizationProblemManager.h"
-#include "IGlobalOptimizationProblem.h"
 
 using json = nlohmann::json;
 

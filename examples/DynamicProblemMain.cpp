@@ -73,8 +73,8 @@ int main(int argc, char* argv[])
       std::cout << "a = " << a << " b = " << b << std::endl;
       solvers[i]->PrintResultToConsole();
 
-      delete[] solvers[i];
-      delete[] problems[i];
+      delete solvers[i];
+      delete problems[i];
     }
 
     delete[] solvers;

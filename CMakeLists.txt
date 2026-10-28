@@ -334,8 +334,13 @@ if(NOT GLOBALIZER_BUILD_AS_LIBRARY_ONLY)
 
   foreach(main_filename ${main_list})
     get_filename_component(sample ${main_filename} NAME_WE)
+	
+	if((sample MATCHES "GCGen") AND (NOT GLOBALIZER_BUILD_GCGEN))
+		continue()
+    endif()
   
     if(GLOBALIZER_BUILD_PROBLEMS OR (sample STREQUAL "SimpleMain"))  
+	
       set(GLOBALIZER_EXECUTABLE_NAME                 ${GLOBALIZER_PROJECT_NAME}${sample}${GLOBALIZER_EXECUTABLE_SUFFIX})
       set(GLOBALIZER_EXECUTABLE_NAME_DEBUG           ${GLOBALIZER_EXECUTABLE_NAME}_${GLOBALIZER_DEBUG_SUFFIX})
       set(GLOBALIZER_EXECUTABLE_NAME_RELEASE         ${GLOBALIZER_EXECUTABLE_NAME})
@@ -495,6 +500,9 @@ set_target_properties(${GLOBALIZER_LIB_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GL
 # add integration tests
 if(${GLOBALIZER_BUILD_INTEGRATION_TESTS})
   add_subdirectory(${PROJECT_SOURCE_DIR}/integration_tests)
+  set_target_properties(Globalizer_IntegrationTests PROPERTIES
+  VS_DEBUGGER_WORKING_DIRECTORY "${GLOBALIZER_OUTPUT_DIRECTORY}"
+)
 endif()
 
 #add tests

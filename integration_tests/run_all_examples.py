@@ -123,6 +123,7 @@ def extract_best_value(text):
     """
     patterns = [
         r"best_value['\"]?\s*[:=]\s*(" + _FLOAT_RE + r")",   # python dict / print
+        r"Minimum\s+value\s*=\s*(" + _FLOAT_RE + r")",        # C++: "Minimum value = ..."
         r"f\*\s*=\s*(" + _FLOAT_RE + r")",                    # "f* = ..."
         r"\bmin\s*=\s*(" + _FLOAT_RE + r")",                  # PrintFinal: "min = ..."
         r"BestValue\s*[:=]\s*(" + _FLOAT_RE + r")",

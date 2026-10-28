@@ -15,8 +15,6 @@ option(GLOBALIZER_USE_MPI "Set OFF to disable MPI.
 option(GLOBALIZER_USE_CUDA "Set ON to use CUDA" OFF)
 option(GLOBALIZER_BUILD_TESTS "Set ON to build tests" OFF)
 option(GLOBALIZER_CMAKE_VERBOSE "Set ON to show debug messages in CMake" ON)
-option(GLOBALIZER_MAX_DIMENSION "Set MAX DIMENSION Globalizer" OFF)
-option(GLOBALIZER_MAX_Number_Of_Function "Set MAX Number Of Function Globalizer" OFF)
 option(GLOBALIZER_BUILD_PROBLEMS "Set ON to build problems" OFF)
 option(GLOBALIZER_USE_DOXYGEN "Set ON to build documentation" OFF)
 option(GLOBALIZER_BUILD_GCGEN "Set ON to build GCGen" OFF)
@@ -69,21 +67,19 @@ if (GLOBALIZER_USE_DOXYGEN)
 endif()
 GLOBALIZER_initialize()
 
-if(${GLOBALIZER_MAX_DIMENSION})
-	message("true " ${GLOBALIZER_MAX_DIMENSION})
-	add_definitions(-DGLOBALIZER_MAX_DIMENSION=${GLOBALIZER_MAX_DIMENSION})
-else()
-	message("false" ${GLOBALIZER_MAX_DIMENSION})
-	add_definitions(-DGLOBALIZER_MAX_DIMENSION=10)
-endif()
+# ---------------------------------------------------------------------------
+# ABI-макросы: определяют раскладку структур (Trial, Extended, Parameters, ...).
+# Должны совпадать у библиотеки и у всех потребителей. Передаются потребителю
+# через INTERFACE_COMPILE_DEFINITIONS экспортируемой цели (см. ниже), поэтому
+# приложению их задавать вручную НЕ нужно.
+# ---------------------------------------------------------------------------
+set(GLOBALIZER_MAX_DIMENSION "10" CACHE STRING "Maximum problem dimension (ABI)")
+set(GLOBALIZER_MAX_Number_Of_Function "20" CACHE STRING "Maximum number of functions (ABI)")
 
-if(${GLOBALIZER_MAX_Number_Of_Function})
-	message("true " ${GLOBALIZER_MAX_Number_Of_Function})
-	add_definitions(-DGLOBALIZER_MAX_Number_Of_Function=${GLOBALIZER_MAX_Number_Of_Function})
-else()
-	message("false" ${GLOBALIZER_MAX_Number_Of_Function})
-	add_definitions(-DGLOBALIZER_MAX_Number_Of_Function=20)
-endif()
+set(GLOBALIZER_ABI_DEFINITIONS
+    GLOBALIZER_MAX_DIMENSION=${GLOBALIZER_MAX_DIMENSION}
+    GLOBALIZER_MAX_Number_Of_Function=${GLOBALIZER_MAX_Number_Of_Function})
+message(STATUS "Globalizer ABI definitions: ${GLOBALIZER_ABI_DEFINITIONS}")
 
 
 if (IS_GNU_COMPILER)
@@ -94,7 +90,7 @@ if (IS_GNU_COMPILER)
 	set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
   endif(CCACHE_FOUND)
 elseif (IS_MICROSOFT_COMPILER)
-  add_definitions(/EHsc /openmp -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
+  add_definitions(/EHsc -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
   replace_compiler_flag("W3" "W4")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /wd4100")
   if (GLOBALIZER_TARGET_ARCH MATCHES "x86")
@@ -147,7 +143,7 @@ endif()
 
 
 if (${GLOBALIZER_ONE_MPI_PROCESS_PER_NODE})
-	add_definitions(-DONE_MPI_PROCESS_PER_NODE)
+	list(APPEND GLOBALIZER_ABI_DEFINITIONS ONE_MPI_PROCESS_PER_NODE)
 endif()
 
 #add MPFR_GMP_MPIR
@@ -158,7 +154,8 @@ if (${GLOBALIZER_USE_MP})
 	setup_gmp(GLOBALIZER_GMP_LIB_DIR GLOBALIZER_GMP_LIB)
 	setup_mpfr(GLOBALIZER_MPFR_LIB_DIR GLOBALIZER_MPFR_LIB)
 else()
-  add_definitions(-DNO_MPREAL)
+  # sizeof(Extended) = 8 вместо 16: ABI
+  list(APPEND GLOBALIZER_ABI_DEFINITIONS NO_MPREAL)
 endif()
 
 # set include directories for project
@@ -227,12 +224,12 @@ if(${GLOBALIZER_BUILD_PROBLEMS})
   set(GLOBALIZER_BENCHMARKS_Interface ${PROJECT_SOURCE_DIR}/third_party/Problems/Interface)
   file(GLOB GLOBALIZER_BENCHMARKS_Interface_HEADERS ${GLOBALIZER_BENCHMARKS_Interface}/include/*.h ${GLOBALIZER_BENCHMARKS_Interface}/include/*.hpp )
   file(GLOB GLOBALIZER_BENCHMARKS_Interface_SOURCES ${GLOBALIZER_BENCHMARKS_Interface}/src/*.c ${GLOBALIZER_BENCHMARKS_Interface}/src/*.cpp)
-  add_definitions(-D_GLOBALIZER_BENCHMARKS)		
+  list(APPEND GLOBALIZER_ABI_DEFINITIONS _GLOBALIZER_BENCHMARKS)
   include_directories(${GLOBALIZER_BENCHMARKS_Interface}/include/)
 endif()
 
 if(${GLOBALIZER_BUILD_INTEGRATION_TESTS})
-  add_definitions(-D_GLOBALIZER_BENCHMARKS)
+  list(APPEND GLOBALIZER_ABI_DEFINITIONS _GLOBALIZER_BENCHMARKS)
  
   include_directories(${PROJECT_SOURCE_DIR}/third_party/Problems/Interface/include)
 endif()
@@ -286,7 +283,7 @@ if (GLOBALIZER_PYTHON OR GLOBALIZER_PYBIND_VERSION)
   message(STATUS "Python executable: ${Python_EXECUTABLE}")
   message(STATUS "Python includes: ${Python_INCLUDE_DIRS}")
 
-  add_definitions(-DUSE_PYTHON)
+  list(APPEND GLOBALIZER_ABI_DEFINITIONS USE_PYTHON)
 else()
   message(STATUS "Python support disabled")
   set(Python_INCLUDE_DIRS "")
@@ -294,12 +291,17 @@ else()
   set(Python_LIBRARIES "")
 endif()
 
+# OpenMP ищем ДО add_library: цель OpenMP::OpenMP_CXX должна существовать
+# к моменту target_link_libraries и попадает в экспорт вместе с флагами.
+find_package(OpenMP REQUIRED)
+
 set(_glib_type STATIC)
 if(BUILD_SHARED_LIBS)
   set(_glib_type SHARED)
 endif()
 
 add_library(${GLOBALIZER_LIB_NAME} ${_glib_type} ${ALL_SRC_FILES} ${GCGEN_SOURCES} ${GCGEN_HEADERS})
+target_compile_definitions(${GLOBALIZER_LIB_NAME} PUBLIC ${GLOBALIZER_ABI_DEFINITIONS})
 
 if(BUILD_SHARED_LIBS)
   target_compile_definitions(${GLOBALIZER_LIB_NAME} PRIVATE GLOBALIZER_EXPORTS)
@@ -437,21 +439,16 @@ else()
     set(GLOBALIZER_MP_LINK "")
 endif()
 
-if(IS_CLANG_COMPILER)
-    target_link_libraries(${GLOBALIZER_LIB_NAME} PRIVATE
-        ${GLOBALIZER_MPI_LIB}
-        ${GLOBALIZER_MP_LINK}
-        ${DISLIN_LIB}
-    )
-	
-	target_link_libraries(${GLOBALIZER_LIB_NAME} PUBLIC OpenMP::OpenMP_CXX)
-else()
-    target_link_libraries(${GLOBALIZER_LIB_NAME} PRIVATE
-        ${GLOBALIZER_MPI_LIB}
-        ${GLOBALIZER_MP_LINK}
-        ${DISLIN_LIB}
-    )
-endif()
+# Приватные зависимости библиотеки (в экспорт не попадают).
+target_link_libraries(${GLOBALIZER_LIB_NAME} PRIVATE
+    ${GLOBALIZER_MPI_LIB}
+    ${GLOBALIZER_MP_LINK}
+    ${DISLIN_LIB}
+)
+
+# OpenMP — PUBLIC для ВСЕХ компиляторов. Статическая библиотека не содержит
+# рантайм OpenMP: его обязан разрешить потребитель, поэтому зависимость экспортируется.
+target_link_libraries(${GLOBALIZER_LIB_NAME} PUBLIC OpenMP::OpenMP_CXX)
 
 # ------------------------------------------------------------------------------
 # Гарантируем правильный порядок сборки MP-библиотек (gmp/mpfr/mpir).
@@ -488,20 +485,12 @@ set_target_properties(${GLOBALIZER_LIB_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GL
 
 
 
-message("Find OpenMP") 
-find_package(OpenMP)
-if (OPENMP_FOUND)
-  message("OpenMP found")
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-else()
-  message("OpenMP not found")
-endif()
+# OpenMP найден выше (find_package(OpenMP REQUIRED) перед add_library).
 
-# add linker flags for GCC
-if (IS_GNU_COMPILER)
-  target_compile_options(${GLOBALIZER_LIB_NAME} INTERFACE -march=native -fopenmp)
-endif()
+## add linker flags for GCC
+#if (IS_GNU_COMPILER)
+#  target_compile_options(${GLOBALIZER_LIB_NAME} INTERFACE -march=native -fopenmp)
+#endif()
 
 # add integration tests
 if(${GLOBALIZER_BUILD_INTEGRATION_TESTS})

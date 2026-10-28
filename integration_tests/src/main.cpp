@@ -16,7 +16,11 @@
 #include "ProblemInterface.h"
 #include "Parameters.h"
 #include "Trial.h"
-#include "GlobalizerProblem.h" 
+#ifdef _GLOBALIZER_BENCHMARKS
+#include "IGlobalOptimizationProblem.h"
+#include "GlobalOptimizationProblemManager.h"
+#endif // _GLOBALIZER_BENCHMARKS
+
 #include "GlobalOptimizationProblemManager.h"
 #include "IGlobalOptimizationProblem.h"
 
@@ -126,8 +130,8 @@ bool RunSingleTest(const json& config)
 
         parameters.m = 10;
 
-        parameters.isPrintResultToConsole = false;
-        parameters.disablePrintParameters = true;
+        parameters.IsPrintResultToConsole = false;
+        parameters.DisablePrintParameters = true;
 
         std::string multipliers = "1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 "
             "1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0";

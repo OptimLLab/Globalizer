@@ -23,13 +23,6 @@ Globalizer — единый раннер интеграционных тесто
   0 — нет ни одного FAIL (все PASS/SKIP);
   1 — есть хотя бы один FAIL;
   2 — ошибка конфигурации (не найден references/examples.json и т. п.).
-
-Использование:
-    python run_all_examples.py
-    python run_all_examples.py --only cpp
-    python run_all_examples.py --only python
-    python run_all_examples.py --bin-dir /path/to/_bin --filter Simple,ackley
-    python run_all_examples.py --list
 """
 
 import argparse
@@ -43,6 +36,18 @@ import importlib.util
 from pathlib import Path
 
 # --------------------------------------------------------------------------- #
+# ВАЖНО: под CTest вывод раннера перенаправляется в pipe, и Python на Windows
+# выбирает системную кодировку (например cp1251), в которой нет многих символов.
+# Принудительно переводим stdout/stderr в UTF-8 с заменой неотображаемых
+# символов — иначе UnicodeEncodeError роняет сам раннер (а не примеры).
+# --------------------------------------------------------------------------- #
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+# --------------------------------------------------------------------------- #
 # Пути. Скрипт лежит в integration_tests/, корень репозитория — на уровень выше.
 # --------------------------------------------------------------------------- #
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -52,7 +57,6 @@ HELPERS_DIR = ROOT_DIR / "PYGlobalizer"
 BENCHMARKS_DIR = ROOT_DIR / "third_party" / "Problems" / "Problems"
 REFERENCES = SCRIPT_DIR / "references" / "examples.json"
 
-# Суффикс отладочной сборки и расширение exe зависят от платформы/конфигурации.
 IS_WINDOWS = os.name == "nt"
 EXE_SUFFIX = ".exe" if IS_WINDOWS else ""
 LIB_PREFIX = "" if IS_WINDOWS else "lib"
@@ -75,7 +79,6 @@ def color(txt, c):
 
 
 def find_bin_dir(explicit):
-    """Определяет каталог _bin с исполняемыми файлами и библиотеками задач."""
     if explicit:
         p = Path(explicit).resolve()
         if p.exists():
@@ -89,7 +92,6 @@ def find_bin_dir(explicit):
 
 
 def resolve_exe(bin_dir, target):
-    """Возвращает путь к exe (сначала релизный, потом *_d отладочный) или None."""
     for name in (f"{target}{EXE_SUFFIX}", f"{target}_d{EXE_SUFFIX}"):
         p = bin_dir / name
         if p.exists():
@@ -98,7 +100,6 @@ def resolve_exe(bin_dir, target):
 
 
 def lib_present(bin_dir, libname):
-    """Есть ли библиотека задачи (librastrigin.so / rastrigin.dll) в _bin."""
     for name in (f"{LIB_PREFIX}{libname}{LIB_EXT}",
                  f"{libname}{LIB_EXT}",
                  f"{LIB_PREFIX}{libname}_d{LIB_EXT}"):
@@ -108,7 +109,6 @@ def lib_present(bin_dir, libname):
 
 
 def py_module_available(modname):
-    """Проверяет импортируемость внешнего python-пакета без его импорта."""
     try:
         return importlib.util.find_spec(modname) is not None
     except (ImportError, ValueError, ModuleNotFoundError):
@@ -118,8 +118,7 @@ def py_module_available(modname):
 def extract_best_value(text):
     """
     Достаёт найденное значение целевой функции из текста вывода примера.
-    Перебирает известные форматы C++ и Python примеров; берёт ПОСЛЕДНЕЕ
-    совпадение (итоговый результат печатается в конце).
+    Берёт ПОСЛЕДНЕЕ совпадение (итоговый результат печатается в конце).
     """
     patterns = [
         r"best_value['\"]?\s*[:=]\s*(" + _FLOAT_RE + r")",   # python dict / print
@@ -159,7 +158,9 @@ class Result:
     def row(self):
         c = {"PASS": "green", "FAIL": "red", "SKIP": "yellow"}.get(self.status, "grey")
         val = "" if self.value is None else f"f={self.value:.6g}"
-        exp = "" if self.expected is None else f" (эталон {self.expected:g})"
+        exp = "" if self.expected is None else f" (ref {self.expected:g})"
+        # Используем только ASCII в строке результата — вывод не зависит от
+        # кодировки консоли/pipe (под CTest это критично).
         return (f"  [{color(self.status, c):>4}] {self.kind:6} {self.name:34} "
                 f"{val}{exp}  {self.seconds:5.1f}s  {self.message}")
 
@@ -168,7 +169,6 @@ class Result:
 # Запуск процесса
 # --------------------------------------------------------------------------- #
 def run_process(cmd, cwd, timeout, extra_env=None):
-    """Запускает процесс, возвращает (returncode|None, вывод, секунды, timed_out)."""
     env = os.environ.copy()
     if extra_env:
         env.update(extra_env)
@@ -189,39 +189,36 @@ def run_process(cmd, cwd, timeout, extra_env=None):
 
 
 def judge(res, spec, returncode, out, timed_out):
-    """Применяет критерий успеха к завершившемуся процессу."""
     if timed_out:
         res.status = "FAIL"
-        res.message = "таймаут"
+        res.message = "timeout"
         return
     if returncode is None or returncode != 0:
         res.status = "FAIL"
-        res.message = f"код выхода {returncode}"
+        res.message = f"exit code {returncode}"
         return
 
     known = spec.get("known_optimum", None)
     if known is None:
-        # Минимум неизвестен — достаточно, что процесс не упал.
         res.status = "PASS"
-        res.message = "завершился без краха (эталон не задан)"
+        res.message = "finished without crash (no reference)"
         res.value = extract_best_value(out)
         return
 
-    # Минимум известен — проверяем попадание в допуск.
     tol = float(spec.get("tolerance", 0.1))
     res.expected = float(known)
     val = extract_best_value(out)
     res.value = val
     if val is None:
         res.status = "FAIL"
-        res.message = "не удалось извлечь найденное значение из вывода"
+        res.message = "could not extract found value from output"
         return
     if abs(val - known) <= tol:
         res.status = "PASS"
-        res.message = f"|Δ|={abs(val-known):.2e} <= {tol:g}"
+        res.message = f"|d|={abs(val-known):.2e} <= {tol:g}"
     else:
         res.status = "FAIL"
-        res.message = f"|Δ|={abs(val-known):.2e} > {tol:g}"
+        res.message = f"|d|={abs(val-known):.2e} > {tol:g}"
 
 
 # --------------------------------------------------------------------------- #
@@ -234,20 +231,19 @@ def run_cpp(spec, bin_dir):
     if exe is None:
         res.status = "SKIP"
         if spec.get("needs_gcgen"):
-            res.message = "exe не собран (GCGen выключен?)"
+            res.message = "exe not built (GCGen off?)"
         else:
-            res.message = f"исполняемый файл {spec['target']} не найден в _bin"
+            res.message = f"executable {spec['target']} not found in _bin"
         return res
 
     for lib in spec.get("requires_libs", []):
         if not lib_present(bin_dir, lib):
             res.status = "SKIP"
-            res.message = f"нет библиотеки задачи '{lib}' в _bin"
+            res.message = f"problem library '{lib}' not found in _bin"
             return res
 
     timeout = int(spec.get("timeout", DEFAULT_TIMEOUT))
     cmd = [str(exe)] + [str(a) for a in spec.get("args", [])]
-    # Рабочая директория = _bin: там tests.json и библиотеки задач.
     env = {"LD_LIBRARY_PATH": f"{bin_dir}{os.pathsep}" + os.environ.get("LD_LIBRARY_PATH", "")}
     rc, out, secs, to = run_process(cmd, bin_dir, timeout, env)
     res.seconds = secs
@@ -263,20 +259,18 @@ def run_python(spec, bin_dir):
     script = EXAMPLES_DIR / spec["script"]
     if not script.exists():
         res.status = "SKIP"
-        res.message = f"скрипт {spec['script']} не найден"
+        res.message = f"script {spec['script']} not found"
         return res
 
-    # Нужен собранный python-модуль PYDGlobalizer.
     if not any(bin_dir.glob("PYDGlobalizer*.pyd")) and not any(bin_dir.glob("PYDGlobalizer*.so")):
         res.status = "SKIP"
-        res.message = "модуль PYDGlobalizer не собран (нужен -DGLOBALIZER_PYBIND_VERSION=ON)"
+        res.message = "PYDGlobalizer module not built (need -DGLOBALIZER_PYBIND_VERSION=ON)"
         return res
 
-    # Для optional-примеров проверяем внешние python-пакеты.
     for mod in spec.get("requires_py", []):
         if not py_module_available(mod):
             res.status = "SKIP"
-            res.message = f"нет внешнего пакета '{mod}'"
+            res.message = f"external package '{mod}' not found"
             return res
 
     timeout = int(spec.get("timeout", DEFAULT_TIMEOUT))
@@ -294,7 +288,7 @@ def run_python(spec, bin_dir):
     # Пример мог сам вывести [SKIP] (нет внешнего пакета) — уважаем это.
     if not to and (rc == 0) and re.search(r"\[SKIP\]", out):
         res.status = "SKIP"
-        res.message = "пример самостоятельно сообщил SKIP"
+        res.message = "example reported SKIP itself"
         return res
 
     judge(res, spec, rc, out, to)
@@ -305,17 +299,17 @@ def run_python(spec, bin_dir):
 # main
 # --------------------------------------------------------------------------- #
 def main():
-    ap = argparse.ArgumentParser(description="Запуск всех примеров Globalizer как тестов.")
-    ap.add_argument("--bin-dir", default=None, help="каталог _bin с exe и библиотеками.")
+    ap = argparse.ArgumentParser(description="Run all Globalizer examples as tests.")
+    ap.add_argument("--bin-dir", default=None, help="_bin directory with exe and libs.")
     ap.add_argument("--only", choices=["cpp", "python"], default=None,
-                    help="запускать только C++ или только Python примеры.")
+                    help="run only C++ or only Python examples.")
     ap.add_argument("--filter", default=None,
-                    help="запятая-разделённый список подстрок имён для отбора.")
-    ap.add_argument("--list", action="store_true", help="показать список тестов и выйти.")
+                    help="comma-separated name substrings to select.")
+    ap.add_argument("--list", action="store_true", help="print the list of tests and exit.")
     args = ap.parse_args()
 
     if not REFERENCES.exists():
-        print(f"[FATAL] не найден {REFERENCES}", file=sys.stderr)
+        print(f"[FATAL] not found {REFERENCES}", file=sys.stderr)
         return 2
     specs = json.loads(REFERENCES.read_text(encoding="utf-8"))
     bin_dir = find_bin_dir(args.bin_dir)
@@ -333,28 +327,28 @@ def main():
         cpp_specs = []
 
     if args.list:
-        print("C++ примеры:")
+        print("C++ examples:")
         for s in cpp_specs:
             print(f"  {s['name']:34} optimum={s.get('known_optimum')}")
-        print("Python примеры:")
+        print("Python examples:")
         for s in py_specs:
             print(f"  {s['name']:34} optimum={s.get('known_optimum')}")
         return 0
 
     print("=" * 78)
-    print("   GLOBALIZER — ЗАПУСК ВСЕХ ПРИМЕРОВ КАК ИНТЕГРАЦИОННЫХ ТЕСТОВ")
+    print("   GLOBALIZER - RUN ALL EXAMPLES AS INTEGRATION TESTS")
     print(f"   _bin: {bin_dir}")
     print("=" * 78)
 
     results = []
     if cpp_specs:
-        print("\n--- C++ примеры ---")
+        print("\n--- C++ examples ---")
         for s in cpp_specs:
             r = run_cpp(s, bin_dir)
             results.append(r)
             print(r.row())
     if py_specs:
-        print("\n--- Python примеры ---")
+        print("\n--- Python examples ---")
         for s in py_specs:
             r = run_python(s, bin_dir)
             results.append(r)
@@ -365,7 +359,7 @@ def main():
     n_skip = sum(1 for r in results if r.status == "SKIP")
 
     print("\n" + "=" * 78)
-    print(f"Итого: {n_pass} PASS, {n_fail} FAIL, {n_skip} SKIP из {len(results)} тестов.")
+    print(f"Total: {n_pass} PASS, {n_fail} FAIL, {n_skip} SKIP of {len(results)} tests.")
     print("=" * 78)
     return 1 if n_fail else 0
 

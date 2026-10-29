@@ -164,14 +164,12 @@ bool RunSingleTest(const json& config)
         double expectedValue = config["optimum"].get<double>();
         double tolerance = config["tolerance"].get<double>();
 
-        // ВЫВОД ЗНАЧЕНИЙ
         std::cout << "      Value:    Expected " << std::fixed << std::setprecision(6) << expectedValue
             << ", Actual " << actualValue
             << " (Diff: " << std::scientific << std::abs(actualValue - expectedValue) << ")" << std::endl;
 
         if (std::abs(actualValue - expectedValue) > tolerance) passed = false;
 
-        // ВЫВОД КООРДИНАТ
         if (config.contains("point"))
         {
             std::vector<double> expectedPoint = config["point"].get<std::vector<double>>();
@@ -184,7 +182,6 @@ bool RunSingleTest(const json& config)
             if (dist > 0.5) passed = false;
         }
 
-        // ВЫВОД ИТЕРАЦИЙ
         if (config.contains("expected_iterations"))
         {
             int expectedIters = config["expected_iterations"].get<int>();

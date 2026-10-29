@@ -209,26 +209,11 @@ public:
 
     for (size_t j = 0; j < n; ++j)
     {
-      IntParametersType t = (IntParametersType)(y[j]) * mData;
-      double minVal = 0;
-      double minX = 0;
-      FunctionalParametersType x = IntToFunctionalParametersType(t + 0);
+      IntParametersType t = (IntParametersType)(y[j]);
+
+      FunctionalParametersType x = IntToFunctionalParametersType(t);
       double result = Functional(x);
-      minVal = result;
-      minX = (double)t / 100.0;
-
-      for (int i = 1; i < mData; i++)
-      {
-        x = IntToFunctionalParametersType(t + i);
-
-        result = Functional(x);
-        if (result < minVal)
-        {
-          minVal = result;
-          minX = (double)(t + i) / 100.0;
-        }
-      }
-      values[j] = minVal;
+      values[j] = result;
     }
   }
     

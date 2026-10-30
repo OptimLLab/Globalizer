@@ -84,3 +84,6 @@ ipch/
 # PYGlobalizer specific
 *.pyd
 *.pyc
+
+.idea/
+third_party/Problems/

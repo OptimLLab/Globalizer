@@ -158,3 +158,54 @@ ctest -R "iopt_|benchmark_libs"        # из каталога сборки
 
 Задачи `rastriginC20`/`rastriginUC` собираются только с
 `-DrastriginC20_build=ON -DrastriginUC_build=ON`, иначе их случаи — SKIP.
+
+## Тесты параллельной MPI-версии
+
+Отдельный набор, потому что MPI есть не везде: `run_mpi_tests.py` и
+`references/mpi_tests.json`. В CTest он регистрируется только в сборке с
+`GLOBALIZER_USE_MPI=ON` (группы `mpi_fallback`, `mpi_sync`, `mpi_async`,
+`mpi_examples`, метка `mpi`). Без `mpiexec` тесты пропускаются (код 77).
+
+```
+gen\TestMPI-VS.bat                    # Intel MPI (oneAPI): build_64_mpi -> _bin_mpi, модульные + MPI-тесты (/ms - MS-MPI, /all - все тесты)
+ctest --test-dir build_64_mpi -C Release -L mpi --output-on-failure
+python integration_tests/run_mpi_tests.py --bin-dir _bin_mpi [--group mpi_async] [--filter S] [--repeat N] [--verbose]
+gen\RunMPI.bat 4 MPI_calc -lib rastrigin.dll -N 2 -r 3.5 -E 0.01   # запуск решателя на 4 процессах
+```
+
+Программы (`GlobalizerMain`, `GlobalizerGCGenGKLSMain`, `GlobalizerSampleMain`,
+`GlobalizerGCGenMain`) запускаются через `mpiexec -n <procs>` с
+`-TypeCalculation MPI_calc` (синхронная схема) или `AsyncMPI` (асинхронная).
+Параметры задач — как в `iopt_tests.json`, поэтому последовательный запуск даёт
+те же эталоны (rastrigin 2D — 859 испытаний, StronginC3 — 555, GKLS 2D №1 — 308).
+Асинхронной схеме число точек первой итерации задаётся явно: `-np <procs - 1>`.
+
+| Группа | Что проверяет |
+|---|---|
+| `mpi_fallback` | MPI-схемы на одном процессе переходят на обычный вычислитель и совпадают с последовательным запуском |
+| `mpi_sync` | синхронная схема (детерминирована): точное число испытаний; по `(ProcNum - 1) * MpiBlockSize` испытаний на итерацию; блочная схема `-mbs 2`; 2 процесса = последовательный запуск; задачи с ограничениями, с дискретными переменными, GKLS |
+| `mpi_async` | асинхронная схема (недетерминирована): значение в допуске, остановка по точности, а не по лимиту испытаний, повторы (`repeat`); 2 процесса = последовательный запуск; запуск без `-np` |
+| `mpi_examples` | примеры `SampleMain`, `GCGenMain` под `mpiexec` в обеих схемах |
+
+Всегда проверяется, что все процессы завершились с кодом 0, без
+`BAD TERMINATION` и без зависания (по таймауту завершается всё задание MPI —
+Job Object на Windows, группа процессов в Unix). Для тестов, которые на текущем
+коде не проходят, поле `issue` описывает проверяемую ошибку, раннер печатает его
+под `[FAIL]`. Сейчас (Intel MPI 2021.19, 4 ядра) не проходят:
+
+| Тест | Ошибка |
+|---|---|
+| `fallback_async_1proc` | на одном процессе асинхронная схема отправляет точки несуществующему процессу 1 (`Fatal error in internal_Send: Invalid rank`) |
+| `sync_rastriginInt_2proc`, `sync_rastriginInt_4proc`, `async_rastriginInt_4proc` | дискретные переменные: на первой итерации точек больше, чем рабочих процессов (по точке на комбинацию значений), вычисляются только первые; f = 11.5 вместо −16.54 |
+| `async_rastrigin_3proc`, `async_rastrigin_4proc` | недетерминированно (на 3 процессах — около половины запусков, на 4 — около 2 из 10): ложная остановка по точности (f = 0.36..7 после 26–348 испытаний) — метод повторно выбирает интервал, испытание в котором ещё вычисляется |
+| `async_rastrigin_4proc_default_np` | без `-np` зависание: работу получает `NumPoints = 1` процесс, а `AsyncFinilize` ждёт ответа от `ProcNum - 2` |
+
+`mpiexec` выбирается так: ключ `--mpiexec` (CTest передаёт `MPIEXEC_EXECUTABLE`
+той реализации MPI, с которой шла сборка), `GLOBALIZER_MPIEXEC`, `I_MPI_ROOT`,
+`MSMPI_BIN`, стандартные каталоги установки и только потом `PATH` (в `PATH`
+бывает чужой `mpiexec`, например из anaconda). Дополнительные ключи `mpiexec` —
+`GLOBALIZER_MPIEXEC_ARGS`; `--max-procs N` (или `GLOBALIZER_MPI_MAX_PROCS`)
+пропускает тесты, которым нужно больше `N` процессов.
+
+Не MPI: `stronginc3` при размерности по умолчанию 1 пишет за границу массива в
+`GetBounds` — задавайте `-N 2`.

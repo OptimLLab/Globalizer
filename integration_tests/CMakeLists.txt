@@ -200,10 +200,59 @@ list(APPEND _integration_tests examples_cpp examples_python)
 foreach(_ex ${GLOBALIZER_CPP_EXAMPLES})
   list(APPEND _integration_tests example_${_ex})
 endforeach()
+
+# ---------------------------------------------------------------------------
+#  Тесты параллельной MPI-версии (references/mpi_tests.json, run_mpi_tests.py).
+#  Отдельный набор с меткой mpi - только в сборке с GLOBALIZER_USE_MPI=ON, так
+#  как MPI есть не везде. mpiexec - той реализации MPI, с которой шла сборка
+#  (MPIEXEC_EXECUTABLE от FindMPI); без него тесты пропускаются (код 77).
+#    ctest -L mpi --output-on-failure
+#  Группы:
+#    mpi_fallback - MPI-режимы на одном процессе (переход на OMP-вычислитель);
+#    mpi_sync     - синхронная схема (-TypeCalculation MPI_calc);
+#    mpi_async    - асинхронная схема (-TypeCalculation AsyncMPI);
+#    mpi_examples - примеры SampleMain и GCGenMain под mpiexec.
+# ---------------------------------------------------------------------------
+set(_it_path_dirs "")
 if (WIN32 AND Python_EXECUTABLE)
   get_filename_component(_it_python_dir "${Python_EXECUTABLE}" DIRECTORY)
+  list(APPEND _it_path_dirs "${_it_python_dir}")
+endif()
+
+if (GLOBALIZER_USE_MPI)
+  if (NOT MPIEXEC_EXECUTABLE)
+    find_program(MPIEXEC_EXECUTABLE NAMES mpiexec mpirun
+      HINTS ENV I_MPI_ROOT ENV MSMPI_BIN PATH_SUFFIXES bin)
+  endif()
+  set(_mpi_runner_args "")
+  if (MPIEXEC_EXECUTABLE)
+    list(APPEND _mpi_runner_args --mpiexec "${MPIEXEC_EXECUTABLE}")
+    # Программы MPI-сборки на Windows ищут impi.dll / msmpi.dll рядом с mpiexec
+    get_filename_component(_it_mpi_dir "${MPIEXEC_EXECUTABLE}" DIRECTORY)
+    list(APPEND _it_path_dirs "${_it_mpi_dir}")
+    message(STATUS "IntegrationTests: MPI tests use ${MPIEXEC_EXECUTABLE}")
+  else()
+    message(WARNING "IntegrationTests: mpiexec not found - MPI tests will be skipped")
+  endif()
+
+  set(GLOBALIZER_MPI_GROUPS mpi_fallback mpi_sync mpi_async mpi_examples)
+  foreach(_group ${GLOBALIZER_MPI_GROUPS})
+    add_test(NAME ${_group}
+      COMMAND ${GLOBALIZER_PY} ${CMAKE_CURRENT_SOURCE_DIR}/run_mpi_tests.py
+              --bin-dir ${GLOBALIZER_TEST_WORKDIR} --group ${_group} ${_mpi_runner_args}
+      WORKING_DIRECTORY ${GLOBALIZER_TEST_WORKDIR})
+    set_tests_properties(${_group} PROPERTIES TIMEOUT 1800 LABELS mpi SKIP_RETURN_CODE 77)
+    list(APPEND _integration_tests ${_group})
+  endforeach()
+endif()
+
+if (WIN32 AND _it_path_dirs)
+  set(_it_path_mod "")
+  foreach(_d ${_it_path_dirs})
+    list(APPEND _it_path_mod "PATH=path_list_prepend:${_d}")
+  endforeach()
   set_tests_properties(${_integration_tests} PROPERTIES
-    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${_it_python_dir}")
+    ENVIRONMENT_MODIFICATION "${_it_path_mod}")
 endif()
 
 message(STATUS "Globalizer integration tests (v5): integration_cases + iOpt groups + examples_cpp/examples_python + per-example tests")

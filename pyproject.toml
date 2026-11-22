@@ -1,0 +1,121 @@
+# ============================================================================
+#  Сборка Python-пакета globalizer (pip install globalizer).
+#
+#  Бэкенд scikit-build-core вызывает существующий CMake-проект Globalizer с
+#  набором опций для Python-колеса (без MPI/MPFR/CUDA, только модуль
+#  PYDGlobalizer) и упаковывает:
+#    PYGlobalizer/globalizer/      -> globalizer/            (Python-код)
+#    PYDGlobalizer*.pyd / *.so     -> globalizer/            (C++-модуль)
+#    PYGlobalizer/PYProblem.py     -> globalizer/_pyproblem.py
+#
+#  Подробная инструкция: docs/PUBLISHING_PYPI.md
+# ============================================================================
+
+[build-system]
+requires = ["scikit-build-core>=0.12", "pybind11>=2.12"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "globalizer"
+dynamic = ["version"]
+description = "Global optimization (Globalizer, UNN) with scipy.optimize- and Optuna-compatible Python interfaces"
+readme = "PYGlobalizer/README_PyPI.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "lib/nlohmann_json/LICENSE"]
+authors = [
+  { name = "Lobachevsky State University of Nizhny Novgorod (UNN)" },
+]
+keywords = ["global optimization", "black-box optimization", "hyperparameter tuning",
+            "Lipschitz optimization", "scipy", "optuna"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "Programming Language :: C++",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.26,<3",
+]
+
+[project.optional-dependencies]
+# Для сравнения с оригиналами (examples/compare_optimizers.py, тесты совместимости).
+compare = ["scipy", "optuna"]
+
+[project.urls]
+Homepage = "https://github.com/OptimLLab/Globalizer"
+Documentation = "https://globalizer-documentation.readthedocs.io/en/latest/"
+Source = "https://github.com/OptimLLab/Globalizer"
+Issues = "https://github.com/OptimLLab/Globalizer/issues"
+
+# ----------------------------------------------------------------------------
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+cmake.version = ">=3.31"          # как в корневом CMakeLists.txt
+ninja.make-fallback = true
+build-dir = "build/{wheel_tag}"   # отдельно от build_64*, не трогает _bin
+cmake.build-type = "Release"
+
+# Python-код пакета берётся прямо из исходников.
+wheel.packages = ["PYGlobalizer/globalizer"]
+wheel.exclude = ["**/__pycache__/**", "**/*.pyc"]
+
+# Из CMake-установки в колесо попадает только компонент "python"
+# (PYDGlobalizer + _pyproblem.py). Заголовки, Globalizer_l.lib и
+# GlobalizerConfig.cmake (globalizer_install.cmake) в колесо не идут.
+install.components = ["python"]
+
+# Исходный архив (sdist): только то, что нужно для сборки модуля.
+sdist.exclude = [
+  ".github/", ".claude/", "_bin*/", "build*/", "comparison_results/",
+  "docs/", "examples/", "gen/", "integration_tests/", "tests/", "third_party/",
+  "lib/dashboards/", "lib/plotters/", "lib/scripts/", "Doxyfile",
+  "Globalizer_conf.xml", "globalizer_log_process_*.txt",
+  "**/__pycache__/", "**/*.pyc",
+]
+
+[tool.scikit-build.metadata.version]
+# Единственный источник версии: __version__ в PYGlobalizer/globalizer/__init__.py
+provider = "scikit_build_core.metadata.regex"
+input = "PYGlobalizer/globalizer/__init__.py"
+
+[tool.scikit-build.cmake.define]
+GLOBALIZER_PYBIND_VERSION = "ON"
+GLOBALIZER_BUILD_AS_LIBRARY_ONLY = "ON"   # без examples/*.exe
+GLOBALIZER_USE_MPI = "OFF"                # заглушка MPI (lib/mpi_stub)
+GLOBALIZER_USE_MP = "OFF"                 # без MPFR/GMP/MPIR
+GLOBALIZER_USE_CUDA = "OFF"
+GLOBALIZER_BUILD_TESTS = "OFF"
+GLOBALIZER_BUILD_PROBLEMS = "OFF"
+GLOBALIZER_BUILD_GCGEN = "OFF"
+GLOBALIZER_CMAKE_VERBOSE = "OFF"
+# ABI-пределы те же, что в gen/Start*-no_mp-No_MPI_PYGlobalizer.bat
+GLOBALIZER_MAX_DIMENSION = "130"
+GLOBALIZER_MAX_Number_Of_Function = "70"
+BUILD_SHARED_LIBS = "OFF"
+# Статическая Globalizer_l линкуется в .so-модуль: на Linux нужен -fPIC.
+CMAKE_POSITION_INDEPENDENT_CODE = "ON"
+
+# ----------------------------------------------------------------------------
+#  cibuildwheel: сборка колёс в GitHub Actions (.github/workflows/wheels.yml)
+# ----------------------------------------------------------------------------
+[tool.cibuildwheel]
+build = "cp311-* cp312-* cp313-* cp314-*"
+skip = "*-musllinux_* *-win32 *_i686"
+build-verbosity = 1
+test-command = "python {project}/integration_tests/test_pip_package.py"
+
+[tool.cibuildwheel.windows]
+# Кладёт в колесо DLL, от которых зависит модуль (vcomp140.dll — OpenMP MSVC).
+before-build = "pip install delvewheel"
+repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"

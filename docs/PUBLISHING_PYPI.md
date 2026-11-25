@@ -45,10 +45,11 @@ globalizer/
 
 ## 1. Перед первой публикацией (один раз)
 
-1. **Лицензия.** В корне лежит `LICENSE` (MIT), шапки исходников переведены на
-   «Licensed under the MIT License (see LICENSE)». Убедитесь, что выбор MIT
-   согласован с правообладателем (ННГУ) и соавторами. После публикации
-   отозвать его для уже выложенных версий нельзя.
+1. **Лицензия.** Проект распространяется по BSD 3-Clause (файл `LICENSE` в
+   корне). В метаданных пакета указано `license = "BSD-3-Clause AND MIT"`:
+   в модуль также компилируется библиотека `lib/nlohmann_json` под MIT, и её
+   файл лицензии тоже кладётся в пакет. Строка «All Rights Reserved» в шапках
+   исходников BSD-лицензии не противоречит.
 2. **Имя пакета.** Откройте https://pypi.org/project/globalizer/.
    * Если открывается «404 Not Found», имя свободно.
    * Если имя занято, выберите другое (например, `globalizer-opt` или
@@ -139,14 +140,23 @@ C++-модуль загружается из пакета (`globalizer.PYDGlobal
 
 ## 3. Отправка изменений в репозиторий
 
+Сначала переместите файл workflow на место. Он лежит в `docs\wheels.yml`,
+потому что папку `.github` нельзя было записать автоматически:
+
+```bat
+move docs\wheels.yml .github\workflows\wheels.yml
+```
+
 ```bat
 git checkout -b pypi-packaging
-git add LICENSE pyproject.toml .gitignore README.md CMakeLists.txt ^
+git status
+git add pyproject.toml .gitignore README.md CMakeLists.txt ^
         cmake\globalizer_targets.cmake cmake\globalizer_dependencies.cmake ^
-        PYGlobalizer docs\PUBLISHING_PYPI.md ^
+        PYGlobalizer\PYGlobalizer.cpp PYGlobalizer\README_PyPI.md ^
+        PYGlobalizer\globalizer\README.md PYGlobalizer\globalizer\optimize\_native.py ^
         integration_tests\test_pip_package.py .github\workflows\wheels.yml ^
-        globalizer examples tests integration_tests\src
-git commit -m "Python package for PyPI: pyproject.toml, wheels CI, MIT license"
+        docs\PUBLISHING_PYPI.md
+git commit -m "Python package for PyPI: pyproject.toml, wheels CI"
 git push -u origin pypi-packaging
 ```
 
@@ -319,11 +329,9 @@ Repository → **Settings → Environments → New environment**:
 
 | Файл | Изменение |
 |---|---|
-| `LICENSE` | Новый файл: MIT, © 2013–2026 ННГУ им. Н. И. Лобачевского. |
-| 113 файлов `*.h`, `*.hpp`, `*.cpp` (`globalizer/`, `PYGlobalizer/`, `lib/mpi_stub/`, `examples/`, `tests/`, `integration_tests/`) | Строка «All Rights Reserved.» в шапке заменена на «Licensed under the MIT License (see LICENSE).». `third_party/` и `lib/nlohmann_json/` не тронуты. |
 | `pyproject.toml` | Новый файл: метаданные пакета, сборка через scikit-build-core, опции CMake для колеса, настройки cibuildwheel. |
 | `PYGlobalizer/README_PyPI.md` | Новый файл: описание пакета для страницы на PyPI. |
-| `.github/workflows/wheels.yml` | Новый файл: сборка колёс и sdist, публикация на TestPyPI и PyPI. |
+| `.github/workflows/wheels.yml` (пока лежит в `docs/wheels.yml`, см. раздел 3) | Новый файл: сборка колёс и sdist, публикация на TestPyPI и PyPI. |
 | `integration_tests/test_pip_package.py` | Новый файл: проверка установленного пакета (запускается в CI после каждого колеса). |
 | `docs/PUBLISHING_PYPI.md` | Эта инструкция. |
 | `CMakeLists.txt` | При сборке через pip (`SKBUILD`) вывод идёт в каталог сборки, а не в `_bin`. |
@@ -331,9 +339,23 @@ Repository → **Settings → Environments → New environment**:
 | `cmake/globalizer_targets.cmake` | То же для модуля; при `SKBUILD` `PYDGlobalizer` и `PYProblem.py` (как `_pyproblem.py`) ставятся в пакет `globalizer`, компонент `python`. Сборка bat-скриптами не изменилась. |
 | `PYGlobalizer/PYGlobalizer.cpp` | Класс `PYProblem` ищется сначала в `globalizer._pyproblem`, затем в `PYProblem`, как раньше. |
 | `PYGlobalizer/globalizer/optimize/_native.py` | Сначала загружается модуль из установленного пакета, затем, как раньше, из `PYTHONPATH`, `GLOBALIZER_BIN` или `_bin`. |
-| `README.md` | Значок лицензии BSD-3 исправлен на MIT, добавлены значок PyPI и раздел «установка через pip». |
+| `README.md` | Добавлены значок PyPI и раздел «Python: установка через pip». |
 | `PYGlobalizer/globalizer/README.md` | Раздел «Установка» дополнен вариантом `pip install`. |
 | `.gitignore` | Добавлены `dist/`, `wheelhouse/`, `*.egg-info/`. |
+
+### Как убедиться, что правки на месте
+
+Если откатываете другие изменения (например, через `git checkout -- .`),
+файлы из таблицы выше не трогайте: без них колесо соберётся без C++-модуля
+или не соберётся вовсе. Быстрая проверка:
+
+```bat
+findstr /n SKBUILD CMakeLists.txt cmake\globalizer_targets.cmake cmake\globalizer_dependencies.cmake
+findstr /n pyproblem_class PYGlobalizer\PYGlobalizer.cpp
+findstr /n _load_installed PYGlobalizer\globalizer\optimize\_native.py
+```
+
+Каждая команда должна найти хотя бы одну строку.
 
 ### Низкоуровневый интерфейс после `pip install`
 

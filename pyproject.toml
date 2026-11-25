@@ -21,7 +21,9 @@ dynamic = ["version"]
 description = "Global optimization (Globalizer, UNN) with scipy.optimize- and Optuna-compatible Python interfaces"
 readme = "PYGlobalizer/README_PyPI.md"
 requires-python = ">=3.11"
-license = "MIT"
+# Код Globalizer - BSD 3-Clause; в модуль также скомпилирован
+# lib/nlohmann_json (MIT), его лицензия кладётся в пакет вместе с LICENSE.
+license = "BSD-3-Clause AND MIT"
 license-files = ["LICENSE", "lib/nlohmann_json/LICENSE"]
 authors = [
   { name = "Lobachevsky State University of Nizhny Novgorod (UNN)" },

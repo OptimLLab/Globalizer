@@ -65,4 +65,4 @@ print(study.best_params, study.best_value)
 * Исходный код: https://github.com/OptimLLab/Globalizer
 * Документация: https://globalizer-documentation.readthedocs.io/en/latest/
 
-Лицензия — MIT.
+Лицензия — BSD 3-Clause (см. файл LICENSE).

@@ -89,3 +89,8 @@ ipch/
 
 .idea/
 third_party/Problems/
+
+# Python packaging (pip / scikit-build-core / cibuildwheel)
+dist/
+wheelhouse/
+*.egg-info/

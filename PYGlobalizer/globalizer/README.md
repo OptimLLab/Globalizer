@@ -17,6 +17,14 @@ from scipy import optimize        ->  from globalizer import optimize
 
 ## Установка
 
+Проще всего — из PyPI (модуль `PYDGlobalizer` уже собран и лежит внутри пакета):
+
+```bash
+pip install globalizer
+```
+
+Из исходников репозитория (например, для MPI-сборки или своих ABI-пределов):
+
 1. Соберите модуль `PYDGlobalizer`:
    `gen\StartGCC-no_mp-No_MPI_PYGlobalizer.bat` (GCC) или
    `gen\StartVS-no_mp-No_MPI_PYGlobalizer.bat` (Visual Studio).

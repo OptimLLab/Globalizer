@@ -163,7 +163,14 @@ function(globalizer_configure_python abi_var)
 
   if (GLOBALIZER_PYTHON OR GLOBALIZER_PYBIND_VERSION)
     set(Python_FIND_DEBUG OFF)
-    find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
+    if (SKBUILD)
+      # Сборка колеса (pip / cibuildwheel): нужен только Development.Module.
+      # В manylinux-контейнерах нет libpython (Development.Embed), а NumPy
+      # C API модулем PYDGlobalizer не используется.
+      find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+    else()
+      find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
+    endif()
     message(STATUS "Python executable: ${Python_EXECUTABLE}")
     message(STATUS "Python includes: ${Python_INCLUDE_DIRS}")
     list(APPEND _abi USE_PYTHON)

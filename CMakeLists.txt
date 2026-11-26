@@ -36,7 +36,14 @@ option(GLOBALIZER_BUILD_AS_LIBRARY_ONLY "Собрать только библи�
 option(BUILD_SHARED_LIBS "Собрать динамическую библиотеку (DLL/.so) вместо статической (.lib/.a)" OFF)
 
 # --- Каталог вывода (_bin) ---------------------------------------------------
-set(GLOBALIZER_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/_bin CACHE STRING "Output directory")
+# При сборке Python-колеса (pip / scikit-build-core, переменная SKBUILD)
+# результаты кладём в каталог сборки, чтобы не перезаписывать рабочий _bin.
+if(SKBUILD)
+  set(_globalizer_default_output_dir ${CMAKE_BINARY_DIR}/_bin)
+else()
+  set(_globalizer_default_output_dir ${PROJECT_SOURCE_DIR}/_bin)
+endif()
+set(GLOBALIZER_OUTPUT_DIRECTORY ${_globalizer_default_output_dir} CACHE STRING "Output directory")
 message("GLOBALIZER_OUTPUT_DIRECTORY" ${GLOBALIZER_OUTPUT_DIRECTORY})
 
 if(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE AND

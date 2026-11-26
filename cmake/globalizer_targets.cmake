@@ -186,7 +186,11 @@ function(globalizer_add_pybind_module)
     return()
   endif()
 
-  find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development)
+  if(SKBUILD)
+    find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module)
+  else()
+    find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development)
+  endif()
   set(PYBIND11_FINDPYTHON ON)
   find_package(pybind11 CONFIG REQUIRED)
 
@@ -208,5 +212,18 @@ function(globalizer_add_pybind_module)
       RUNTIME_OUTPUT_DIRECTORY "${GLOBALIZER_OUTPUT_DIRECTORY}"
       LIBRARY_OUTPUT_DIRECTORY "${GLOBALIZER_OUTPUT_DIRECTORY}")
 
-  install(TARGETS ${GLOBALIZER_PYD_NAME} DESTINATION .)
+  if(SKBUILD)
+    # Python-колесо (pip install): модуль и PYProblem.py кладём внутрь
+    # пакета globalizer. В колесо попадает только компонент "python"
+    # (см. install.components в pyproject.toml).
+    install(TARGETS ${GLOBALIZER_PYD_NAME}
+            LIBRARY DESTINATION globalizer COMPONENT python
+            RUNTIME DESTINATION globalizer COMPONENT python)
+    install(FILES ${PROJECT_SOURCE_DIR}/PYGlobalizer/PYProblem.py
+            DESTINATION globalizer
+            RENAME _pyproblem.py
+            COMPONENT python)
+  else()
+    install(TARGETS ${GLOBALIZER_PYD_NAME} DESTINATION .)
+  endif()
 endfunction()

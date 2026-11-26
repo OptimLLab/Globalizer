@@ -3,6 +3,7 @@
 </p>
 
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-green)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/globalizer)](https://pypi.org/project/globalizer/)
 [![python: 3.11](https://img.shields.io/badge/python-3.11-44cc12?style=flat-square&logo=python)](https://www.python.org/downloads/release/python-3110/)
 [![C++](https://img.shields.io/badge/C++-17-44cc12?style=flat-square&logo=c%2B%2B)](https://isocpp.org/)
 [![docs: ](https://readthedocs.org/projects/ebonite/badge/?style=flat-square)](https://globalizer-documentation.readthedocs.io/en/latest/)
@@ -104,6 +105,15 @@ int main(int argc, char* argv[])
   return 0;
 }
 ```
+
+## Python: установка через pip
+
+```bash
+pip install globalizer
+```
+
+Готовые колёса — для Windows x64 и Linux x86_64, Python 3.11–3.14 (без MPI, MPFR и CUDA).
+Сборка и публикация пакета описаны в [docs/PUBLISHING_PYPI.md](docs/PUBLISHING_PYPI.md).
 
 ## Python: интерфейс, совместимый с scipy.optimize
 

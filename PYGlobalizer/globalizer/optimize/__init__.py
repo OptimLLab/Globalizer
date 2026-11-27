@@ -13,7 +13,7 @@ minimize. Классы: OptimizeResult, Bounds, NonlinearConstraint,
 LinearConstraint, OptimizeWarning. Настройки Globalizer: set_options().
 """
 
-from ._optimize import OptimizeResult, OptimizeWarning
+from ._result import OptimizeResult, OptimizeWarning
 from ._constraints import Bounds, NonlinearConstraint, LinearConstraint
 from ._global import (differential_evolution, dual_annealing, shgo, direct,
                       basinhopping, minimize, set_options, get_options)

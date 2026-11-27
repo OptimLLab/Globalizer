@@ -1,4 +1,4 @@
-# globalizer.optuna — интерфейс Globalizer в стиле Optuna
+# globalizer.tuning — интерфейс Globalizer в стиле Optuna
 
 Пакет повторяет API [Optuna](https://optuna.org) (study / trial / `suggest_*`),
 но точки испытаний выбирает индексный метод глобальной оптимизации Globalizer.
@@ -6,7 +6,7 @@
 
 ```python
 import optuna                          # было
-import globalizer.optuna as optuna     # стало
+import globalizer.tuning as optuna     # стало
 
 def objective(trial):
     x = trial.suggest_float("x", -10, 10)
@@ -18,6 +18,12 @@ study = optuna.create_study()
 study.optimize(objective, n_trials=200)
 print(study.best_params, study.best_value)
 ```
+
+Модуль назван `tuning`, а не `optuna`: имя чужого продукта в имени модуля
+публикуемого пакета путало бы его с самой Optuna (и затрагивало бы её товарный
+знак). Кода Optuna в модуле нет — совпадают только имена классов, функций и
+параметров. Базовое исключение — `TuningError`; имя `OptunaError` оставлено
+псевдонимом для кода, который его перехватывает.
 
 Это третий Python-интерфейс Globalizer. Есть ещё собственный
 (`PYDGlobalizer.solve` + `PYProblem`) и интерфейс в стиле scipy
@@ -136,14 +142,14 @@ study = optuna.create_study(sampler=sampler)
 
 ## Тесты, примеры, сравнение
 
-- `integration_tests/test_globalizer_optuna.py` — тесты (unittest), в CTest:
-  `python_optuna_interface`. Если Optuna установлена, они проверяют ещё и
+- `integration_tests/test_globalizer_tuning.py` — тесты (unittest), в CTest:
+  `python_tuning_interface`. Если Optuna установлена, они проверяют ещё и
   совпадение сигнатур и то, что одна целевая функция работает в обеих
   библиотеках.
-- `examples/example_optuna_interface.py` — основной пример: типы параметров,
+- `examples/example_tuning_interface.py` — основной пример: типы параметров,
   ограничения, условное пространство, ask/tell. С аргументом `optuna` те же
   задачи решает Optuna.
-- `examples/example_optuna_ml.py` — выбор модели scikit-learn и прунинг.
+- `examples/example_tuning_ml.py` — выбор модели scikit-learn и прунинг.
 - `examples/compare_optimizers.py` — сравнение Globalizer (все три интерфейса),
   scipy.optimize и Optuna при равном бюджете вычислений. Отчёт пишется в
   `comparison_results/report.md` и `results.csv`. Короткий прогон в CTest:

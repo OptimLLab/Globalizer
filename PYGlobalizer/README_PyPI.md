@@ -40,7 +40,7 @@ print(res.fun, res.x)
 ## Интерфейс в стиле Optuna
 
 ```python
-import globalizer.optuna as optuna
+import globalizer.tuning as optuna
 
 def objective(trial):
     x = trial.suggest_float("x", -10, 10)
@@ -66,3 +66,16 @@ print(study.best_params, study.best_value)
 * Документация: https://globalizer-documentation.readthedocs.io/en/latest/
 
 Лицензия — BSD 3-Clause (см. файл LICENSE).
+
+## Совместимость и товарные знаки
+
+Globalizer — независимый проект ННГУ, не связанный с разработчиками SciPy и
+Optuna и не одобренный ими. Пакет не содержит кода SciPy и Optuna и не зависит
+от них: с ними совпадают только имена функций, классов и параметров, нужные
+для совместимости интерфейсов. Названия SciPy и Optuna упоминаются лишь для
+описания этой совместимости и принадлежат их правообладателям.
+
+Globalizer is an independent project of UNN. It is not affiliated with or
+endorsed by the SciPy or Optuna projects and contains no code from them; only
+the function, class and parameter names needed for API compatibility are the
+same. SciPy and Optuna are trademarks of their respective owners.

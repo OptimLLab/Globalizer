@@ -20,14 +20,14 @@ pip install globalizer
 
 ```python
 from globalizer.optimize import differential_evolution   # как scipy.optimize
-import globalizer.optuna as optuna                       # как Optuna
+import globalizer.tuning as optuna                       # как Optuna
 ```
 
 Внутри колеса:
 
 ```
 globalizer/
-  __init__.py, optimize/, optuna/        <- PYGlobalizer/globalizer/ (Python-код)
+  __init__.py, optimize/, tuning/        <- PYGlobalizer/globalizer/ (Python-код)
   PYDGlobalizer.cp312-win_amd64.pyd      <- C++-модуль (на Linux: *.so)
   _pyproblem.py                          <- копия PYGlobalizer/PYProblem.py
 ```
@@ -50,6 +50,19 @@ globalizer/
    в модуль также компилируется библиотека `lib/nlohmann_json` под MIT, и её
    файл лицензии тоже кладётся в пакет. Строка «All Rights Reserved» в шапках
    исходников BSD-лицензии не противоречит.
+
+   **Интерфейсы в стиле scipy и Optuna.** Кода scipy (BSD-3-Clause) и Optuna
+   (MIT) в пакете нет: интерфейсы написаны заново, с ними совпадают только
+   имена функций, классов, параметров и атрибутов, нужные для совместимости.
+   Это проверено автоматическим поиском совпадений строк и блоков кода с
+   исходниками scipy 1.18 и Optuna 5.1. Дословно совпадавшие сообщения об
+   ошибках, строки журнала и вспомогательная функция округления границы сетки
+   переписаны. Поэтому указывать их лицензии в пакете не нужно. Чтобы не
+   задевать товарный знак Optuna и не путать модуль с самой Optuna, подпакет
+   называется `globalizer.tuning` (а не `globalizer.optuna`). В
+   `README_PyPI.md` есть оговорка о том, что проект не связан с SciPy и Optuna.
+   При доработке интерфейсов не копируйте код и тексты сообщений из scipy и
+   Optuna. Перед выпуском можно повторить проверку (раздел 8).
 2. **Имя пакета.** Откройте https://pypi.org/project/globalizer/.
    * Если открывается «404 Not Found», имя свободно.
    * Если имя занято, выберите другое (например, `globalizer-opt` или
@@ -110,7 +123,7 @@ python -m zipfile -l dist\globalizer-0.2.0-cp312-cp312-win_amd64.whl
 
 В списке должны быть `globalizer/PYDGlobalizer.cp312-win_amd64.pyd`,
 `globalizer/_pyproblem.py`, `globalizer/optimize/...`,
-`globalizer/optuna/...` и `LICENSE`. Заголовков `.h` и `Globalizer_l.lib`
+`globalizer/tuning/...` и `LICENSE`. Заголовков `.h` и `Globalizer_l.lib`
 там быть не должно.
 
 Проверьте установку в чистом окружении. Запускайте не из корня
@@ -302,6 +315,10 @@ Repository → **Settings → Environments → New environment**:
 
 1. Изменения влиты в `main`, CI `Globalizer Test` зелёный.
 2. Поднята `__version__` в `PYGlobalizer/globalizer/__init__.py`.
+   Если менялись интерфейсы `globalizer.optimize` / `globalizer.tuning`:
+   `python integration_tests/check_foreign_code.py` пишет
+   `no borrowed fragments found` (нужны scipy и optuna из
+   `requirements_compare.txt`).
 3. (По желанию) пробный прогон: Actions → Wheels / PyPI → `testpypi`
    с версией `X.Y.Z.devN`.
 4. Release `vX.Y.Z` → Publish → Approve deployment.
@@ -342,6 +359,10 @@ Repository → **Settings → Environments → New environment**:
 | `README.md` | Добавлены значок PyPI и раздел «Python: установка через pip». |
 | `PYGlobalizer/globalizer/README.md` | Раздел «Установка» дополнен вариантом `pip install`. |
 | `.gitignore` | Добавлены `dist/`, `wheelhouse/`, `*.egg-info/`. |
+| `PYGlobalizer/globalizer/optuna/` → `tuning/` | Интерфейс в стиле Optuna переименован: `import globalizer.tuning as optuna`. Базовое исключение — `TuningError` (`OptunaError` — псевдоним). |
+| `PYGlobalizer/globalizer/optimize/_optimize.py` → `_result.py` | Внутренний модуль с `OptimizeResult`, `OptimizeWarning`. |
+| `examples/example_optuna_*.py`, `example_scipy_interface.py` | Переименованы в `example_tuning_interface.py`, `example_tuning_ml.py`, `example_optimize_interface.py`. |
+| `integration_tests/test_globalizer_optuna.py` | Переименован в `test_globalizer_tuning.py`, тест CTest — `python_tuning_interface`. |
 
 ### Как убедиться, что правки на месте
 

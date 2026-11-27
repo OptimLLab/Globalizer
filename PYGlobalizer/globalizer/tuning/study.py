@@ -1,4 +1,4 @@
-"""Исследование (Study) - как в optuna.study; точки испытаний выбирает Globalizer."""
+"""Исследование (Study) с интерфейсом Optuna; точки испытаний выбирает Globalizer."""
 
 import copy
 import datetime
@@ -42,7 +42,7 @@ def _to_direction(d):
         return StudyDirection.MINIMIZE
     if d == "maximize":
         return StudyDirection.MAXIMIZE
-    raise ValueError(f"Please set either 'minimize' or 'maximize' to direction. You specified {d}.")
+    raise ValueError(f"direction must be 'minimize' or 'maximize', got {d!r}.")
 
 
 class Study:
@@ -104,7 +104,7 @@ class Study:
 
     def set_metric_names(self, metric_names):
         if len(metric_names) != 1:
-            raise ValueError("The number of objectives must match the length of the metric names.")
+            raise ValueError("A single-objective study takes exactly one metric name.")
         self._metric_names = list(metric_names)
 
     @property
@@ -119,10 +119,10 @@ class Study:
         complete = [t for t in self._trials
                     if t.state == TrialState.COMPLETE and t.value is not None]
         if not complete:
-            raise ValueError("No trials are completed yet.")
+            raise ValueError("The study has no completed trials.")
         feasible = [t for t in complete if t.feasible]
         if not feasible:
-            raise ValueError("No feasible trials are completed yet.")
+            raise ValueError("The study has no completed feasible trials.")
         pick = max if self._direction == StudyDirection.MAXIMIZE else min
         return pick(feasible, key=lambda t: t.value)
 
@@ -327,8 +327,8 @@ class Study:
         frozen = self._resolve(trial)
         if frozen.state.is_finished():
             if skip_if_finished:
-                _logger.info(f"Skipped telling trial {frozen.number} with values {values} and "
-                             f"state {state!r} since trial was already finished.")
+                _logger.info(f"tell() skipped: trial {frozen.number} is already finished "
+                             f"(values={values}, state={state!r}).")
                 return copy.deepcopy(frozen)
             raise RuntimeError(f"Cannot tell a {frozen.state.name} trial.")
         if state is None:
@@ -365,8 +365,7 @@ class Study:
         frozen.datetime_complete = datetime.datetime.now()
         frozen.system_attrs["fail_reason"] = repr(exc)
         self._feed_method(frozen)
-        _logger.warning(f"Trial {frozen.number} failed with parameters: {frozen.params} because "
-                        f"of the following error: {exc!r}.")
+        _logger.warning(f"Trial {frozen.number} FAILED, params {frozen.params}: {exc!r}")
         return copy.deepcopy(frozen)
 
     def _fail(self, frozen, message):
@@ -375,8 +374,7 @@ class Study:
         frozen.datetime_complete = datetime.datetime.now()
         frozen.system_attrs["fail_reason"] = message
         self._feed_method(frozen)
-        _logger.warning(f"Trial {frozen.number} failed with parameters: {frozen.params} because "
-                        f"of the following error: {message}")
+        _logger.warning(f"Trial {frozen.number} FAILED, params {frozen.params}: {message}")
         return copy.deepcopy(frozen)
 
     def _resolve(self, trial):
@@ -386,10 +384,9 @@ class Study:
             return trial._frozen
         if isinstance(trial, int):
             if not 0 <= trial < len(self._trials):
-                raise ValueError(f"Cannot tell for trial with number {trial} since it has not "
-                                 "been created.")
+                raise ValueError(f"tell(): the study has no trial number {trial}.")
             return self._trials[trial]
-        raise TypeError("Trial must be a trial object or trial number.")
+        raise TypeError("tell() expects a Trial or a trial number.")
 
     # --- связь с методом Globalizer ----------------------------------------
     def _sign(self):
@@ -454,15 +451,14 @@ class Study:
         if frozen.state == TrialState.COMPLETE:
             try:
                 best = self._best()
-                tail = f" Best is trial {best.number} with value: {best.value}."
+                tail = f"; best: trial {best.number}, value {best.value}"
             except ValueError:
                 tail = ""
-            _logger.info(f"Trial {frozen.number} finished with value: {frozen.value} and "
-                         f"parameters: {frozen.params}.{tail}")
+            _logger.info(f"Trial {frozen.number}: value {frozen.value}, params {frozen.params}{tail}")
         elif frozen.state == TrialState.PRUNED:
-            _logger.info(f"Trial {frozen.number} pruned. ")
+            _logger.info(f"Trial {frozen.number} PRUNED.")
         else:
-            _logger.warning(f"Trial {frozen.number} failed with parameters: {frozen.params}.")
+            _logger.warning(f"Trial {frozen.number} FAILED, params {frozen.params}.")
 
     # --- добавление испытаний вручную --------------------------------------
     def enqueue_trial(self, params, user_attrs=None, skip_if_exists=False):
@@ -530,21 +526,20 @@ class Study:
 
 
 def _check_value(value):
-    """(values, None) или (None, сообщение об ошибке) - как проверка в Optuna."""
+    """(values, None) или (None, сообщение об ошибке): значение испытания - одно конечное число."""
     if value is None:
-        return None, "The objective function returned None."
+        return None, "the objective returned None"
     if isinstance(value, (list, tuple, np.ndarray)):
         seq = list(np.asarray(value, dtype=object).reshape(-1))
         if len(seq) != 1:
-            return None, (f"The number of the values {len(seq)} did not match the number of the "
-                          "objectives 1.")
+            return None, f"the objective returned {len(seq)} values, expected one"
         value = seq[0]
     try:
         v = float(value)
     except (TypeError, ValueError):
-        return None, (f"The value {value!r} could not be cast to float.")
+        return None, f"the objective value {value!r} is not a number"
     if math.isnan(v):
-        return None, f"The value {v} is not acceptable."
+        return None, "the objective value is NaN"
     return [v], None
 
 
@@ -552,14 +547,14 @@ def create_study(*, storage=None, sampler=None, pruner=None, study_name=None, di
                  load_if_exists=False, directions=None):
     """Создаёт исследование (в памяти). Точки испытаний выбирает Globalizer."""
     if storage is not None:
-        raise NotImplementedError("globalizer.optuna keeps studies in memory only: "
+        raise NotImplementedError("globalizer.tuning keeps studies in memory only: "
                                   "`storage` is not supported.")
     if direction is not None and directions is not None:
-        raise ValueError("Specify only one of `direction` and `directions`.")
+        raise ValueError("Pass either `direction` or `directions`, not both.")
     if directions is not None:
         if len(directions) != 1:
             raise NotImplementedError("Multi-objective optimization is not supported by "
-                                      "globalizer.optuna: use a single direction.")
+                                      "globalizer.tuning: use a single direction.")
         direction = directions[0]
     direction = _to_direction(direction if direction is not None else "minimize")
     if pruner is None:
@@ -568,12 +563,12 @@ def create_study(*, storage=None, sampler=None, pruner=None, study_name=None, di
         raise TypeError(f"Unsupported pruner {pruner!r}.")
     name = study_name or f"no-name-{uuid.uuid4()}"
     study = Study(name, direction, as_globalizer_sampler(sampler), pruner)
-    _logger.info(f"A new study created in memory with name: {name}")
+    _logger.info(f"Study '{name}' created (in-memory).")
     return study
 
 
 def _no_storage(*args, **kwargs):
-    raise NotImplementedError("globalizer.optuna keeps studies in memory only "
+    raise NotImplementedError("globalizer.tuning keeps studies in memory only "
                               "(no storage support).")
 
 

@@ -1,11 +1,11 @@
-"""Пример: интерфейс globalizer.optuna, совместимый с Optuna.
+"""Пример: интерфейс globalizer.tuning, совместимый с Optuna.
 
 Код ниже написан для Optuna. Чтобы решить те же задачи Globalizer'ом,
 достаточно заменить импорт:
 
-    import optuna                         ->   import globalizer.optuna as optuna
+    import optuna                         ->   import globalizer.tuning as optuna
 
-Запуск:  python examples/example_optuna_interface.py [optuna]
+Запуск:  python examples/example_tuning_interface.py [optuna]
 (с аргументом optuna - те же задачи решает Optuna, для сравнения).
 """
 
@@ -18,7 +18,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "optuna":
 else:
     # Папка с пакетом globalizer (PYGlobalizer); PYDGlobalizer ищется в _bin.
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "PYGlobalizer"))
-    import globalizer.optuna as optuna
+    import globalizer.tuning as optuna
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 

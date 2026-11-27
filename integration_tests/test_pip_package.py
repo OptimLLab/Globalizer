@@ -18,7 +18,7 @@ import numpy as np
 def main():
     import globalizer
     import globalizer.optimize as gopt
-    import globalizer.optuna  # noqa: F401  (проверяем, что подпакет импортируется)
+    import globalizer.tuning  # noqa: F401  (проверяем, что подпакет импортируется)
     from globalizer.optimize import _native
 
     print("globalizer", globalizer.__version__, "from", Path(globalizer.__file__).parent)

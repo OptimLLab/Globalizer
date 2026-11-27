@@ -5,7 +5,7 @@
 
     from scipy.optimize import ...      ->   from globalizer.optimize import ...
 
-Запуск:  python examples/example_scipy_interface.py [scipy]
+Запуск:  python examples/example_optimize_interface.py [scipy]
 (с аргументом scipy - те же задачи решает scipy, для сравнения).
 """
 

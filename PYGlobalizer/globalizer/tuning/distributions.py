@@ -41,15 +41,15 @@ class BaseDistribution:
         return f"{type(self).__name__}({kw})"
 
 
-def _adjust_high(low, high, step):
-    """Как в Optuna: high сдвигается вниз до ближайшего узла сетки low + k*step."""
-    d_high = decimal.Decimal(str(high))
-    d_low = decimal.Decimal(str(low))
-    d_step = decimal.Decimal(str(step))
-    d_r = d_high - d_low
-    if d_r % d_step != decimal.Decimal("0"):
-        high = float((d_r // d_step) * d_step + d_low)
-    return high
+def _snap_high(low, high, step):
+    """Последний узел сетки low, low + step, ... не правее high.
+
+    Узел считается в десятичной арифметике: для шагов вида 0.1 двоичная
+    погрешность float не сдвигает границу на лишний узел.
+    """
+    lo, hi, st = (decimal.Decimal(repr(float(v))) for v in (low, high, step))
+    nodes = (hi - lo) // st
+    return float(lo + nodes * st)
 
 
 class FloatDistribution(BaseDistribution):
@@ -57,15 +57,15 @@ class FloatDistribution(BaseDistribution):
 
     def __init__(self, low, high, log=False, step=None):
         if log and step is not None:
-            raise ValueError("The parameter `step` is not supported when `log` is true.")
+            raise ValueError("FloatDistribution: step cannot be combined with log=True.")
         if low > high:
-            raise ValueError(f"`low <= high` must hold, but got (low, high)=({low}, {high}).")
+            raise ValueError(f"Invalid range: low={low} is greater than high={high}.")
         if log and low <= 0.0:
-            raise ValueError(f"`low > 0` must hold for `log=True`, but got (low, high)=({low}, {high}).")
+            raise ValueError(f"A log-scale range needs low > 0, got low={low}.")
         if step is not None and step <= 0:
-            raise ValueError(f"`step > 0` must hold, but got step={step}.")
+            raise ValueError(f"step must be positive, got {step}.")
         if step is not None:
-            high = _adjust_high(low, high, step)
+            high = _snap_high(low, high, step)
         self.low = float(low)
         self.high = float(high)
         self.log = bool(log)
@@ -95,14 +95,13 @@ class IntDistribution(BaseDistribution):
 
     def __init__(self, low, high, log=False, step=1):
         if log and step != 1:
-            raise ValueError("Samplers and other components in Optuna only accept step is 1 "
-                             "when `log` argument is True.")
+            raise ValueError("IntDistribution: a log-scale range requires step=1.")
         if low > high:
-            raise ValueError(f"`low <= high` must hold, but got (low, high)=({low}, {high}).")
+            raise ValueError(f"Invalid range: low={low} is greater than high={high}.")
         if log and low < 1:
-            raise ValueError(f"`low >= 1` must hold for `log=True`, but got (low, high)=({low}, {high}).")
+            raise ValueError(f"A log-scale integer range needs low >= 1, got low={low}.")
         if step <= 0:
-            raise ValueError(f"`step > 0` must hold, but got step={step}.")
+            raise ValueError(f"step must be positive, got {step}.")
         self.log = bool(log)
         self.step = int(step)
         self.low = int(low)
@@ -125,13 +124,12 @@ class CategoricalDistribution(BaseDistribution):
 
     def __init__(self, choices):
         if len(choices) == 0:
-            raise ValueError("The `choices` must contain one or more elements.")
+            raise ValueError("CategoricalDistribution: the list of choices is empty.")
         for c in choices:
             if c is not None and not isinstance(c, (bool, int, float, str)):
                 raise ValueError(
-                    "Choices for a categorical distribution should be a tuple of None, bool, "
-                    f"int, float and str for persistent storage but contains {c!r} which is of "
-                    f"type {type(c).__name__}.")
+                    f"Unsupported categorical choice {c!r} ({type(c).__name__}): allowed "
+                    "types are None, bool, int, float and str.")
         self.choices = tuple(choices)
 
     def single(self):
@@ -184,9 +182,8 @@ def convert(dist):
 
 
 def check_distribution_compatibility(dist_old, dist_new):
-    """Как в Optuna: у одного параметра нельзя менять тип распределения."""
+    """У одного параметра нельзя менять тип распределения и набор категорий."""
     if type(dist_old) is not type(dist_new):
-        raise ValueError("Cannot set different distribution kind to the same parameter name.")
+        raise ValueError("The parameter was already suggested with another distribution type.")
     if isinstance(dist_old, CategoricalDistribution) and dist_old.choices != dist_new.choices:
-        raise ValueError(CategoricalDistribution.__name__ +
-                         " does not support dynamic value space.")
+        raise ValueError("The choices of a categorical parameter must stay the same in all trials.")

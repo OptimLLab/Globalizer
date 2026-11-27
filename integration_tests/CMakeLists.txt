@@ -151,14 +151,14 @@ if (GLOBALIZER_PYBIND_VERSION)
     ENVIRONMENT "GLOBALIZER_BIN=${GLOBALIZER_OUTPUT_DIRECTORY}")
   list(APPEND _integration_tests python_iterative_solver)
 
-  # Интерфейс globalizer.optuna, совместимый с Optuna (сама Optuna не нужна;
+  # Интерфейс globalizer.tuning, совместимый с Optuna (сама Optuna не нужна;
   # если она установлена, проверяется ещё и совместимость сигнатур).
-  add_test(NAME python_optuna_interface
-    COMMAND ${_scipy_iface_py} ${CMAKE_CURRENT_SOURCE_DIR}/test_globalizer_optuna.py
+  add_test(NAME python_tuning_interface
+    COMMAND ${_scipy_iface_py} ${CMAKE_CURRENT_SOURCE_DIR}/test_globalizer_tuning.py
     WORKING_DIRECTORY ${GLOBALIZER_TEST_WORKDIR})
-  set_tests_properties(python_optuna_interface PROPERTIES TIMEOUT 600
+  set_tests_properties(python_tuning_interface PROPERTIES TIMEOUT 600
     ENVIRONMENT "GLOBALIZER_BIN=${GLOBALIZER_OUTPUT_DIRECTORY}")
-  list(APPEND _integration_tests python_optuna_interface)
+  list(APPEND _integration_tests python_tuning_interface)
 
   # Короткий прогон сравнения Globalizer / scipy / Optuna (examples/compare_optimizers.py).
   # Без scipy или optuna скрипт возвращает 77 - тест помечается пропущенным.

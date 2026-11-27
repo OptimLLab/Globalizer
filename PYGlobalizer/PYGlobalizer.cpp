@@ -207,10 +207,28 @@ static void apply_parameters(const SolverParameters& params)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Класс PYProblem: в пакете, установленном через pip, он лежит в
+// globalizer._pyproblem; при запуске из исходников (PYGlobalizer в sys.path)
+// - в модуле верхнего уровня PYProblem.
+static py::object pyproblem_class()
+{
+  try
+  {
+    return py::module_::import("globalizer._pyproblem").attr("PYProblem");
+  }
+  catch (py::error_already_set& e)
+  {
+    if (!e.matches(PyExc_ImportError))
+      throw;
+  }
+  return py::module_::import("PYProblem").attr("PYProblem");
+}
+
+// ------------------------------------------------------------------------------------------------
 static void ensure_pyproblem(py::object obj)
 {
   py::gil_scoped_acquire gil;
-  py::object cls = py::module_::import("PYProblem").attr("PYProblem");
+  py::object cls = pyproblem_class();
   if (!py::isinstance(obj, cls))
     throw std::invalid_argument("Expected PYProblem instance, got: "
       + std::string(py::str(obj.get_type())));

@@ -14,6 +14,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 _bin/
+_bin_mpi*/
 
 # Compiled Static libraries
 *.lai
@@ -88,3 +89,8 @@ ipch/
 
 .idea/
 third_party/Problems/
+
+# Python packaging (pip / scikit-build-core / cibuildwheel)
+dist/
+wheelhouse/
+*.egg-info/

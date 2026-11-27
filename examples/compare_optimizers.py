@@ -3,7 +3,7 @@
 Методы
   Globalizer   GLZ-native  - собственный интерфейс PYDGlobalizer.solve (PYProblem);
                GLZ-scipy   - globalizer.optimize.differential_evolution (стиль scipy);
-               GLZ-optuna  - globalizer.optuna (стиль Optuna);
+               GLZ-optuna  - globalizer.tuning (стиль Optuna);
   scipy        SciPy-DE, SciPy-DA (dual_annealing), SciPy-DIRECT, SciPy-SHGO;
   Optuna       Optuna-TPE, Optuna-CMA (CmaEsSampler, нужен пакет cmaes), Optuna-Random.
 
@@ -56,7 +56,7 @@ for _d in (ROOT / "PYGlobalizer", ROOT / "_bin"):
 import PYDGlobalizer                          # noqa: E402
 from PYProblem import PYProblem               # noqa: E402
 import globalizer.optimize as gopt            # noqa: E402
-import globalizer.optuna as goptuna           # noqa: E402
+import globalizer.tuning as goptuna           # noqa: E402
 
 try:
     import optuna                             # noqa: E402
@@ -362,7 +362,7 @@ METHODS = [
     ("GLZ-scipy", run_glz_scipy, False, {"box", "constrained", "mixed"},
      "globalizer.optimize.differential_evolution(maxfev=B), параметры по умолчанию"),
     ("GLZ-optuna", run_glz_optuna, False, {"box", "constrained", "mixed"},
-     "globalizer.optuna: create_study() по умолчанию (GlobalizerSampler), n_trials=B"),
+     "globalizer.tuning: create_study() по умолчанию (GlobalizerSampler), n_trials=B"),
     ("SciPy-DE", run_scipy_de, True, {"box", "constrained", "mixed"},
      "scipy differential_evolution: popsize=15, maxiter=B/(15*n), polish=False"),
     ("SciPy-DA", run_scipy_da, True, {"box"},

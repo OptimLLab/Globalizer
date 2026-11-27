@@ -1,0 +1,95 @@
+# ============================================================================
+#  Сборка Python-пакета globalizer и публикация на PyPI.
+#
+#  * Ручной запуск (Actions -> "Wheels / PyPI" -> Run workflow):
+#      target = build     - только собрать колёса и sdist (артефакты);
+#      target = testpypi  - собрать и выложить на test.pypi.org.
+#  * Публикация GitHub Release -> собрать и выложить на pypi.org.
+#
+#  Публикация без токенов: Trusted Publishing (OIDC). Настройка на стороне
+#  PyPI / TestPyPI описана в docs/PUBLISHING_PYPI.md.
+# ============================================================================
+name: Wheels / PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "build | testpypi"
+        required: true
+        default: build
+        type: choice
+        options: [build, testpypi]
+  release:
+    types: [published]
+
+jobs:
+  build_wheels:
+    name: Wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v5
+        # Подмодули third_party для колеса не нужны (Problems/GCGen/MPFR выключены).
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.4.0
+        # Настройки — в [tool.cibuildwheel] файла pyproject.toml.
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: ./wheelhouse/*.whl
+
+  build_sdist:
+    name: Source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build sdist
+        run: pipx run build --sdist
+      - name: Check metadata
+        run: pipx run twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  publish_testpypi:
+    name: Publish to TestPyPI
+    needs: [build_wheels, build_sdist]
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/globalizer
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish_pypi:
+    name: Publish to PyPI
+    needs: [build_wheels, build_sdist]
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/globalizer
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1

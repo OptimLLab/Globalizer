@@ -26,7 +26,7 @@ import warnings
 import numpy as np
 
 from ._constraints import normalize_bounds, normalize_constraints
-from ._optimize import OptimizeResult, OptimizeWarning
+from ._result import OptimizeResult, OptimizeWarning
 from . import _native
 
 #: Лимит вычислений по умолчанию, если метод scipy не задаёт его явно, и
@@ -39,10 +39,10 @@ _MAXFEV_LIMIT = 10_000_000
 DEFAULT_EQ_TOL = 1e-2
 
 _MESSAGES = {
-    0: "Optimization terminated successfully.",
-    1: "Maximum number of function evaluations has been exceeded.",
-    2: "`callback` function requested stop early.",
-    3: "No feasible point was found.",
+    0: "Globalizer reached the required accuracy (eps).",
+    1: "Globalizer used up the trial budget (maxfev).",
+    2: "Search stopped by the callback.",
+    3: "Globalizer found no feasible point.",
 }
 
 #: Ключи словаря options, которые понимает Globalizer.
@@ -84,8 +84,8 @@ class _Layout:
                 lo, hi = math.ceil(lb[i]), math.floor(ub[i])
                 if lo > hi:
                     raise ValueError(
-                        "One of the integrality constraints does not have any possible "
-                        "integer values between the lower/upper bounds.")
+                        f"integrality: variable {i} has no integer value in "
+                        f"[{lb[i]}, {ub[i]}].")
                 if lo == hi:
                     self.template[i] = lo
                 else:
@@ -174,7 +174,7 @@ class _Evaluator:
             self.nfev += 1
         f = np.asarray(f, dtype=float)
         if f.size != 1:
-            raise RuntimeError("The user-provided objective function must return a scalar value.")
+            raise RuntimeError("The objective must return a single number.")
         return float(f.reshape(-1)[0])
 
     def is_feasible(self, x):

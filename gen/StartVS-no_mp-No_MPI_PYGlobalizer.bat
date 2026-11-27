@@ -222,8 +222,8 @@ echo ========================================
 echo Run with:
 echo   conda activate "%ENV_DIR%"
 echo   cd /d "%ROOT_DIR%"
-echo   python examples\example_scipy_interface.py
-echo   python examples\example_optuna_interface.py
+echo   python examples\example_optimize_interface.py
+echo   python examples\example_tuning_interface.py
 echo Example_simple.py additionally needs:
 echo   pip install -r requirements.txt -r third_party\Problems\Problems\iOptProblemSimple\requirements.txt
 echo Python C++ module name: %PY_MODULE%

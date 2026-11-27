@@ -17,7 +17,7 @@ import numpy as np
 
 from . import _solver
 from ._constraints import normalize_bounds
-from ._optimize import OptimizeResult
+from ._result import OptimizeResult
 
 _defaults = {}
 
@@ -193,8 +193,7 @@ def direct(func, bounds, *, args=(), eps=1e-4, maxfun=None, maxiter=1000,
         # остановка по f_min - штатное завершение, как в scipy
         res["status"] = 0
         res["success"] = True
-        res["message"] = "The best function value found is within a relative error=" \
-                         f"{f_min_rtol} of the (known) global optimum f_min"
+        res["message"] = f"Reached f_min within the relative tolerance f_min_rtol={f_min_rtol}."
     return res
 
 

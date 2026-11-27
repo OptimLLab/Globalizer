@@ -55,7 +55,7 @@ function(globalizer_setup_install)
           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Globalizer)
 
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/GlobalizerConfig.cmake"
-"include(CMakeFindDependencyMacro)\nfind_dependency(OpenMP)\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/GlobalizerTargets.cmake\")\n")
+"include(CMakeFindDependencyMacro)\nfind_dependency(OpenMP)\nif (NOT WIN32)\n  find_dependency(Threads)\nendif()\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/GlobalizerTargets.cmake\")\n")
 
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GlobalizerConfig.cmake"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Globalizer)

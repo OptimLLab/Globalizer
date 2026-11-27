@@ -1,7 +1,7 @@
-"""Логирование в стиле optuna.logging.
+"""Логирование (функции и уровни - с именами optuna.logging).
 
-По умолчанию, как в Optuna, о каждом завершённом испытании пишется строка
-уровня INFO в stderr. Уменьшить вывод: ``optuna.logging.set_verbosity(optuna.logging.WARNING)``.
+По умолчанию о каждом завершённом испытании пишется строка уровня INFO в
+stderr. Уменьшить вывод: ``optuna.logging.set_verbosity(optuna.logging.WARNING)``.
 """
 
 import logging as _logging
@@ -20,14 +20,14 @@ __all__ = ["CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO", "DEBUG",
            "get_logger", "get_verbosity", "set_verbosity", "disable_default_handler",
            "enable_default_handler", "disable_propagation", "enable_propagation"]
 
-_ROOT = "globalizer.optuna"
+_ROOT = "globalizer.tuning"
 _lock = threading.Lock()
 _default_handler = None
 
 
 class _Formatter(_logging.Formatter):
     def __init__(self):
-        super().__init__("[%(levelname)1.1s %(asctime)s] %(message)s")
+        super().__init__("[globalizer %(levelname)s %(asctime)s] %(message)s")
 
 
 def _root_logger():
@@ -48,7 +48,7 @@ def _configure():
 
 
 def get_logger(name):
-    """Логгер пакета (имя - внутри пространства globalizer.optuna)."""
+    """Логгер пакета (имя - внутри пространства globalizer.tuning)."""
     _configure()
     if not name.startswith(_ROOT):
         name = _ROOT + "." + name

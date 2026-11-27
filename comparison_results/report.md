@@ -116,7 +116,7 @@
 
 - **GLZ-native**: PYDGlobalizer.solve: r=4, eps=0.01, max_iterations=B, локальный поиск при улучшении минимума.
 - **GLZ-scipy**: globalizer.optimize.differential_evolution(maxfev=B), параметры по умолчанию.
-- **GLZ-optuna**: globalizer.optuna: create_study() по умолчанию (GlobalizerSampler), n_trials=B.
+- **GLZ-optuna**: globalizer.tuning: create_study() по умолчанию (GlobalizerSampler), n_trials=B.
 - **SciPy-DE** (стохастический): scipy differential_evolution: popsize=15, maxiter=B/(15*n), polish=False.
 - **SciPy-DA** (стохастический): scipy dual_annealing(maxfun=B) - только задачи без ограничений.
 - **SciPy-DIRECT**: scipy direct(maxfun=B) - только задачи без ограничений.

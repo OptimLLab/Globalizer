@@ -1,4 +1,4 @@
-"""Пример: подбор гиперпараметров моделей scikit-learn через globalizer.optuna.
+"""Пример: подбор гиперпараметров моделей scikit-learn через globalizer.tuning.
 
 Типичный сценарий Optuna, решаемый методом Globalizer:
   1) выбор модели и её гиперпараметров (условное пространство поиска,
@@ -7,7 +7,7 @@
   2) досрочная остановка (прунинг) неперспективных испытаний по
      промежуточным значениям: SGDClassifier учится по эпохам.
 
-Запуск:  python examples/example_optuna_ml.py [optuna]
+Запуск:  python examples/example_tuning_ml.py [optuna]
 (с аргументом optuna - то же самое делает Optuna). Нужен scikit-learn.
 """
 
@@ -21,7 +21,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "optuna":
     import optuna
 else:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "PYGlobalizer"))
-    import globalizer.optuna as optuna
+    import globalizer.tuning as optuna
 
 from sklearn.datasets import load_breast_cancer
 from sklearn.ensemble import RandomForestClassifier

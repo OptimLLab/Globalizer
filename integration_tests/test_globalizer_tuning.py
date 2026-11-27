@@ -1,6 +1,6 @@
-"""Тесты интерфейса globalizer.optuna, совместимого с Optuna.
+"""Тесты интерфейса globalizer.tuning, совместимого с Optuna.
 
-Запуск:  python integration_tests/test_globalizer_optuna.py [-v]
+Запуск:  python integration_tests/test_globalizer_tuning.py [-v]
 Нужен собранный модуль PYDGlobalizer (в _bin или GLOBALIZER_BIN).
 Если установлена Optuna, дополнительно проверяется совместимость сигнатур и
 то, что одна и та же целевая функция работает с обеими библиотеками.
@@ -18,8 +18,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "PYGlobalizer"))
 
-import globalizer.optuna as goptuna            # noqa: E402
-from globalizer import optuna as goptuna2      # noqa: E402
+import globalizer.tuning as goptuna            # noqa: E402
+from globalizer import tuning as goptuna2      # noqa: E402
 
 try:
     import optuna as real_optuna

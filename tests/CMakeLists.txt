@@ -51,8 +51,16 @@ add_test(all_tests ${TESTS_OUTPUT_DIRECTORY}/${PROJECT_NAME_STR})
 
 # Тесты линкуются с Python (через Solver -> Plotters): на Windows для запуска
 # нужна pythonXY.dll, она лежит рядом с интерпретатором.
+set(_tests_path_mod "")
 if (WIN32 AND Python_EXECUTABLE)
   get_filename_component(_tests_python_dir "${Python_EXECUTABLE}" DIRECTORY)
-  set_tests_properties(all_tests PROPERTIES
-    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${_tests_python_dir}")
+  list(APPEND _tests_path_mod "PATH=path_list_prepend:${_tests_python_dir}")
+endif()
+# Сборка с MPI: impi.dll / msmpi.dll лежат рядом с mpiexec
+if (WIN32 AND GLOBALIZER_USE_MPI AND MPIEXEC_EXECUTABLE)
+  get_filename_component(_tests_mpi_dir "${MPIEXEC_EXECUTABLE}" DIRECTORY)
+  list(APPEND _tests_path_mod "PATH=path_list_prepend:${_tests_mpi_dir}")
+endif()
+if (_tests_path_mod)
+  set_tests_properties(all_tests PROPERTIES ENVIRONMENT_MODIFICATION "${_tests_path_mod}")
 endif()

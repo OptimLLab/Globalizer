@@ -3,7 +3,7 @@
 #
 # Только библиотеки, необходимые самому Globalizer во время работы:
 #   * ядро Python-части (встроенный Python, PYProblem, globalizer.optimize,
-#     globalizer.optuna) - numpy;
+#     globalizer.tuning) - numpy;
 #   * встроенная визуализация lib/plotters (графики при IsPlot = true) -
 #     matplotlib, scikit-learn.
 #

@@ -13,9 +13,19 @@ from scipy import optimize        ->  from globalizer import optimize
 
 Сигнатуры (имена и порядок параметров), форма результата (`OptimizeResult`
 с полями `x`, `fun`, `success`, `status`, `message`, `nfev`, `nit`) и
-классы ограничений совпадают со scipy (проверено для scipy 1.17).
+классы ограничений совпадают со scipy (проверено для scipy 1.17 и 1.18).
+Кода scipy в пакете нет: совпадают только имена и сигнатуры, нужные для
+совместимости; сам алгоритм во всех функциях — индексный метод Globalizer.
 
 ## Установка
+
+Проще всего — из PyPI (модуль `PYDGlobalizer` уже собран и лежит внутри пакета):
+
+```bash
+pip install globalizer
+```
+
+Из исходников репозитория (например, для MPI-сборки или своих ABI-пределов):
 
 1. Соберите модуль `PYDGlobalizer`:
    `gen\StartGCC-no_mp-No_MPI_PYGlobalizer.bat` (GCC) или
@@ -100,12 +110,12 @@ res = opt.differential_evolution(f, bounds, globalizer_options={"maxfev": 5000})
 - `integration_tests/test_globalizer_optimize.py` — тесты (unittest). При
   установленном scipy проверяют и совместимость сигнатур, и совпадение
   ответов со scipy. В CTest: `python_scipy_interface`.
-- `examples/example_scipy_interface.py` — пример; с аргументом `scipy` те же
+- `examples/example_optimize_interface.py` — пример; с аргументом `scipy` те же
   задачи решает scipy.
 
 ## См. также
 
-- [optuna/README.md](optuna/README.md) — `globalizer.optuna`, интерфейс в стиле
-  Optuna (`import globalizer.optuna as optuna`).
+- [tuning/README.md](tuning/README.md) — `globalizer.tuning`, интерфейс в стиле
+  Optuna (`import globalizer.tuning as optuna`).
 - `examples/compare_optimizers.py` — сравнение Globalizer, scipy.optimize и
   Optuna на общих тестовых задачах.
